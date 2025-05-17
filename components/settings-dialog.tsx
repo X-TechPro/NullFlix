@@ -478,16 +478,16 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Second best",
     },
     {
+      id: "vidsrc.co" as Provider,
+      name: "Vidsrc.co",
+      url: "https://player.vidsrc.co/embed/movie/",
+      description: "Good provider 👍",
+    },
+    {
       id: "vidsrc.cc" as Provider,
       name: "Vidsrc.cc",
       url: "https://vidsrc.cc/v2/embed/movie/",
       description: "Normal",
-    },
-    {
-      id: "vidsrc.co" as Provider,
-      name: "Vidsrc.co",
-      url: "https://player.vidsrc.co/embed/movie/",
-      description: "Good provider",
     },
     {
       id: "autoembed" as Provider,
