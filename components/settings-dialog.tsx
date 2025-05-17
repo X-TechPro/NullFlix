@@ -17,6 +17,8 @@ import {
   Server,
   Upload,
   Download,
+  ChevronDown,
+  Globe,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,8 +31,7 @@ import {
 } from "@/utils/db"
 import { fetchAndStoreMovies, fetchAndStoreTVShows, createDownloadableData } from "@/services/data-service"
 import { handleMovieDatabaseUpload, handleTVDatabaseUpload } from "@/utils/file-upload-handler"
-
-type Provider = "embed.su" | "vidsrc" | "autoembed" | "2embed.cc" | "2embed.skin" | "vidsrc.xyz"
+import type { Provider, ProviderServer } from "@/services/movie-service"
 
 interface ProgressIndicatorProps {
   type: string
@@ -90,7 +91,8 @@ interface SettingsDialogProps {
 }
 
 export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
-  const [selectedProvider, setSelectedProvider] = useState<Provider>("embed.su")
+  const [selectedProvider, setSelectedProvider] = useState<Provider>("pstream")
+  const [selectedServer, setSelectedServer] = useState<ProviderServer | null>(null)
   const [isDownloadingMovies, setIsDownloadingMovies] = useState(false)
   const [isDownloadingTV, setIsDownloadingTV] = useState(false)
   const [isDirectFetchingMovies, setIsDirectFetchingMovies] = useState(false)
@@ -106,6 +108,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [isObliterating, setIsObliterating] = useState(false)
   const [isUploadingMovies, setIsUploadingMovies] = useState(false)
   const [isUploadingTV, setIsUploadingTV] = useState(false)
+  const [showServerMenu, setShowServerMenu] = useState<string | null>(null)
 
   // Refs for file inputs
   const movieFileInputRef = useRef<HTMLInputElement>(null)
@@ -116,6 +119,19 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     const savedProvider = localStorage.getItem("selectedProvider") as Provider
     if (savedProvider) {
       setSelectedProvider(savedProvider)
+    }
+
+    // Load saved server from localStorage
+    const savedServer = localStorage.getItem("selectedServer") as ProviderServer
+    if (savedServer) {
+      setSelectedServer(savedServer)
+    } else {
+      // Set default servers based on provider
+      if (savedProvider === "2embed") {
+        setSelectedServer("2embed.cc")
+      } else if (savedProvider === "vidsrc.xyz") {
+        setSelectedServer("vidsrc.xyz")
+      }
     }
 
     // Check if database is already initialized
@@ -143,6 +159,29 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const handleProviderSelect = (provider: Provider) => {
     setSelectedProvider(provider)
     localStorage.setItem("selectedProvider", provider)
+
+    // Set default server when provider changes
+    if (provider === "2embed" && !selectedServer) {
+      setSelectedServer("2embed.cc")
+      localStorage.setItem("selectedServer", "2embed.cc")
+    } else if (provider === "vidsrc.xyz" && !selectedServer) {
+      setSelectedServer("vidsrc.xyz")
+      localStorage.setItem("selectedServer", "vidsrc.xyz")
+    }
+  }
+
+  const handleServerSelect = (server: ProviderServer) => {
+    setSelectedServer(server)
+    localStorage.setItem("selectedServer", server)
+    setShowServerMenu(null) // Close the menu after selection
+  }
+
+  const toggleServerMenu = (providerId: string) => {
+    if (showServerMenu === providerId) {
+      setShowServerMenu(null)
+    } else {
+      setShowServerMenu(providerId)
+    }
   }
 
   const handleClearDatabase = async () => {
@@ -191,7 +230,8 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setTVDownloadComplete(false)
         setMovieCount(null)
         setTVCount(null)
-        setSelectedProvider("embed.su")
+        setSelectedProvider("pstream")
+        setSelectedServer(null)
 
         // Show success message
         alert("All data has been obliterated. The app will now reload.")
@@ -426,34 +466,71 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
   const providers = [
     {
+      id: "pstream" as Provider,
+      name: "P-Stream",
+      url: "https://iframe.pstream.org/media/tmdb-movie-",
+      description: "Best movie provider 🔥",
+    },
+    {
       id: "embed.su" as Provider,
       name: "Embed.su",
       url: "https://embed.su/embed/movie/",
+      description: "Second best",
     },
     {
-      id: "vidsrc" as Provider,
-      name: "Vidsrc",
+      id: "vidsrc.cc" as Provider,
+      name: "Vidsrc.cc",
       url: "https://vidsrc.cc/v2/embed/movie/",
+      description: "Normal",
+    },
+    {
+      id: "vidsrc.co" as Provider,
+      name: "Vidsrc.co",
+      url: "https://player.vidsrc.co/embed/movie/",
+      description: "Good provider",
     },
     {
       id: "autoembed" as Provider,
       name: "Autoembed",
       url: "https://player.autoembed.cc/embed/movie/",
+      description: "Normal",
     },
     {
-      id: "2embed.cc" as Provider,
-      name: "2Embed.cc",
+      id: "2embed" as Provider,
+      name: "2Embed",
       url: "https://www.2embed.cc/embed/",
-    },
-    {
-      id: "2embed.skin" as Provider,
-      name: "2Embed.skin",
-      url: "https://www.2embed.skin/embed/",
+      description: "Multiple servers available",
+      hasServers: true,
+      servers: [
+        { id: "2embed.cc" as ProviderServer, name: "2embed.cc" },
+        { id: "2embed.skin" as ProviderServer, name: "2embed.skin" },
+      ],
     },
     {
       id: "vidsrc.xyz" as Provider,
       name: "Vidsrc.xyz",
-      url: "https://vidsrc.xyz/embed/movie/",
+      url: "https://vidsrc.xyz/embed/movie?imdb=",
+      description: "Multiple servers available",
+      hasServers: true,
+      servers: [
+        { id: "vidsrc.xyz" as ProviderServer, name: "vidsrc.xyz" },
+        { id: "vidsrc.in" as ProviderServer, name: "vidsrc.in" },
+        { id: "vidsrc.pm" as ProviderServer, name: "vidsrc.pm" },
+        { id: "vidsrc.me" as ProviderServer, name: "vidsrc.me" },
+        { id: "vidsrc.net" as ProviderServer, name: "vidsrc.net" },
+      ],
+    },
+    {
+      id: "uembed" as Provider,
+      name: "UEmbed",
+      url: "https://uembed.site/?id=",
+      description: "Meh. Why not",
+    },
+    {
+      id: "vidsrc.su" as Provider,
+      name: "Vidsrc.su",
+      url: "https://vidsrc.su/embed/movie/",
+      description: "Worst provider. Might not work",
     },
   ]
 
@@ -482,30 +559,69 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
           <div className="grid gap-2 sm:gap-3 mt-3 sm:mt-4 w-full">
             {providers.map((provider) => (
-              <Button
-                key={provider.id}
-                variant="outline"
-                className={`justify-start h-auto p-2 sm:p-3 text-left w-[95%] mx-auto ${
-                  selectedProvider === provider.id
-                    ? "bg-sky-600/20 border-sky-500 text-white"
-                    : "bg-gray-900/50 border-gray-700 text-gray-300 hover:border-sky-500/50"
-                }`}
-                onClick={() => handleProviderSelect(provider.id)}
-              >
-                <div className="flex items-center w-full">
-                  <div
-                    className={`w-4 h-4 mr-2 sm:mr-3 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
-                      selectedProvider === provider.id ? "border-sky-500" : "border-gray-600"
-                    }`}
-                  >
-                    {selectedProvider === provider.id && <div className="w-2 h-2 rounded-full bg-sky-500"></div>}
+              <div key={provider.id} className="w-[95%] mx-auto">
+                <Button
+                  variant="outline"
+                  className={`justify-start h-auto p-2 sm:p-3 text-left w-full ${
+                    selectedProvider === provider.id
+                      ? "bg-sky-600/20 border-sky-500 text-white"
+                      : "bg-gray-900/50 border-gray-700 text-gray-300 hover:border-sky-500/50"
+                  }`}
+                  onClick={() => handleProviderSelect(provider.id)}
+                >
+                  <div className="flex items-center w-full">
+                    <div
+                      className={`w-4 h-4 mr-2 sm:mr-3 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                        selectedProvider === provider.id ? "border-sky-500" : "border-gray-600"
+                      }`}
+                    >
+                      {selectedProvider === provider.id && <div className="w-2 h-2 rounded-full bg-sky-500"></div>}
+                    </div>
+                    <div className="overflow-hidden flex-1">
+                      <div className="font-medium truncate">{provider.name}</div>
+                      <div className="text-xs text-gray-400 mt-0.5 truncate">{provider.url}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{provider.description}</div>
+                    </div>
                   </div>
-                  <div className="overflow-hidden flex-1">
-                    <div className="font-medium truncate">{provider.name}</div>
-                    <div className="text-xs text-gray-400 mt-0.5 truncate">{provider.url}</div>
+                </Button>
+
+                {/* Server selection for providers with multiple servers */}
+                {provider.hasServers && selectedProvider === provider.id && (
+                  <div className="mt-1 pl-8">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700"
+                      onClick={() => toggleServerMenu(provider.id)}
+                    >
+                      <div className="flex items-center">
+                        <Globe className="w-4 h-4 mr-2 text-sky-400" />
+                        <span>{selectedServer || (provider.servers && provider.servers[0].name)}</span>
+                      </div>
+                      <ChevronDown className="w-4 h-4 ml-2" />
+                    </Button>
+
+                    {/* Server selection dropdown */}
+                    {showServerMenu === provider.id && (
+                      <div className="mt-1 bg-gray-800 border border-gray-700 rounded-md overflow-hidden">
+                        {provider.servers?.map((server) => (
+                          <Button
+                            key={server.id}
+                            variant="ghost"
+                            className={`justify-start h-auto py-1.5 px-2 text-left w-full rounded-none ${
+                              selectedServer === server.id
+                                ? "bg-sky-600/20 text-white"
+                                : "text-gray-300 hover:bg-gray-700"
+                            }`}
+                            onClick={() => handleServerSelect(server.id)}
+                          >
+                            {server.name}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              </Button>
+                )}
+              </div>
             ))}
           </div>
 

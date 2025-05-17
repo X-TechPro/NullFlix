@@ -11,6 +11,26 @@ export interface Media {
   seasons?: number[]
 }
 
+export type Provider =
+  | "pstream"
+  | "embed.su"
+  | "vidsrc.cc"
+  | "autoembed"
+  | "2embed"
+  | "vidsrc.xyz"
+  | "vidsrc.su"
+  | "vidsrc.co"
+  | "uembed"
+
+export type ProviderServer =
+  | "2embed.cc"
+  | "2embed.skin"
+  | "vidsrc.xyz"
+  | "vidsrc.in"
+  | "vidsrc.pm"
+  | "vidsrc.me"
+  | "vidsrc.net"
+
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return []
 
@@ -20,11 +40,18 @@ export async function searchMedia(query: string): Promise<Media[]> {
 
 export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number): string {
   // Use a try-catch block to handle potential localStorage errors
-  let provider = "embed.su"
+  let provider: Provider = "pstream"
+  let server: ProviderServer | null = null
+
   try {
     const savedProvider = localStorage.getItem("selectedProvider")
     if (savedProvider) {
-      provider = savedProvider
+      provider = savedProvider as Provider
+    }
+
+    const savedServer = localStorage.getItem("selectedServer")
+    if (savedServer) {
+      server = savedServer as ProviderServer
     }
   } catch (error) {
     console.error("Error accessing localStorage:", error)
@@ -33,16 +60,27 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
   if (mediaType === "tv" && season !== undefined && episode !== undefined) {
     // TV show URL with season and episode
     switch (provider) {
-      case "vidsrc":
+      case "pstream":
+        return `https://iframe.pstream.org/embed/tmdb-tv-${mediaId}/${season}/${episode}`
+      case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${season}/${episode}`
       case "autoembed":
         return `https://player.autoembed.cc/embed/tv/${mediaId}/${season}/${episode}`
-      case "2embed.cc":
-        return `https://www.2embed.cc/embedtv/${mediaId}&s=${season}&e=${episode}`
-      case "2embed.skin":
-        return `https://www.2embed.skin/embedtv/${mediaId}&s=${season}&e=${episode}`
+      case "2embed":
+        if (server === "2embed.skin") {
+          return `https://www.2embed.skin/embedtv/${mediaId}&s=${season}&e=${episode}`
+        } else {
+          return `https://www.2embed.cc/embedtv/${mediaId}&s=${season}&e=${episode}`
+        }
       case "vidsrc.xyz":
-        return `https://vidsrc.xyz/embed/tv?imdb=${mediaId}&season=${season}&episode=${episode}`
+        const vidsrcDomain = server || "vidsrc.xyz"
+        return `https://${vidsrcDomain}/embed/tv?imdb=${mediaId}&season=${season}&episode=${episode}`
+      case "vidsrc.su":
+        return `https://vidsrc.su/embed/tv/${mediaId}/${season}/${episode}`
+      case "vidsrc.co":
+        return `https://player.vidsrc.co/embed/tv/${mediaId}/${season}/${episode}`
+      case "uembed":
+        return `https://uembed.site/?id=${mediaId}&season=${season}&episode=${episode}`
       case "embed.su":
       default:
         return `https://embed.su/embed/tv/${mediaId}/${season}/${episode}`
@@ -50,16 +88,27 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
   } else {
     // Movie URL
     switch (provider) {
-      case "vidsrc":
+      case "pstream":
+        return `https://iframe.pstream.org/media/tmdb-movie-${mediaId}`
+      case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/movie/${mediaId}`
       case "autoembed":
         return `https://player.autoembed.cc/embed/movie/${mediaId}`
-      case "2embed.cc":
-        return `https://www.2embed.cc/embed/${mediaId}`
-      case "2embed.skin":
-        return `https://www.2embed.skin/embed/${mediaId}`
+      case "2embed":
+        if (server === "2embed.skin") {
+          return `https://www.2embed.skin/embed/${mediaId}`
+        } else {
+          return `https://www.2embed.cc/embed/${mediaId}`
+        }
       case "vidsrc.xyz":
-        return `https://vidsrc.xyz/embed/movie/${mediaId}`
+        const vidsrcDomain = server || "vidsrc.xyz"
+        return `https://${vidsrcDomain}/embed/movie?imdb=${mediaId}`
+      case "vidsrc.su":
+        return `https://vidsrc.su/embed/movie/${mediaId}`
+      case "vidsrc.co":
+        return `https://player.vidsrc.co/embed/movie/${mediaId}`
+      case "uembed":
+        return `https://uembed.site/?id=${mediaId}`
       case "embed.su":
       default:
         return `https://embed.su/embed/movie/${mediaId}`
