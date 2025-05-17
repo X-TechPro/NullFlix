@@ -301,7 +301,7 @@ export default function Home() {
               href="https://github.com/Jonathan-Chayna/NullFlix"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30"
+              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30 flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -312,7 +312,7 @@ export default function Home() {
                 setShowBookmarks(!showBookmarks)
                 setSearchInitiated(false)
               }}
-              className={`p-2 transition-colors rounded-full ${showBookmarks ? "text-sky-400 bg-blue-800/50" : "text-blue-300 hover:text-white hover:bg-blue-800/30"}`}
+              className={`p-2 transition-colors rounded-full flex items-center justify-center ${showBookmarks ? "text-sky-400 bg-blue-800/50" : "text-blue-300 hover:text-white hover:bg-blue-800/30"}`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -320,7 +320,7 @@ export default function Home() {
             </motion.button>
             <motion.button
               onClick={() => setShowSettings(true)}
-              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30"
+              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30 flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -596,16 +596,19 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                 </motion.button>
 
                 <div
-                  className="relative aspect-[2/3] w-full overflow-hidden bg-gray-700 max-h-[180px] cursor-pointer"
+                  className="relative aspect-[2/3] w-full overflow-hidden bg-gray-700 max-h-[180px] cursor-pointer movie-card-poster-container"
                   onClick={() => onMediaSelect(item)}
                 >
                   {/* Show poster if available, otherwise show colored background */}
                   {item.poster ? (
-                    <img
-                      src={item.poster || "/placeholder.svg"}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      <div className="movie-card-poster-blur" style={{ backgroundImage: `url(${item.poster})` }}></div>
+                      <img
+                        src={item.poster || "/placeholder.svg"}
+                        alt={item.title}
+                        className="movie-card-poster-main"
+                      />
+                    </>
                   ) : (
                     <div
                       className={`flex items-center justify-center w-full h-full bg-gradient-to-br ${getRandomColor(

@@ -245,6 +245,12 @@ input:focus-visible {
   .mobile-overflow-hidden {
     overflow: hidden;
   }
+
+  /* Add styles for the movie player on mobile */
+  .movie-player-container {
+    height: 70vh !important;
+    max-height: 70vh !important;
+  }
 }
 
 /* Ensure modals and popups are scrollable on mobile */
@@ -267,4 +273,48 @@ input:focus-visible {
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* Styles for movie cards with proper poster display */
+.movie-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.movie-card-portrait {
+  aspect-ratio: 2 / 3;
+  width: 100%;
+}
+
+.movie-card-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.movie-card-poster-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.movie-card-poster-blur {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  opacity: 0.5;
+  transform: scale(1.1);
+}
+
+.movie-card-poster-main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  margin: 0 auto;
 }

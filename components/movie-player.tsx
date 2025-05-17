@@ -26,7 +26,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, onClo
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl"
+        className="relative w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl movie-player-container"
       >
         <button
           onClick={onClose}

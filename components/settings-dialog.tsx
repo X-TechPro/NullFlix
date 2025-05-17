@@ -600,7 +600,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
           <div className="grid gap-2 sm:gap-3 mt-3 sm:mt-4 w-full">
             {providers.map((provider) => (
-              <div key={provider.id} className="w-[90%] mx-auto">
+              <div key={provider.id} className="w-[90%] mx-auto flex justify-center">
                 <Button
                   variant="outline"
                   className={`justify-start h-auto p-2 sm:p-3 text-left w-full ${
@@ -625,49 +625,57 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     </div>
                   </div>
                 </Button>
-
-                {/* Server selection for providers with multiple servers */}
-                {provider.hasServers && selectedProvider === provider.id && (
-                  <div className="mt-1 pl-8 w-full">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700"
-                      onClick={() => toggleServerMenu(provider.id)}
-                    >
-                      <div className="flex items-center">
-                        <Globe className="w-4 h-4 mr-2 text-sky-400" />
-                        <span>{selectedServer || (provider.servers && provider.servers[0].name)}</span>
-                      </div>
-                      <ChevronDown className="w-4 h-4 ml-2" />
-                    </Button>
-
-                    {/* Server selection dropdown */}
-                    {showServerMenu === provider.id && (
-                      <div className="mt-1 bg-gray-800 border border-gray-700 rounded-md overflow-hidden">
-                        {provider.servers?.map((server) => (
-                          <Button
-                            key={server.id}
-                            variant="ghost"
-                            className={`justify-start h-auto py-1.5 px-2 text-left w-full rounded-none ${
-                              selectedServer === server.id
-                                ? "bg-sky-600/20 text-white"
-                                : "text-gray-300 hover:bg-gray-700"
-                            }`}
-                            onClick={() => handleServerSelect(server.id)}
-                          >
-                            {server.name}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             ))}
           </div>
 
+          {/* Server selection for providers with multiple servers */}
+          {providers.find((p) => p.id === selectedProvider)?.hasServers && selectedProvider && (
+            <div className="mt-1 pl-8 w-full flex justify-center">
+              <div className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700"
+                  onClick={() => toggleServerMenu(selectedProvider)}
+                >
+                  <div className="flex items-center">
+                    <Globe className="w-4 h-4 mr-2 text-sky-400" />
+                    <span>
+                      {selectedServer ||
+                        (providers.find((p) => p.id === selectedProvider)?.servers &&
+                          providers.find((p) => p.id === selectedProvider)?.servers![0].name)}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+
+                {/* Server selection dropdown */}
+                {showServerMenu === selectedProvider && (
+                  <div className="mt-1 bg-gray-800 border border-gray-700 rounded-md overflow-hidden">
+                    {providers
+                      .find((p) => p.id === selectedProvider)
+                      ?.servers?.map((server) => (
+                        <Button
+                          key={server.id}
+                          variant="ghost"
+                          className={`justify-start h-auto py-1.5 px-2 text-left w-full rounded-none ${
+                            selectedServer === server.id
+                              ? "bg-sky-600/20 text-white"
+                              : "text-gray-300 hover:bg-gray-700"
+                          }`}
+                          onClick={() => handleServerSelect(server.id)}
+                        >
+                          {server.name}
+                        </Button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* OMDB API Section */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[90%] mx-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Info size={18} className="text-sky-400 flex-shrink-0" />
@@ -720,7 +728,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
           </div>
 
           {/* Movie Database Section */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[90%] mx-auto">
             <div className="flex items-center gap-2">
               <Film size={18} className="text-sky-400 flex-shrink-0" />
               <h3 className="text-lg font-medium text-white">Movie Database</h3>
@@ -822,7 +830,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
           </div>
 
           {/* TV Series Database Section */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[90%] mx-auto">
             <div className="flex items-center gap-2">
               <Tv size={18} className="text-sky-400 flex-shrink-0" />
               <h3 className="text-lg font-medium text-white">TV Series Database</h3>
@@ -926,7 +934,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
           )}
 
           {/* Database Management Section */}
-          <div className="mt-6 w-[95%] mx-auto">
+          <div className="mt-6 w-[90%] mx-auto">
             <h3 className="text-lg font-medium text-white mb-3">Database Management</h3>
 
             {(moviesDownloadComplete || tvDownloadComplete) && (
