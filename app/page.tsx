@@ -11,6 +11,7 @@ import BackgroundShapes from "@/components/background-shapes"
 import BookmarksArea from "@/components/bookmarks-area"
 import SettingsDialog from "@/components/settings-dialog"
 import MoviePlayer from "@/components/movie-player"
+import MovieDetailsPopup from "@/components/movie-details-popup"
 import TVEpisodeSelector from "@/components/tv-episode-selector"
 import GlowingSearchBar from "@/components/glowing-search-bar"
 import { searchMedia, type Media } from "@/services/movie-service"
@@ -34,6 +35,8 @@ export default function Home() {
   const [searchInitiated, setSearchInitiated] = useState(false)
   const [movieCount, setMovieCount] = useState<number | null>(null)
   const [tvCount, setTVCount] = useState<number | null>(null)
+  const [showMovieDetails, setShowMovieDetails] = useState(false)
+  const [selectedMediaForDetails, setSelectedMediaForDetails] = useState<string | null>(null)
 
   // Load media data
   useEffect(() => {
@@ -209,7 +212,15 @@ export default function Home() {
   }
 
   const handleMediaSelect = (media: Media) => {
-    if (media.type === "movie") {
+    // Check if OMDB API is enabled
+    const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
+
+    if (media.type === "movie" && isOMDBEnabled) {
+      // Show movie details popup first
+      setSelectedMediaForDetails(media.imdb || media.id)
+      setShowMovieDetails(true)
+    } else if (media.type === "movie") {
+      // Play movie directly
       setSelectedMovie(media.imdb || media.id)
     } else if (media.type === "tv") {
       setSelectedTVShow(media.tmdb)
@@ -226,6 +237,16 @@ export default function Home() {
     setSelectedTVShow(null)
     setSelectedSeason(null)
     setSelectedEpisode(null)
+  }
+
+  const handleCloseMovieDetails = () => {
+    setShowMovieDetails(false)
+    setSelectedMediaForDetails(null)
+  }
+
+  const handlePlayFromDetails = () => {
+    setShowMovieDetails(false)
+    setSelectedMovie(selectedMediaForDetails)
   }
 
   return (
@@ -440,7 +461,17 @@ export default function Home() {
                 if (media.mediaType === "tv" || media.type === "tv") {
                   setSelectedTVShow(media.tmdbID || media.tmdb || Number.parseInt(media.imdbID))
                 } else {
-                  setSelectedMovie(media.imdbID || media.imdb || media.id)
+                  // Check if OMDB API is enabled
+                  const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
+
+                  if (isOMDBEnabled) {
+                    // Show movie details popup first
+                    setSelectedMediaForDetails(media.imdbID || media.imdb || media.id)
+                    setShowMovieDetails(true)
+                  } else {
+                    // Play movie directly
+                    setSelectedMovie(media.imdbID || media.imdb || media.id)
+                  }
                 }
               }}
               onBack={() => {
@@ -469,6 +500,13 @@ export default function Home() {
             season={selectedSeason}
             episode={selectedEpisode}
             onClose={handleClosePlayer}
+          />
+        )}
+        {showMovieDetails && selectedMediaForDetails && (
+          <MovieDetailsPopup
+            mediaId={selectedMediaForDetails}
+            onClose={handleCloseMovieDetails}
+            onPlay={handlePlayFromDetails}
           />
         )}
       </AnimatePresence>

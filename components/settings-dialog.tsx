@@ -19,8 +19,12 @@ import {
   Download,
   ChevronDown,
   Globe,
+  Save,
+  Info,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
 import {
   storeMovies,
   storeTVShows,
@@ -109,6 +113,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [isUploadingMovies, setIsUploadingMovies] = useState(false)
   const [isUploadingTV, setIsUploadingTV] = useState(false)
   const [showServerMenu, setShowServerMenu] = useState<string | null>(null)
+  const [omdbEnabled, setOmdbEnabled] = useState(false)
+  const [omdbApiKey, setOmdbApiKey] = useState("")
+  const [isSavingApiKey, setIsSavingApiKey] = useState(false)
+  const [apiKeySaved, setApiKeySaved] = useState(false)
 
   // Refs for file inputs
   const movieFileInputRef = useRef<HTMLInputElement>(null)
@@ -133,6 +141,13 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setSelectedServer("vidsrc.xyz")
       }
     }
+
+    // Load OMDB settings
+    const savedOmdbEnabled = localStorage.getItem("omdbEnabled") === "true"
+    setOmdbEnabled(savedOmdbEnabled)
+
+    const savedOmdbApiKey = localStorage.getItem("omdbApiKey") || ""
+    setOmdbApiKey(savedOmdbApiKey)
 
     // Check if database is already initialized
     const checkDatabase = async () => {
@@ -184,6 +199,30 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     }
   }
 
+  const handleOmdbToggle = (checked: boolean) => {
+    setOmdbEnabled(checked)
+    localStorage.setItem("omdbEnabled", checked.toString())
+
+    // Reset saved state when toggling
+    setApiKeySaved(false)
+  }
+
+  const handleSaveApiKey = () => {
+    setIsSavingApiKey(true)
+
+    // Simulate API call to validate key
+    setTimeout(() => {
+      localStorage.setItem("omdbApiKey", omdbApiKey)
+      setIsSavingApiKey(false)
+      setApiKeySaved(true)
+
+      // Reset saved state after 3 seconds
+      setTimeout(() => {
+        setApiKeySaved(false)
+      }, 3000)
+    }, 500)
+  }
+
   const handleClearDatabase = async () => {
     if (window.confirm("Are you sure you want to clear the movie and TV database? This cannot be undone.")) {
       setIsClearing(true)
@@ -232,6 +271,8 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setTVCount(null)
         setSelectedProvider("pstream")
         setSelectedServer(null)
+        setOmdbEnabled(false)
+        setOmdbApiKey("")
 
         // Show success message
         alert("All data has been obliterated. The app will now reload.")
@@ -623,6 +664,59 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                 )}
               </div>
             ))}
+          </div>
+
+          {/* OMDB API Section */}
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Info size={18} className="text-sky-400 flex-shrink-0" />
+                <h3 className="text-lg font-medium text-white">OMDB API</h3>
+              </div>
+              <Switch
+                checked={omdbEnabled}
+                onCheckedChange={handleOmdbToggle}
+                className="data-[state=checked]:bg-sky-600"
+              />
+            </div>
+
+            <p className="text-sm text-gray-300 mb-4">
+              Enable OMDB API to get detailed movie information and posters.
+              <a
+                href="https://www.omdbapi.com/apikey.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-400 hover:underline ml-1"
+              >
+                Get a free API key
+              </a>
+            </p>
+
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Enter your OMDB API key"
+                value={omdbApiKey}
+                onChange={(e) => setOmdbApiKey(e.target.value)}
+                disabled={!omdbEnabled}
+                className={`flex-1 bg-gray-800 border-gray-700 text-white ${!omdbEnabled ? "opacity-50" : ""}`}
+              />
+              <Button
+                onClick={handleSaveApiKey}
+                disabled={!omdbEnabled || !omdbApiKey || isSavingApiKey}
+                className={`bg-sky-600 hover:bg-sky-700 text-white ${!omdbEnabled || !omdbApiKey ? "opacity-50" : ""}`}
+              >
+                {isSavingApiKey ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : apiKeySaved ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-2">Limited to 1,000 requests per day with the free API key.</p>
           </div>
 
           {/* Movie Database Section */}
