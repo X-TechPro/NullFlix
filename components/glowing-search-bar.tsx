@@ -56,7 +56,7 @@ export default function GlowingSearchBar({
 
   return (
     <form onSubmit={onSubmit} className={`relative w-full ${className}`}>
-      <div className="relative flex" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <div className="relative flex w-full p-2 sm:p-0">
         {/* Input container with glow effect */}
         <div ref={searchBarRef} className="relative flex-1">
           {/* Glow effect overlay - only for the input part */}

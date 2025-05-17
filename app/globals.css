@@ -223,3 +223,48 @@
 input:focus-visible {
   box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.5), 0 0 20px 5px rgba(255, 255, 255, 0.2);
 }
+
+/* Enhanced responsive styles */
+@media (max-width: 640px) {
+  /* Smaller text for mobile */
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+
+  /* Adjust padding for mobile */
+  .mobile-p-reduced {
+    padding: 0.5rem !important;
+  }
+
+  /* Ensure buttons are properly sized on mobile */
+  .mobile-btn-full {
+    width: 100%;
+  }
+
+  /* Ensure content doesn't overflow on small screens */
+  .mobile-overflow-hidden {
+    overflow: hidden;
+  }
+}
+
+/* Ensure modals and popups are scrollable on mobile */
+.modal-scrollable {
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 640px) {
+  button,
+  [role="button"],
+  a {
+    min-height: 44px;
+  }
+}
+
+/* Ensure images don't cause horizontal overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}

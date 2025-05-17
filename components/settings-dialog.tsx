@@ -600,7 +600,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
           <div className="grid gap-2 sm:gap-3 mt-3 sm:mt-4 w-full">
             {providers.map((provider) => (
-              <div key={provider.id} className="w-[95%] mx-auto">
+              <div key={provider.id} className="w-[90%] mx-auto">
                 <Button
                   variant="outline"
                   className={`justify-start h-auto p-2 sm:p-3 text-left w-full ${
@@ -620,7 +620,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     </div>
                     <div className="overflow-hidden flex-1">
                       <div className="font-medium truncate">{provider.name}</div>
-                      <div className="text-xs text-gray-400 mt-0.5 truncate">{provider.url}</div>
+                      <div className="text-xs text-gray-400 mt-0.5 truncate max-w-full">{provider.url}</div>
                       <div className="text-xs text-gray-500 mt-0.5">{provider.description}</div>
                     </div>
                   </div>
@@ -628,7 +628,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
                 {/* Server selection for providers with multiple servers */}
                 {provider.hasServers && selectedProvider === provider.id && (
-                  <div className="mt-1 pl-8">
+                  <div className="mt-1 pl-8 w-full">
                     <Button
                       variant="outline"
                       className="w-full justify-between bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700"
