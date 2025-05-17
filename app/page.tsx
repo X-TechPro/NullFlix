@@ -118,26 +118,18 @@ export default function Home() {
     }
   }, [showNoDatabaseError])
 
-  // Update the handleSearch function to prioritize OMDB API
-
   const handleSearch = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       if (!query.trim()) return
 
-      // Check if OMDB API is enabled
-      const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-      const hasOMDBKey = !!localStorage.getItem("omdbApiKey")
+      // Check if database is initialized
+      const moviesInitialized = await isDatabaseInitialized()
+      const tvInitialized = await isTVDatabaseInitialized()
 
-      // If OMDB API is not enabled, check if database is initialized
-      if (!isOMDBEnabled || !hasOMDBKey) {
-        const moviesInitialized = await isDatabaseInitialized()
-        const tvInitialized = await isTVDatabaseInitialized()
-
-        if (!moviesInitialized && !tvInitialized) {
-          setShowNoDatabaseError(true)
-          return
-        }
+      if (!moviesInitialized && !tvInitialized) {
+        setShowNoDatabaseError(true)
+        return
       }
 
       setSearchInitiated(true)
@@ -146,7 +138,7 @@ export default function Home() {
       // Use setTimeout to allow the UI to update before starting the search
       setTimeout(async () => {
         try {
-          // Search using the service (which now prioritizes OMDB if enabled)
+          // Search in IndexedDB
           const results = await searchMedia(query)
           setMediaResults(results)
           setShowBookmarks(false)
@@ -601,18 +593,26 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                   className="relative aspect-[2/3] w-full overflow-hidden bg-gray-700 max-h-[180px] cursor-pointer"
                   onClick={() => onMediaSelect(item)}
                 >
-                  {/* Placeholder image with random gradient color */}
-                  <div
-                    className={`flex items-center justify-center w-full h-full bg-gradient-to-br ${getRandomColor(
-                      item.id || item.title,
-                    )}`}
-                  >
-                    {item.type === "tv" ? (
-                      <Tv className="w-10 h-10 text-gray-600/80" />
-                    ) : (
-                      <Film className="w-10 h-10 text-gray-600/80" />
-                    )}
-                  </div>
+                  {/* Show poster if available, otherwise show colored background */}
+                  {item.poster ? (
+                    <img
+                      src={item.poster || "/placeholder.svg"}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className={`flex items-center justify-center w-full h-full bg-gradient-to-br ${getRandomColor(
+                        item.id || item.title,
+                      )}`}
+                    >
+                      {item.type === "tv" ? (
+                        <Tv className="w-10 h-10 text-gray-600/80" />
+                      ) : (
+                        <Film className="w-10 h-10 text-gray-600/80" />
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 flex-1 flex flex-col cursor-pointer" onClick={() => onMediaSelect(item)}>
                   <div className="overflow-hidden h-6 mb-2">

@@ -1,5 +1,4 @@
 import { searchMediaInDB, getTVShowByTMDB } from "@/utils/db"
-import { searchMoviesByTitle, convertOMDBToMedia } from "@/services/omdb-service"
 
 export interface Media {
   id: string
@@ -10,6 +9,7 @@ export interface Media {
   genre?: string
   type: "movie" | "tv"
   seasons?: number[]
+  poster?: string // Add this field for movie posters
 }
 
 export type Provider =
@@ -32,28 +32,61 @@ export type ProviderServer =
   | "vidsrc.me"
   | "vidsrc.net"
 
+async function searchMoviesViaOMDB(query: string): Promise<any[]> {
+  const apiKey = localStorage.getItem("omdbApiKey")
+  if (!apiKey) {
+    throw new Error("OMDB API key is required.")
+  }
+
+  const url = `https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`OMDB API request failed with status: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  if (data.Response === "True") {
+    return data.Search
+  } else {
+    return []
+  }
+}
+
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return []
 
   // Check if OMDB API is enabled
   const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-  const hasOMDBKey = !!localStorage.getItem("omdbApiKey")
+  const apiKey = localStorage.getItem("omdbApiKey")
 
-  // If OMDB API is enabled and we have an API key, try to search with it first
-  if (isOMDBEnabled && hasOMDBKey) {
+  // If OMDB API is enabled and we have an API key, try to use it first
+  if (isOMDBEnabled && apiKey) {
     try {
-      const omdbResults = await searchMoviesByTitle(query)
-      if (omdbResults && omdbResults.length > 0) {
+      const omdbResults = await searchMoviesViaOMDB(query)
+
+      if (omdbResults.length > 0) {
         // Convert OMDB results to our Media format
-        return omdbResults.map(convertOMDBToMedia)
+        const formattedResults: Media[] = omdbResults.map((result) => ({
+          id: result.imdbID,
+          title: result.Title,
+          imdb: result.imdbID,
+          tmdb: 0, // OMDB doesn't provide TMDB IDs
+          year: Number.parseInt(result.Year) || undefined,
+          type: result.Type === "series" ? "tv" : "movie",
+          poster: result.Poster !== "N/A" ? result.Poster : undefined,
+        }))
+
+        return formattedResults
       }
     } catch (error) {
       console.error("Error searching with OMDB API:", error)
-      // Fall back to local database if OMDB search fails
+      // Fall back to local database search
     }
   }
 
-  // Use IndexedDB search to find both movies and TV shows as fallback
+  // Use IndexedDB search to find both movies and TV shows
   return searchMediaInDB(query)
 }
 
