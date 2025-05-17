@@ -1,4 +1,4 @@
-import { searchMediaInDB, getTVShowByTMDB } from "@/utils/db"
+import { searchMediaInDB, getTVShowByTMDB, isDatabaseInitialized, isTVDatabaseInitialized } from "@/utils/db"
 
 export interface Media {
   id: string
@@ -35,21 +35,28 @@ export type ProviderServer =
 async function searchMoviesViaOMDB(query: string): Promise<any[]> {
   const apiKey = localStorage.getItem("omdbApiKey")
   if (!apiKey) {
-    throw new Error("OMDB API key is required.")
+    console.error("OMDB API key not found")
+    return []
   }
 
-  const url = `https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`
-  const response = await fetch(url)
+  try {
+    const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}`
+    const response = await fetch(url)
 
-  if (!response.ok) {
-    throw new Error(`OMDB API request failed with status: ${response.status}`)
-  }
+    if (!response.ok) {
+      throw new Error(`OMDB API request failed with status: ${response.status}`)
+    }
 
-  const data = await response.json()
+    const data = await response.json()
 
-  if (data.Response === "True") {
-    return data.Search
-  } else {
+    if (data.Response === "True" && Array.isArray(data.Search)) {
+      return data.Search
+    } else {
+      console.log("OMDB API returned no results:", data.Error || "Unknown error")
+      return []
+    }
+  } catch (error) {
+    console.error("Error fetching from OMDB API:", error)
     return []
   }
 }
@@ -64,6 +71,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
   // If OMDB API is enabled and we have an API key, try to use it first
   if (isOMDBEnabled && apiKey) {
     try {
+      console.log("Searching with OMDB API...")
       const omdbResults = await searchMoviesViaOMDB(query)
 
       if (omdbResults.length > 0) {
@@ -82,12 +90,26 @@ export async function searchMedia(query: string): Promise<Media[]> {
       }
     } catch (error) {
       console.error("Error searching with OMDB API:", error)
-      // Fall back to local database search
+      // Fall back to local database search if available
     }
   }
 
-  // Use IndexedDB search to find both movies and TV shows
-  return searchMediaInDB(query)
+  // Try to use IndexedDB search as fallback
+  try {
+    // Check if database is initialized before searching
+    const moviesInitialized = await isDatabaseInitialized()
+    const tvInitialized = await isTVDatabaseInitialized()
+
+    if (moviesInitialized || tvInitialized) {
+      return searchMediaInDB(query)
+    } else {
+      // No local database and OMDB failed or returned no results
+      return []
+    }
+  } catch (error) {
+    console.error("Error searching local database:", error)
+    return []
+  }
 }
 
 export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number): string {

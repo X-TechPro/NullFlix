@@ -123,13 +123,19 @@ export default function Home() {
       e.preventDefault()
       if (!query.trim()) return
 
-      // Check if database is initialized
-      const moviesInitialized = await isDatabaseInitialized()
-      const tvInitialized = await isTVDatabaseInitialized()
+      // Check if OMDB API is enabled
+      const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
+      const hasApiKey = !!localStorage.getItem("omdbApiKey")
 
-      if (!moviesInitialized && !tvInitialized) {
-        setShowNoDatabaseError(true)
-        return
+      // If OMDB is not enabled, check if database is initialized
+      if (!isOMDBEnabled || !hasApiKey) {
+        const moviesInitialized = await isDatabaseInitialized()
+        const tvInitialized = await isTVDatabaseInitialized()
+
+        if (!moviesInitialized && !tvInitialized) {
+          setShowNoDatabaseError(true)
+          return
+        }
       }
 
       setSearchInitiated(true)
@@ -138,7 +144,7 @@ export default function Home() {
       // Use setTimeout to allow the UI to update before starting the search
       setTimeout(async () => {
         try {
-          // Search in IndexedDB
+          // Search using OMDB API or IndexedDB
           const results = await searchMedia(query)
           setMediaResults(results)
           setShowBookmarks(false)
