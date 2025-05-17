@@ -1,4 +1,5 @@
 import { searchMediaInDB, getTVShowByTMDB } from "@/utils/db"
+import { searchMoviesByTitle, convertOMDBToMedia } from "@/services/omdb-service"
 
 export interface Media {
   id: string
@@ -34,7 +35,25 @@ export type ProviderServer =
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return []
 
-  // Use IndexedDB search to find both movies and TV shows
+  // Check if OMDB API is enabled
+  const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
+  const hasOMDBKey = !!localStorage.getItem("omdbApiKey")
+
+  // If OMDB API is enabled and we have an API key, try to search with it first
+  if (isOMDBEnabled && hasOMDBKey) {
+    try {
+      const omdbResults = await searchMoviesByTitle(query)
+      if (omdbResults && omdbResults.length > 0) {
+        // Convert OMDB results to our Media format
+        return omdbResults.map(convertOMDBToMedia)
+      }
+    } catch (error) {
+      console.error("Error searching with OMDB API:", error)
+      // Fall back to local database if OMDB search fails
+    }
+  }
+
+  // Use IndexedDB search to find both movies and TV shows as fallback
   return searchMediaInDB(query)
 }
 

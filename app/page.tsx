@@ -118,18 +118,26 @@ export default function Home() {
     }
   }, [showNoDatabaseError])
 
+  // Update the handleSearch function to prioritize OMDB API
+
   const handleSearch = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       if (!query.trim()) return
 
-      // Check if database is initialized
-      const moviesInitialized = await isDatabaseInitialized()
-      const tvInitialized = await isTVDatabaseInitialized()
+      // Check if OMDB API is enabled
+      const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
+      const hasOMDBKey = !!localStorage.getItem("omdbApiKey")
 
-      if (!moviesInitialized && !tvInitialized) {
-        setShowNoDatabaseError(true)
-        return
+      // If OMDB API is not enabled, check if database is initialized
+      if (!isOMDBEnabled || !hasOMDBKey) {
+        const moviesInitialized = await isDatabaseInitialized()
+        const tvInitialized = await isTVDatabaseInitialized()
+
+        if (!moviesInitialized && !tvInitialized) {
+          setShowNoDatabaseError(true)
+          return
+        }
       }
 
       setSearchInitiated(true)
@@ -138,7 +146,7 @@ export default function Home() {
       // Use setTimeout to allow the UI to update before starting the search
       setTimeout(async () => {
         try {
-          // Search in IndexedDB
+          // Search using the service (which now prioritizes OMDB if enabled)
           const results = await searchMedia(query)
           setMediaResults(results)
           setShowBookmarks(false)

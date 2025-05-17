@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   X,
   Check,
@@ -11,16 +11,14 @@ import {
   Loader2,
   Trash2,
   Film,
-  Tv,
   Bomb,
   Database,
   Server,
   Upload,
   Download,
-  ChevronDown,
-  Globe,
   Save,
   Info,
+  ExternalLink,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -36,6 +34,10 @@ import {
 import { fetchAndStoreMovies, fetchAndStoreTVShows, createDownloadableData } from "@/services/data-service"
 import { handleMovieDatabaseUpload, handleTVDatabaseUpload } from "@/utils/file-upload-handler"
 import type { Provider, ProviderServer } from "@/services/movie-service"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Label } from "@/components/ui/label"
 
 interface ProgressIndicatorProps {
   type: string
@@ -117,6 +119,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [omdbApiKey, setOmdbApiKey] = useState("")
   const [isSavingApiKey, setIsSavingApiKey] = useState(false)
   const [apiKeySaved, setApiKeySaved] = useState(false)
+  const [omdbSaveSuccess, setOmdbSaveSuccess] = useState(false)
 
   // Refs for file inputs
   const movieFileInputRef = useRef<HTMLInputElement>(null)
@@ -575,6 +578,100 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     },
   ]
 
+  const handleDownloadMovies = async () => {
+    setIsDownloadingMovies(true)
+    setDownloadProgress("Downloading movies...")
+    setDownloadProgressType("loading")
+    setDownloadError(null)
+
+    try {
+      const response = await fetch("/api/download-data?type=movie&useWget=true")
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to download movies")
+      }
+
+      const movieData = result.data
+
+      if (!Array.isArray(movieData)) {
+        throw new Error("Invalid movie data format received")
+      }
+
+      setDownloadProgress(`Processing ${movieData.length} movies...`)
+
+      // Store movies in IndexedDB
+      await storeMovies(movieData)
+      localStorage.setItem("movieDatabaseDownloaded", "true")
+
+      // Get the actual count of stored movies
+      const count = await getMetadata("movieCount")
+      setMovieCount(count)
+      setMoviesDownloadComplete(true)
+      setDownloadProgress(null)
+
+      // Create a downloadable version
+      await createDownloadableData("movie")
+    } catch (error) {
+      console.error("Download error:", error)
+      setDownloadError(error instanceof Error ? error.message : "Unknown error occurred")
+      setDownloadProgressType("error")
+      setDownloadProgress(null)
+    } finally {
+      setIsDownloadingMovies(false)
+    }
+  }
+
+  const handleDownloadTV = async () => {
+    setIsDownloadingTV(true)
+    setDownloadProgress("Downloading TV shows...")
+    setDownloadProgressType("loading")
+    setDownloadError(null)
+
+    try {
+      const response = await fetch("/api/download-data?type=tv&useWget=true")
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to download TV shows")
+      }
+
+      const tvData = result.data
+
+      if (!Array.isArray(tvData)) {
+        throw new Error("Invalid TV data format received")
+      }
+
+      setDownloadProgress(`Processing ${tvData.length} TV shows...`)
+
+      // Store TV shows in IndexedDB
+      await storeTVShows(tvData)
+      localStorage.setItem("tvDatabaseDownloaded", "true")
+
+      // Get the actual count of stored TV shows
+      const count = await getMetadata("tvCount")
+      setTVCount(count)
+      setTVDownloadComplete(true)
+      setDownloadProgress(null)
+
+      // Create a downloadable version
+      await createDownloadableData("tv")
+    } catch (error) {
+      console.error("Download error:", error)
+      setDownloadError(error instanceof Error ? error.message : "Unknown error occurred")
+      setDownloadProgressType("error")
+      setDownloadProgress(null)
+    } finally {
+      setIsDownloadingTV(false)
+    }
+  }
+
+  const handleSaveOmdbApiKey = () => {
+    localStorage.setItem("omdbApiKey", omdbApiKey)
+    setApiKeySaved(true)
+    setTimeout(() => setApiKeySaved(false), 3000)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -583,7 +680,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="relative w-[90%] max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-gray-800 shadow-xl"
+        className="relative w-[90%] max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg bg-gray-800 shadow-xl"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between p-3 sm:p-4 bg-gray-800 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Settings</h2>
@@ -595,380 +692,475 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
           </button>
         </div>
 
-        <div className="p-3 sm:p-6 flex flex-col items-center">
-          <p className="text-sm text-gray-300 w-full">Select your preferred streaming provider</p>
+        <Tabs defaultValue="database" className="p-3 sm:p-6">
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="database" className="data-[state=active]:bg-sky-900/50">
+              <Database className="w-4 h-4 mr-2" />
+              Database
+            </TabsTrigger>
+            <TabsTrigger value="providers" className="data-[state=active]:bg-sky-900/50">
+              <Film className="w-4 h-4 mr-2" />
+              Providers
+            </TabsTrigger>
+            <TabsTrigger value="api" className="data-[state=active]:bg-sky-900/50">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              API
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="grid gap-2 sm:gap-3 mt-3 sm:mt-4 w-full">
-            {providers.map((provider) => (
-              <div key={provider.id} className="w-[95%] mx-auto">
-                <Button
-                  variant="outline"
-                  className={`justify-start h-auto p-2 sm:p-3 text-left w-full ${
-                    selectedProvider === provider.id
-                      ? "bg-sky-600/20 border-sky-500 text-white"
-                      : "bg-gray-900/50 border-gray-700 text-gray-300 hover:border-sky-500/50"
-                  }`}
-                  onClick={() => handleProviderSelect(provider.id)}
-                >
-                  <div className="flex items-center w-full">
-                    <div
-                      className={`w-4 h-4 mr-2 sm:mr-3 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
-                        selectedProvider === provider.id ? "border-sky-500" : "border-gray-600"
-                      }`}
-                    >
-                      {selectedProvider === provider.id && <div className="w-2 h-2 rounded-full bg-sky-500"></div>}
-                    </div>
-                    <div className="overflow-hidden flex-1">
-                      <div className="font-medium truncate">{provider.name}</div>
-                      <div className="text-xs text-gray-400 mt-0.5 truncate">{provider.url}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{provider.description}</div>
-                    </div>
-                  </div>
-                </Button>
+          <TabsContent value="database" className="space-y-4">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Movie Database</CardTitle>
+                <CardDescription>Download the movie database for offline use</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col space-y-4">
+                  {/* Direct browser setup button - Primary method */}
+                  <Button
+                    onClick={handleDirectMovieSetup}
+                    disabled={isDirectFetchingMovies || isDownloadingMovies || isUploadingMovies}
+                    className={`w-full mx-auto flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 ${
+                      moviesDownloadComplete
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "bg-sky-600 hover:bg-sky-700 text-white"
+                    }`}
+                  >
+                    {isDirectFetchingMovies ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+                        <span className="text-center">Setting up movies...</span>
+                      </>
+                    ) : moviesDownloadComplete ? (
+                      <>
+                        <Check size={16} className="flex-shrink-0 mr-2" />
+                        <span className="text-center whitespace-normal">
+                          Movies Downloaded {movieCount && `(${movieCount})`}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Database size={16} className="flex-shrink-0 mr-2" />
+                        <span className="text-center">Setup Movie Database</span>
+                      </>
+                    )}
+                  </Button>
 
-                {/* Server selection for providers with multiple servers */}
-                {provider.hasServers && selectedProvider === provider.id && (
-                  <div className="mt-1 pl-8">
+                  {/* Server-side download button - Fallback method */}
+                  {!moviesDownloadComplete && (
                     <Button
+                      onClick={handleDownloadMovieDatabase}
+                      disabled={isDownloadingMovies || isDirectFetchingMovies || isUploadingMovies}
                       variant="outline"
-                      className="w-full justify-between bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700"
-                      onClick={() => toggleServerMenu(provider.id)}
+                      className="w-full mx-auto mt-2 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
                     >
-                      <div className="flex items-center">
-                        <Globe className="w-4 h-4 mr-2 text-sky-400" />
-                        <span>{selectedServer || (provider.servers && provider.servers[0].name)}</span>
-                      </div>
-                      <ChevronDown className="w-4 h-4 ml-2" />
+                      {isDownloadingMovies ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+                          <span className="text-center">Downloading via server...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Server size={16} className="flex-shrink-0 mr-2" />
+                          <span className="text-center">Download via server (fallback)</span>
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {/* File upload button */}
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      onClick={triggerMovieFileInput}
+                      disabled={isUploadingMovies || isDirectFetchingMovies || isDownloadingMovies}
+                      variant="outline"
+                      className="flex-1 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+                    >
+                      {isUploadingMovies ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+                          <span className="text-center">Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} className="flex-shrink-0 mr-2" />
+                          <span className="text-center">Upload Database File</span>
+                        </>
+                      )}
                     </Button>
 
-                    {/* Server selection dropdown */}
-                    {showServerMenu === provider.id && (
-                      <div className="mt-1 bg-gray-800 border border-gray-700 rounded-md overflow-hidden">
-                        {provider.servers?.map((server) => (
-                          <Button
-                            key={server.id}
-                            variant="ghost"
-                            className={`justify-start h-auto py-1.5 px-2 text-left w-full rounded-none ${
-                              selectedServer === server.id
-                                ? "bg-sky-600/20 text-white"
-                                : "text-gray-300 hover:bg-gray-700"
-                            }`}
-                            onClick={() => handleServerSelect(server.id)}
-                          >
-                            {server.name}
-                          </Button>
-                        ))}
-                      </div>
+                    {moviesDownloadComplete && (
+                      <Button
+                        onClick={handleCreateDownloadableMovies}
+                        variant="outline"
+                        className="flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+                      >
+                        <Download size={16} className="flex-shrink-0" />
+                      </Button>
                     )}
+
+                    {/* Hidden file input */}
+                    <input
+                      type="file"
+                      ref={movieFileInputRef}
+                      onChange={handleMovieFileUpload}
+                      accept=".json"
+                      className="hidden"
+                    />
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
 
-          {/* OMDB API Section */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Info size={18} className="text-sky-400 flex-shrink-0" />
-                <h3 className="text-lg font-medium text-white">OMDB API</h3>
-              </div>
-              <Switch
-                checked={omdbEnabled}
-                onCheckedChange={handleOmdbToggle}
-                className="data-[state=checked]:bg-sky-600"
-              />
-            </div>
+                  {/* TV Series Database Section */}
+                  {/* Direct browser setup button - Primary method */}
+                  <Button
+                    onClick={handleDirectTVSetup}
+                    disabled={isDirectFetchingTV || isDownloadingTV || isUploadingTV}
+                    className={`w-full mx-auto mt-3 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 ${
+                      tvDownloadComplete
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "bg-sky-600 hover:bg-sky-700 text-white"
+                    }`}
+                  >
+                    {isDirectFetchingTV ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+                        <span className="text-center">Setting up TV shows...</span>
+                      </>
+                    ) : tvDownloadComplete ? (
+                      <>
+                        <Check size={16} className="flex-shrink-0 mr-2" />
+                        <span className="text-center whitespace-normal">
+                          TV Series Downloaded {tvCount && `(${tvCount})`}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Database size={16} className="flex-shrink-0 mr-2" />
+                        <span className="text-center">Setup TV Series Database</span>
+                      </>
+                    )}
+                  </Button>
 
-            <p className="text-sm text-gray-300 mb-4">
-              Enable OMDB API to get detailed movie information and posters.
-              <a
-                href="https://www.omdbapi.com/apikey.aspx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sky-400 hover:underline ml-1"
-              >
-                Get a free API key
-              </a>
-            </p>
+                  {/* Server-side download button - Fallback method */}
+                  {!tvDownloadComplete && (
+                    <Button
+                      onClick={handleDownloadTVDatabase}
+                      disabled={isDownloadingTV || isDirectFetchingTV || isUploadingTV}
+                      variant="outline"
+                      className="w-full mx-auto mt-2 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+                    >
+                      {isDownloadingTV ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+                          <span className="text-center">Downloading via server...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Server size={16} className="flex-shrink-0 mr-2" />
+                          <span className="text-center">Download via server (fallback)</span>
+                        </>
+                      )}
+                    </Button>
+                  )}
 
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Enter your OMDB API key"
-                value={omdbApiKey}
-                onChange={(e) => setOmdbApiKey(e.target.value)}
-                disabled={!omdbEnabled}
-                className={`flex-1 bg-gray-800 border-gray-700 text-white ${!omdbEnabled ? "opacity-50" : ""}`}
-              />
-              <Button
-                onClick={handleSaveApiKey}
-                disabled={!omdbEnabled || !omdbApiKey || isSavingApiKey}
-                className={`bg-sky-600 hover:bg-sky-700 text-white ${!omdbEnabled || !omdbApiKey ? "opacity-50" : ""}`}
-              >
-                {isSavingApiKey ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : apiKeySaved ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
+                  {/* File upload button */}
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      onClick={triggerTVFileInput}
+                      disabled={isUploadingTV || isDirectFetchingTV || isDownloadingTV}
+                      variant="outline"
+                      className="flex-1 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+                    >
+                      {isUploadingTV ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+                          <span className="text-center">Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} className="flex-shrink-0 mr-2" />
+                          <span className="text-center">Upload Database File</span>
+                        </>
+                      )}
+                    </Button>
 
-            <p className="text-xs text-gray-500 mt-2">Limited to 1,000 requests per day with the free API key.</p>
-          </div>
+                    {tvDownloadComplete && (
+                      <Button
+                        onClick={handleCreateDownloadableTV}
+                        variant="outline"
+                        className="flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+                      >
+                        <Download size={16} className="flex-shrink-0" />
+                      </Button>
+                    )}
 
-          {/* Movie Database Section */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
-            <div className="flex items-center gap-2">
-              <Film size={18} className="text-sky-400 flex-shrink-0" />
-              <h3 className="text-lg font-medium text-white">Movie Database</h3>
-            </div>
-            <p className="mt-1 text-sm text-gray-300">Download the movie database for offline search</p>
+                    {/* Hidden file input */}
+                    <input
+                      type="file"
+                      ref={tvFileInputRef}
+                      onChange={handleTVFileUpload}
+                      accept=".json"
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t border-gray-700 pt-4">
+                <p className="text-xs text-gray-400">
+                  The database will be stored in your browser's IndexedDB storage. This allows for fast searching
+                  without needing to download the data each time.
+                </p>
+              </CardFooter>
+            </Card>
 
-            {/* Direct browser setup button - Primary method */}
-            <Button
-              onClick={handleDirectMovieSetup}
-              disabled={isDirectFetchingMovies || isDownloadingMovies || isUploadingMovies}
-              className={`w-full mx-auto mt-3 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 ${
-                moviesDownloadComplete
-                  ? "bg-green-600 hover:bg-green-700 text-white"
-                  : "bg-sky-600 hover:bg-sky-700 text-white"
-              }`}
-            >
-              {isDirectFetchingMovies ? (
-                <>
-                  <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                  <span className="text-center">Setting up movies...</span>
-                </>
-              ) : moviesDownloadComplete ? (
-                <>
-                  <Check size={16} className="flex-shrink-0 mr-2" />
-                  <span className="text-center whitespace-normal">
-                    Movies Downloaded {movieCount && `(${movieCount})`}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Database size={16} className="flex-shrink-0 mr-2" />
-                  <span className="text-center">Setup Movie Database</span>
-                </>
-              )}
-            </Button>
-
-            {/* Server-side download button - Fallback method */}
-            {!moviesDownloadComplete && (
-              <Button
-                onClick={handleDownloadMovieDatabase}
-                disabled={isDownloadingMovies || isDirectFetchingMovies || isUploadingMovies}
-                variant="outline"
-                className="w-full mx-auto mt-2 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
-              >
-                {isDownloadingMovies ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                    <span className="text-center">Downloading via server...</span>
-                  </>
-                ) : (
-                  <>
-                    <Server size={16} className="flex-shrink-0 mr-2" />
-                    <span className="text-center">Download via server (fallback)</span>
-                  </>
-                )}
-              </Button>
-            )}
-
-            {/* File upload button */}
-            <div className="mt-2 flex gap-2">
-              <Button
-                onClick={triggerMovieFileInput}
-                disabled={isUploadingMovies || isDirectFetchingMovies || isDownloadingMovies}
-                variant="outline"
-                className="flex-1 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
-              >
-                {isUploadingMovies ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                    <span className="text-center">Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} className="flex-shrink-0 mr-2" />
-                    <span className="text-center">Upload Database File</span>
-                  </>
-                )}
-              </Button>
-
-              {moviesDownloadComplete && (
-                <Button
-                  onClick={handleCreateDownloadableMovies}
-                  variant="outline"
-                  className="flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+            <AnimatePresence>
+              {downloadProgress && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                 >
-                  <Download size={16} className="flex-shrink-0" />
-                </Button>
+                  <Alert variant="default" className="bg-blue-900/30 border-blue-800 text-white">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>{downloadProgress}</AlertDescription>
+                  </Alert>
+                </motion.div>
               )}
-
-              {/* Hidden file input */}
-              <input
-                type="file"
-                ref={movieFileInputRef}
-                onChange={handleMovieFileUpload}
-                accept=".json"
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* TV Series Database Section */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-700 w-[95%] mx-auto">
-            <div className="flex items-center gap-2">
-              <Tv size={18} className="text-sky-400 flex-shrink-0" />
-              <h3 className="text-lg font-medium text-white">TV Series Database</h3>
-            </div>
-            <p className="mt-1 text-sm text-gray-300">Download the TV series database for offline search</p>
-
-            {/* Direct browser setup button - Primary method */}
-            <Button
-              onClick={handleDirectTVSetup}
-              disabled={isDirectFetchingTV || isDownloadingTV || isUploadingTV}
-              className={`w-full mx-auto mt-3 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 ${
-                tvDownloadComplete
-                  ? "bg-green-600 hover:bg-green-700 text-white"
-                  : "bg-sky-600 hover:bg-sky-700 text-white"
-              }`}
-            >
-              {isDirectFetchingTV ? (
-                <>
-                  <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                  <span className="text-center">Setting up TV shows...</span>
-                </>
-              ) : tvDownloadComplete ? (
-                <>
-                  <Check size={16} className="flex-shrink-0 mr-2" />
-                  <span className="text-center whitespace-normal">
-                    TV Series Downloaded {tvCount && `(${tvCount})`}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Database size={16} className="flex-shrink-0 mr-2" />
-                  <span className="text-center">Setup TV Series Database</span>
-                </>
-              )}
-            </Button>
-
-            {/* Server-side download button - Fallback method */}
-            {!tvDownloadComplete && (
-              <Button
-                onClick={handleDownloadTVDatabase}
-                disabled={isDownloadingTV || isDirectFetchingTV || isUploadingTV}
-                variant="outline"
-                className="w-full mx-auto mt-2 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
-              >
-                {isDownloadingTV ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                    <span className="text-center">Downloading via server...</span>
-                  </>
-                ) : (
-                  <>
-                    <Server size={16} className="flex-shrink-0 mr-2" />
-                    <span className="text-center">Download via server (fallback)</span>
-                  </>
-                )}
-              </Button>
-            )}
-
-            {/* File upload button */}
-            <div className="mt-2 flex gap-2">
-              <Button
-                onClick={triggerTVFileInput}
-                disabled={isUploadingTV || isDirectFetchingTV || isDownloadingTV}
-                variant="outline"
-                className="flex-1 flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
-              >
-                {isUploadingTV ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                    <span className="text-center">Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} className="flex-shrink-0 mr-2" />
-                    <span className="text-center">Upload Database File</span>
-                  </>
-                )}
-              </Button>
-
-              {tvDownloadComplete && (
-                <Button
-                  onClick={handleCreateDownloadableTV}
-                  variant="outline"
-                  className="flex items-center justify-center gap-2 min-h-[2.5rem] py-2 px-3 bg-gray-700/50 hover:bg-gray-700 text-gray-300 border-gray-600"
+              {downloadError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                 >
-                  <Download size={16} className="flex-shrink-0" />
-                </Button>
+                  <Alert variant="destructive" className="bg-red-900/30 border-red-800 text-white">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>{downloadError}</AlertDescription>
+                  </Alert>
+                </motion.div>
               )}
+            </AnimatePresence>
+          </TabsContent>
 
-              {/* Hidden file input */}
-              <input type="file" ref={tvFileInputRef} onChange={handleTVFileUpload} accept=".json" className="hidden" />
-            </div>
-          </div>
+          <TabsContent value="providers" className="space-y-4">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Video Providers</CardTitle>
+                <CardDescription>Select your preferred video provider</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {providers.map((provider) => (
+                    <div key={provider.id} className="relative">
+                      <Button
+                        variant={selectedProvider === provider.id ? "default" : "outline"}
+                        className={`w-full justify-between ${
+                          selectedProvider === provider.id
+                            ? "bg-sky-600 hover:bg-sky-700 text-white"
+                            : "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                        }`}
+                        onClick={() => handleProviderSelect(provider.id)}
+                      >
+                        {provider.name}
+                        {(provider.id === "2embed" || provider.id === "vidsrc.xyz") && (
+                          <button
+                            className="ml-1 p-1 rounded-full hover:bg-gray-600"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleServerMenu(provider.id)
+                            }}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="m6 9 6 6 6-6" />
+                            </svg>
+                          </button>
+                        )}
+                      </Button>
 
-          {downloadProgress && (
-            <ProgressIndicator
-              type={downloadProgressType}
-              message={downloadProgress}
-              progress={downloadProgressType === "loading" ? 50 : undefined}
-            />
-          )}
+                      {/* Server selection dropdown */}
+                      {showServerMenu === provider.id && (
+                        <div className="absolute z-10 mt-1 w-full bg-gray-700 rounded-md shadow-lg">
+                          {provider.id === "2embed" && (
+                            <div className="py-1">
+                              {provider.servers?.map((server) => (
+                                <Button
+                                  key={server.id}
+                                  variant="ghost"
+                                  className={`block px-4 py-2 text-sm w-full text-left hover:bg-gray-600 ${
+                                    selectedServer === server.id ? "bg-sky-900/50 text-white" : "text-gray-200"
+                                  }`}
+                                  onClick={() => handleServerSelect(server.id)}
+                                >
+                                  {server.name}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
 
-          {/* Database Management Section */}
-          <div className="mt-6 w-[95%] mx-auto">
-            <h3 className="text-lg font-medium text-white mb-3">Database Management</h3>
+                          {provider.id === "vidsrc.xyz" && (
+                            <div className="py-1">
+                              {provider.servers?.map((server) => (
+                                <Button
+                                  key={server.id}
+                                  variant="ghost"
+                                  className={`block px-4 py-2 text-sm w-full text-left hover:bg-gray-600 ${
+                                    selectedServer === server.id ? "bg-sky-900/50 text-white" : "text-gray-200"
+                                  }`}
+                                  onClick={() => handleServerSelect(server.id)}
+                                >
+                                  {server.name}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter className="border-t border-gray-700 pt-4">
+                <p className="text-xs text-gray-400">
+                  Your selected provider will be used to stream movies and TV shows. Some providers may work better than
+                  others depending on your location and network.
+                </p>
+              </CardFooter>
+            </Card>
+          </TabsContent>
 
-            {(moviesDownloadComplete || tvDownloadComplete) && (
-              <Button
-                onClick={handleClearDatabase}
-                disabled={isClearing}
-                variant="outline"
-                className="w-full mx-auto mb-3 border-red-800/50 text-red-400 hover:bg-red-900/20 hover:text-red-300"
-              >
-                {isClearing ? (
-                  <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
-                ) : (
-                  <Trash2 size={16} className="mr-2 flex-shrink-0" />
-                )}
-                <span className="text-center">Clear All Databases</span>
-              </Button>
-            )}
+          <TabsContent value="api" className="space-y-4">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">OMDB API</CardTitle>
+                <CardDescription>Enable OMDB API to get detailed movie information and posters</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="omdb-toggle" className="text-white">
+                      Enable OMDB API
+                    </Label>
+                    <Switch
+                      id="omdb-toggle"
+                      checked={omdbEnabled}
+                      onCheckedChange={handleOmdbToggle}
+                      className="data-[state=checked]:bg-sky-600"
+                    />
+                  </div>
 
-            {/* Obliterate Everything Button */}
+                  <div className="space-y-2">
+                    <Label htmlFor="omdb-api-key" className={`${!omdbEnabled ? "text-gray-500" : "text-white"}`}>
+                      API Key
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="omdb-api-key"
+                        type="text"
+                        placeholder="Enter your OMDB API key"
+                        value={omdbApiKey}
+                        onChange={(e) => setOmdbApiKey(e.target.value)}
+                        disabled={!omdbEnabled}
+                        className={`flex-1 bg-gray-800 border-gray-700 text-white ${!omdbEnabled ? "opacity-50" : ""}`}
+                      />
+                      <Button
+                        onClick={handleSaveOmdbApiKey}
+                        disabled={!omdbEnabled || !omdbApiKey || isSavingApiKey}
+                        className={`bg-sky-600 hover:bg-sky-700 text-white ${!omdbEnabled || !omdbApiKey ? "opacity-50" : ""}`}
+                      >
+                        {isSavingApiKey ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : apiKeySaved ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <Save className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <a
+                      href="https://www.omdbapi.com/apikey.aspx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-400 hover:text-sky-300 text-sm flex items-center"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      Get a free API key
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t border-gray-700 pt-4">
+                <p className="text-xs text-gray-400">
+                  The OMDB API provides detailed movie information including posters, ratings, and plot summaries. The
+                  free plan is limited to 1,000 requests per day. If this limit is reached, the app will fall back to
+                  the downloaded database.
+                </p>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {downloadProgress && (
+          <ProgressIndicator
+            type={downloadProgressType}
+            message={downloadProgress}
+            progress={downloadProgressType === "loading" ? 50 : undefined}
+          />
+        )}
+
+        {/* Database Management Section */}
+        <div className="mt-6 w-[95%] mx-auto">
+          <h3 className="text-lg font-medium text-white mb-3">Database Management</h3>
+
+          {(moviesDownloadComplete || tvDownloadComplete) && (
             <Button
-              onClick={handleObliterateEverything}
-              disabled={isObliterating}
+              onClick={handleClearDatabase}
+              disabled={isClearing}
               variant="outline"
-              className="w-full mx-auto border-red-900 bg-red-900/30 text-red-300 hover:bg-red-900/50 hover:text-red-100"
+              className="w-full mx-auto mb-3 border-red-800/50 text-red-400 hover:bg-red-900/20 hover:text-red-300"
             >
-              {isObliterating ? (
+              {isClearing ? (
                 <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
               ) : (
-                <Bomb size={16} className="mr-2 flex-shrink-0" />
+                <Trash2 size={16} className="mr-2 flex-shrink-0" />
               )}
-              <span className="text-center font-bold">OBLITERATE EVERYTHING</span>
+              <span className="text-center">Clear All Databases</span>
             </Button>
-            <p className="text-xs text-red-400/70 mt-1 text-center">
-              Deletes all data: bookmarks, databases, cached TV shows, and settings
-            </p>
-          </div>
+          )}
 
-          <div className="flex justify-end mt-4 sm:mt-6 w-full">
-            <Button onClick={onClose} className="bg-sky-600 hover:bg-sky-700 text-white">
-              Close
-            </Button>
-          </div>
+          {/* Obliterate Everything Button */}
+          <Button
+            onClick={handleObliterateEverything}
+            disabled={isObliterating}
+            variant="outline"
+            className="w-full mx-auto border-red-900 bg-red-900/30 text-red-300 hover:bg-red-900/50 hover:text-red-100"
+          >
+            {isObliterating ? (
+              <Loader2 size={16} className="animate-spin mr-2 flex-shrink-0" />
+            ) : (
+              <Bomb size={16} className="mr-2 flex-shrink-0" />
+            )}
+            <span className="text-center font-bold">OBLITERATE EVERYTHING</span>
+          </Button>
+          <p className="text-xs text-red-400/70 mt-1 text-center">
+            Deletes all data: bookmarks, databases, cached TV shows, and settings
+          </p>
+        </div>
+
+        <div className="flex justify-end mt-4 sm:mt-6 w-full">
+          <Button onClick={onClose} className="bg-sky-600 hover:bg-sky-700 text-white">
+            Close
+          </Button>
         </div>
       </motion.div>
     </div>
