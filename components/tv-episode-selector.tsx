@@ -207,34 +207,6 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                 </div>
               )}
 
-              {/* Show info */}
-              {tvShow && (
-                <div className="mt-6 p-4 bg-gray-700/50 rounded-lg">
-                  <div className="text-sm text-gray-300">
-                    <div className="flex items-center mb-2">
-                      <Tv className="w-4 h-4 mr-2 text-sky-400" />
-                      <h4 className="font-medium text-white">{tvShow?.title}</h4>
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-2">
-                      {tvShow?.year && (
-                        <p className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1 text-sky-400" />
-                          <span>{tvShow.year}</span>
-                        </p>
-                      )}
-
-                      <p className="flex items-center">
-                        <Clock className="w-3 h-3 mr-1 text-sky-400" />
-                        <span>~45 min</span>
-                      </p>
-                    </div>
-
-                    {tvShow?.genre && <p className="mt-2 text-gray-400">{tvShow.genre}</p>}
-                  </div>
-                </div>
-              )}
-
               <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300">
                 <p>
                   Note: If an episode doesn't load, try another episode or season. Not all episodes may be available.

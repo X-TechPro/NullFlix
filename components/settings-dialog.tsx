@@ -18,7 +18,6 @@ interface SettingsDialogProps {
 
 export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = useState("providers")
-  const [omdbEnabled, setOmdbEnabled] = useState(false)
   const [omdbApiKey, setOmdbApiKey] = useState("")
   const [selectedProvider, setSelectedProvider] = useState<string>("embed.su")
   const [selectedServer, setSelectedServer] = useState<string>("")
@@ -103,9 +102,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   // Load settings from localStorage on component mount
   useEffect(() => {
     try {
-      const savedOmdbEnabled = localStorage.getItem("omdbEnabled")
-      setOmdbEnabled(savedOmdbEnabled === "true") // always set, default to false if not found
-
+      // Set default OMDB API key for first-time users
+      if (typeof window !== "undefined" && !localStorage.getItem("omdbApiKey")) {
+        localStorage.setItem("omdbApiKey", "9f603783")
+        setOmdbApiKey("9f603783")
+      }
       const savedOmdbApiKey = localStorage.getItem("omdbApiKey")
       if (savedOmdbApiKey !== null) {
         setOmdbApiKey(savedOmdbApiKey)
@@ -150,7 +151,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   // Save OMDB settings manually
   const handleSaveOmdb = () => {
     try {
-      localStorage.setItem("omdbEnabled", omdbEnabled ? "true" : "false")
       localStorage.setItem("omdbApiKey", omdbApiKey)
     } catch (e) {
       console.error("Error saving OMDB settings:", e)
@@ -372,55 +372,38 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
             <TabsContent value="general" className="space-y-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="omdb-toggle" className="text-white">
-                      Enable OMDB API
-                    </Label>
-                    <p className="text-xs text-gray-400">Use OMDB API for movie information</p>
+                <div className="space-y-2">
+                  <Label htmlFor="omdb-api-key" className="text-white">
+                    OMDB API Key
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="omdb-api-key"
+                      value={omdbApiKey}
+                      onChange={(e) => setOmdbApiKey(e.target.value)}
+                      placeholder="Enter your OMDB API key"
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                    <Button
+                      type="button"
+                      className="bg-sky-600 hover:bg-sky-700 text-white"
+                      onClick={handleSaveOmdb}
+                    >
+                      Save
+                    </Button>
                   </div>
-                  <Switch
-                    id="omdb-toggle"
-                    checked={omdbEnabled}
-                    onCheckedChange={setOmdbEnabled}
-                    className="data-[state=checked]:bg-sky-600"
-                  />
+                  <p className="text-xs text-gray-400">
+                    Get a free API key at{" "}
+                    <a
+                      href="https://www.omdbapi.com/apikey.aspx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-400 hover:underline"
+                    >
+                      omdbapi.com
+                    </a>
+                  </p>
                 </div>
-
-                {omdbEnabled && (
-                  <div className="space-y-2">
-                    <Label htmlFor="omdb-api-key" className="text-white">
-                      OMDB API Key
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="omdb-api-key"
-                        value={omdbApiKey}
-                        onChange={(e) => setOmdbApiKey(e.target.value)}
-                        placeholder="Enter your OMDB API key"
-                        className="bg-gray-700 border-gray-600 text-white"
-                      />
-                      <Button
-                        type="button"
-                        className="bg-sky-600 hover:bg-sky-700 text-white"
-                        onClick={handleSaveOmdb}
-                      >
-                        Save
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      Get a free API key at{" "}
-                      <a
-                        href="https://www.omdbapi.com/apikey.aspx"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sky-400 hover:underline"
-                      >
-                        omdbapi.com
-                      </a>
-                    </p>
-                  </div>
-                )}
 
                 <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300">
                   <div className="flex gap-2">

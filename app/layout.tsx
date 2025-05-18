@@ -8,8 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "NullFlix | Movie Player App",
-  description: "A slick movie player app with search functionality",
-  generator: "v0.dev",
+  description: "A slick movie player app",
 }
 
 export default function RootLayout({

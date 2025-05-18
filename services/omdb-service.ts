@@ -31,98 +31,56 @@ export interface OMDBResponse {
   Response: string
 }
 
-export async function fetchMovieDetails(title: string): Promise<OMDBResponse | null> {
+// Helper to get OMDB API key if enabled
+function getOMDBApiKey(): string | null {
+  // Always use a default key if none is set
+  if (typeof window !== "undefined") {
+    // If no key is set, set the default key for first-time users
+    if (!localStorage.getItem("omdbApiKey")) {
+      localStorage.setItem("omdbApiKey", "9f603783")
+    }
+  }
+  // Optionally, you can keep the omdbEnabled logic if needed
+  // if (localStorage.getItem("omdbEnabled") !== "true") return null
+  const apiKey = localStorage.getItem("omdbApiKey")
+  if (!apiKey) console.error("OMDB API key not found")
+  return apiKey
+}
+
+// Generalized fetch function
+async function fetchOMDB(params: string): Promise<any | null> {
+  const apiKey = getOMDBApiKey()
+  if (!apiKey) return null
   try {
-    // Check if OMDB API is enabled
-    const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-    if (!isOMDBEnabled) {
-      return null
-    }
-
-    // Get API key from localStorage
-    const apiKey = localStorage.getItem("omdbApiKey")
-    if (!apiKey) {
-      console.error("OMDB API key not found")
-      return null
-    }
-
-    // Fetch movie details from OMDB API
-    const response = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${apiKey}`)
+    const response = await fetch(`https://www.omdbapi.com/?${params}&apikey=${apiKey}`)
     const data = await response.json()
-
-    // Check if the response is valid
-    if (data.Response === "True") {
-      return data
-    } else {
-      console.error("OMDB API error:", data.Error)
-      return null
-    }
+    if (data.Response === "True") return data
+    console.error("OMDB API error:", data.Error)
+    return null
   } catch (error) {
-    console.error("Error fetching movie details:", error)
+    console.error("OMDB API fetch error:", error)
     return null
   }
+}
+
+export async function fetchMovieDetails(title: string): Promise<OMDBResponse | null> {
+  return fetchOMDB(`t=${encodeURIComponent(title)}`)
 }
 
 export async function fetchMovieDetailsByIMDB(imdbId: string): Promise<OMDBResponse | null> {
-  try {
-    // Check if OMDB API is enabled
-    const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-    if (!isOMDBEnabled) {
-      return null
-    }
-
-    // Get API key from localStorage
-    const apiKey = localStorage.getItem("omdbApiKey")
-    if (!apiKey) {
-      console.error("OMDB API key not found")
-      return null
-    }
-
-    // Fetch movie details from OMDB API
-    const response = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${apiKey}`)
-    const data = await response.json()
-
-    // Check if the response is valid
-    if (data.Response === "True") {
-      return data
-    } else {
-      console.error("OMDB API error:", data.Error)
-      return null
-    }
-  } catch (error) {
-    console.error("Error fetching movie details:", error)
-    return null
-  }
+  return fetchOMDB(`i=${imdbId}`)
 }
 
 // Add a new function to search movies via OMDB API
-
 export async function searchMoviesViaOMDB(query: string): Promise<OMDBResponse[]> {
+  const apiKey = getOMDBApiKey()
+  if (!apiKey) return []
   try {
-    // Check if OMDB API is enabled
-    const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-    if (!isOMDBEnabled) {
-      return []
-    }
-
-    // Get API key from localStorage
-    const apiKey = localStorage.getItem("omdbApiKey")
-    if (!apiKey) {
-      console.error("OMDB API key not found")
-      return []
-    }
-
-    // Fetch search results from OMDB API
     const response = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}`)
     const data = await response.json()
-
-    // Check if the response is valid
-    if (data.Response === "True" && Array.isArray(data.Search)) {
-      return data.Search
-    } else {
-      console.error("OMDB API search error:", data.Error)
-      return []
-    }
+    if (data.Response === "True" && Array.isArray(data.Search)) return data.Search
+    console.error("OMDB API search error:", data.Error)
+    return []
   } catch (error) {
     console.error("Error searching movies via OMDB:", error)
     return []

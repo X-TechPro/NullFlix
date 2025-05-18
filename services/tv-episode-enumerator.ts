@@ -103,6 +103,55 @@ function saveTVStructureToCache(structure: TVShowStructure): void {
   }
 }
 
+// Helper to find valid seasons
+async function findValidSeasons(
+  tmdbId: number,
+  provider: string,
+  maxSeason: number,
+  onProgress: (message: string, progress: number) => void
+): Promise<number[]> {
+  const validSeasons: number[] = []
+  let firstFound = false
+  for (let season = 1; season <= maxSeason; season++) {
+    const episodeUrl = getEpisodeUrl(tmdbId, season, 1, provider)
+    const isValid = await isValidUrl(episodeUrl)
+    if (isValid) {
+      validSeasons.push(season)
+      firstFound = true
+    }
+    onProgress(`Checking season ${season}...`, (season / maxSeason) * 50)
+    // Stop early if no valid seasons found after 5 tries
+    if (season >= 5 && !firstFound) break
+    // Stop if found at least one and now hit an invalid one (after first block)
+    if (firstFound && !isValid) break
+  }
+  return validSeasons
+}
+
+// Helper to find valid episodes for a season
+async function findValidEpisodes(
+  tmdbId: number,
+  season: number,
+  provider: string,
+  maxEpisode: number
+): Promise<number[]> {
+  const validEpisodes: number[] = []
+  let firstFound = false
+  for (let episode = 1; episode <= maxEpisode; episode++) {
+    const episodeUrl = getEpisodeUrl(tmdbId, season, episode, provider)
+    const isValid = await isValidUrl(episodeUrl)
+    if (isValid) {
+      validEpisodes.push(episode)
+      firstFound = true
+    }
+    // Stop early if no valid episodes found after 10 tries
+    if (episode >= 10 && !firstFound) break
+    // Stop if found at least one and now hit an invalid one (after first block)
+    if (firstFound && !isValid) break
+  }
+  return validEpisodes.length ? validEpisodes : Array.from({ length: 10 }, (_, j) => j + 1)
+}
+
 // Enumerate episodes for a TV show
 export async function enumerateTVShow(
   tmdbId: number,
@@ -129,96 +178,34 @@ export async function enumerateTVShow(
     lastUpdated: new Date().toISOString(),
   }
 
+  const maxSeason = 20
+  const maxEpisode = 30
+
   // Get the current provider
   let provider = "embed.su"
   try {
     const savedProvider = localStorage.getItem("selectedProvider")
-    if (savedProvider) {
-      provider = savedProvider
-    }
+    if (savedProvider) provider = savedProvider
   } catch (error) {
     console.error("Error accessing localStorage:", error)
   }
 
-  const maxSeason = 20 // Limit to 20 seasons for performance
-  let seasonFound = false
-
-  // Find valid seasons
   onProgress("Finding available seasons...", 0)
 
-  // Different providers have different URL structures, so we need to handle them differently
-  if (provider === "2embed.cc" || provider === "2embed.skin") {
-    // For 2embed providers, we'll check each season directly
-    for (let season = 1; season <= maxSeason; season++) {
-      const episodeUrl = getEpisodeUrl(tmdbId, season, 1, provider)
-      const isValid = await isValidUrl(episodeUrl)
-
-      if (isValid) {
-        seasonFound = true
-        structure.seasons[season] = []
-      }
-
-      onProgress(`Checking season ${season}...`, (season / maxSeason) * 50)
-
-      // If we've found at least one season and now hit an invalid one,
-      // we can assume we've found all seasons
-      if (season > 5 && !seasonFound) {
-        break
-      }
-    }
-  } else if (provider === "vidsrc.xyz") {
-    // For vidsrc.xyz, we'll check each season directly
-    for (let season = 1; season <= maxSeason; season++) {
-      const episodeUrl = getEpisodeUrl(tmdbId, season, 1, provider)
-      const isValid = await isValidUrl(episodeUrl)
-
-      if (isValid) {
-        seasonFound = true
-        structure.seasons[season] = []
-      }
-
-      onProgress(`Checking season ${season}...`, (season / maxSeason) * 50)
-
-      // If we've found at least one season and now hit an invalid one,
-      // we can assume we've found all seasons
-      if (season > 5 && !seasonFound) {
-        break
-      }
-    }
+  // Find valid seasons
+  let validSeasons: number[] = []
+  if (
+    provider === "2embed.cc" ||
+    provider === "2embed.skin" ||
+    provider === "vidsrc.xyz"
+  ) {
+    validSeasons = await findValidSeasons(tmdbId, provider, maxSeason, onProgress)
   } else {
-    // For other providers, we'll use the original approach
-    let currentSeason = 1
-
-    while (currentSeason <= maxSeason) {
-      const episodeUrl = getEpisodeUrl(tmdbId, currentSeason, 1, provider)
-      const isValid = await isValidUrl(episodeUrl)
-
-      if (isValid) {
-        seasonFound = true
-        structure.seasons[currentSeason] = []
-        currentSeason++
-      } else {
-        // If we've found at least one season and now hit an invalid one,
-        // we can assume we've found all seasons
-        if (seasonFound) {
-          break
-        }
-        // If we haven't found any seasons yet, keep looking
-        currentSeason++
-
-        // If we've checked 5 seasons and found nothing, stop
-        if (currentSeason > 5 && !seasonFound) {
-          break
-        }
-      }
-
-      onProgress(`Checking season ${currentSeason}...`, (currentSeason / maxSeason) * 50)
-    }
+    validSeasons = await findValidSeasons(tmdbId, provider, maxSeason, onProgress)
   }
 
   // If no seasons found, create default structure
-  if (!seasonFound) {
-    // Default to 3 seasons with 10 episodes each
+  if (!validSeasons.length) {
     for (let i = 1; i <= 3; i++) {
       structure.seasons[i] = Array.from({ length: 10 }, (_, j) => j + 1)
     }
@@ -228,45 +215,11 @@ export async function enumerateTVShow(
   }
 
   // Find valid episodes for each season
-  const seasons = Object.keys(structure.seasons).map(Number)
-  const totalSeasons = seasons.length
-
+  const totalSeasons = validSeasons.length
   for (let i = 0; i < totalSeasons; i++) {
-    const season = seasons[i]
-    let currentEpisode = 1
-    const maxEpisode = 30 // Limit to 30 episodes per season for performance
-    let episodeFound = false
-
+    const season = validSeasons[i]
     onProgress(`Finding episodes for season ${season}...`, 50 + (i / totalSeasons) * 50)
-
-    while (currentEpisode <= maxEpisode) {
-      const episodeUrl = getEpisodeUrl(tmdbId, season, currentEpisode, provider)
-      const isValid = await isValidUrl(episodeUrl)
-
-      if (isValid) {
-        episodeFound = true
-        structure.seasons[season].push(currentEpisode)
-        currentEpisode++
-      } else {
-        // If we've found at least one episode and now hit an invalid one,
-        // we can assume we've found all episodes for this season
-        if (episodeFound) {
-          break
-        }
-        // If we haven't found any episodes yet, keep looking
-        currentEpisode++
-
-        // If we've checked 10 episodes and found nothing, stop
-        if (currentEpisode > 10 && !episodeFound) {
-          break
-        }
-      }
-    }
-
-    // If no episodes found for this season, add default episodes
-    if (!episodeFound) {
-      structure.seasons[season] = Array.from({ length: 10 }, (_, j) => j + 1)
-    }
+    structure.seasons[season] = await findValidEpisodes(tmdbId, season, provider, maxEpisode)
   }
 
   // Save to cache

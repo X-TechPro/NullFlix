@@ -15,12 +15,12 @@ import MovieDetailsPopup from "@/components/movie-details-popup"
 import TVEpisodeSelector from "@/components/tv-episode-selector"
 import GlowingSearchBar from "@/components/glowing-search-bar"
 import { searchMedia, type Media } from "@/services/movie-service"
-import { isDatabaseInitialized, isTVDatabaseInitialized, getMetadata } from "@/utils/db"
+import TVDetailsPopup from "@/components/tv-details-popup"
 
 export default function Home() {
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [isLoadingMedia, setIsLoadingMedia] = useState(true)
+  const [isLoadingMedia, setIsLoadingMedia] = useState(false)
   const [bookmarks, setBookmarks] = useState<any[]>([])
   const [showBookmarks, setShowBookmarks] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -30,62 +30,11 @@ export default function Home() {
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [usingOfflineDatabase, setUsingOfflineDatabase] = useState(false)
-  const [showNoDatabaseError, setShowNoDatabaseError] = useState(false)
   const [searchInitiated, setSearchInitiated] = useState(false)
-  const [movieCount, setMovieCount] = useState<number | null>(null)
-  const [tvCount, setTVCount] = useState<number | null>(null)
   const [showMovieDetails, setShowMovieDetails] = useState(false)
   const [selectedMediaForDetails, setSelectedMediaForDetails] = useState<string | null>(null)
-
-  // Load media data
-  useEffect(() => {
-    const loadMedia = async () => {
-      setIsLoadingMedia(true)
-      setError(null)
-
-      try {
-        // Check if we have a downloaded database in IndexedDB
-        const moviesInitialized = await isDatabaseInitialized()
-        const tvInitialized = await isTVDatabaseInitialized()
-
-        if (moviesInitialized || tvInitialized) {
-          try {
-            // Get movie count from metadata
-            if (moviesInitialized) {
-              const count = await getMetadata("movieCount")
-              setMovieCount(count)
-            }
-
-            // Get TV count from metadata
-            if (tvInitialized) {
-              const count = await getMetadata("tvCount")
-              setTVCount(count)
-            }
-
-            // We don't need to load all media into memory anymore
-            // Just set the flag that we have a database
-            setUsingOfflineDatabase(true)
-            setIsLoadingMedia(false)
-            return
-          } catch (err) {
-            console.error("Error loading from IndexedDB:", err)
-            setError("Failed to load media database. Please try downloading again.")
-          }
-        }
-
-        // If we reach here, either no database or failed to load
-        setMediaResults([])
-      } catch (err) {
-        console.error("Error loading media:", err)
-        setError("Failed to load media. Please try again later.")
-      } finally {
-        setIsLoadingMedia(false)
-      }
-    }
-
-    loadMedia()
-  }, [])
+  const [showTVDetails, setShowTVDetails] = useState(false)
+  const [selectedTVShowForDetails, setSelectedTVShowForDetails] = useState<number | null>(null)
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -108,43 +57,18 @@ export default function Home() {
     }
   }, [bookmarks])
 
-  // Auto-hide the no database error after 5 seconds
-  useEffect(() => {
-    if (showNoDatabaseError) {
-      const timer = setTimeout(() => {
-        setShowNoDatabaseError(false)
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [showNoDatabaseError])
-
   const handleSearch = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       if (!query.trim()) return
 
-      // Check if OMDB API is enabled
-      const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-      const hasApiKey = !!localStorage.getItem("omdbApiKey")
-
-      // If OMDB is not enabled, check if database is initialized
-      if (!isOMDBEnabled || !hasApiKey) {
-        const moviesInitialized = await isDatabaseInitialized()
-        const tvInitialized = await isTVDatabaseInitialized()
-
-        if (!moviesInitialized && !tvInitialized) {
-          setShowNoDatabaseError(true)
-          return
-        }
-      }
+      // OMDB API is always enabled, so skip checks
 
       setSearchInitiated(true)
       setIsSearching(true)
 
-      // Use setTimeout to allow the UI to update before starting the search
       setTimeout(async () => {
         try {
-          // Search using OMDB API or IndexedDB
           const results = await searchMedia(query)
           setMediaResults(results)
           setShowBookmarks(false)
@@ -153,7 +77,7 @@ export default function Home() {
         } finally {
           setIsSearching(false)
         }
-      }, 500) // Reduced loading time for better UX
+      }, 500)
     },
     [query],
   )
@@ -216,22 +140,20 @@ export default function Home() {
     setSearchInitiated(false)
     setMediaResults([])
     setQuery("")
+    setError(null)
   }
 
   const handleMediaSelect = (media: Media) => {
-    // Check if OMDB API is enabled
-    const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
+    // OMDB API is always enabled, so skip checks
 
-    if (media.type === "movie" && isOMDBEnabled) {
+    if (media.type === "movie") {
       // Show movie details popup first
       setSelectedMediaForDetails(media.imdb || media.id)
       setShowMovieDetails(true)
-    } else if (media.type === "movie") {
-      // Play movie directly
-      setSelectedMovie(media.imdb || media.id)
     } else if (media.type === "tv") {
-      // For TV shows, use the TMDB ID if available, otherwise use the IMDB ID
-      setSelectedTVShow(media.tmdb)
+      // Show TV details popup instead of episode selector
+      setSelectedTVShowForDetails(media.tmdb)
+      setShowTVDetails(true)
     }
   }
 
@@ -257,6 +179,16 @@ export default function Home() {
     setSelectedMovie(selectedMediaForDetails)
   }
 
+  const handleCloseTVDetails = () => {
+    setShowTVDetails(false)
+    setSelectedTVShowForDetails(null)
+  }
+
+  const handlePlayTVFromDetails = (tmdbId: number) => {
+    setShowTVDetails(false)
+    setSelectedTVShow(tmdbId)
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
       <BackgroundShapes />
@@ -277,20 +209,6 @@ export default function Home() {
           >
             <Sparkles className="w-6 h-6 text-sky-400" />
             <h1 className="text-2xl font-bold text-white">NullFlix</h1>
-            {usingOfflineDatabase && (
-              <div className="flex items-center gap-1">
-                {movieCount && (
-                  <span className="px-2 py-0.5 text-xs bg-green-600/20 text-green-400 rounded-full border border-green-800/30">
-                    Movies: {movieCount}
-                  </span>
-                )}
-                {tvCount && (
-                  <span className="px-2 py-0.5 text-xs bg-blue-600/20 text-blue-400 rounded-full border border-blue-800/30">
-                    TV: {tvCount}
-                  </span>
-                )}
-              </div>
-            )}
           </motion.div>
 
           <motion.div
@@ -300,7 +218,7 @@ export default function Home() {
             className="flex items-center gap-3"
           >
             <motion.a
-              href="https://github.com/Jonathan-Chayna/NullFlix"
+              href="https://github.com/X-TechPro/NullFlix"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30 flex items-center justify-center"
@@ -331,25 +249,6 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* No Database Error Alert */}
-        <AnimatePresence>
-          {showNoDatabaseError && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mb-4"
-            >
-              <Alert variant="destructive" className="bg-red-900/30 border-red-800 text-white">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  No media database found. Please download the database from Settings first.
-                </AlertDescription>
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <AnimatePresence mode="wait">
           {isLoadingMedia ? (
             <motion.div
@@ -371,7 +270,7 @@ export default function Home() {
               className="flex flex-col items-center justify-center min-h-[70vh] text-center"
             >
               <p className="text-xl text-red-400">{error}</p>
-              <Button className="mt-6 bg-sky-600 hover:bg-sky-700 text-white" onClick={() => window.location.reload()}>
+              <Button className="mt-6 bg-sky-600 hover:bg-sky-700 text-white" onClick={() => setError(null)}>
                 Retry
               </Button>
             </motion.div>
@@ -469,17 +368,10 @@ export default function Home() {
                 if (media.mediaType === "tv" || media.type === "tv") {
                   setSelectedTVShow(media.tmdbID || media.tmdb || Number.parseInt(media.imdbID))
                 } else {
-                  // Check if OMDB API is enabled
-                  const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-
-                  if (isOMDBEnabled) {
-                    // Show movie details popup first
-                    setSelectedMediaForDetails(media.imdbID || media.imdb || media.id)
-                    setShowMovieDetails(true)
-                  } else {
-                    // Play movie directly
-                    setSelectedMovie(media.imdbID || media.imdb || media.id)
-                  }
+                  // OMDB API is always enabled, so skip checks
+                  // Show movie details popup first
+                  setSelectedMediaForDetails(media.imdbID || media.imdb || media.id)
+                  setShowMovieDetails(true)
                 }
               }}
               onBack={() => {
@@ -515,6 +407,15 @@ export default function Home() {
             mediaId={selectedMediaForDetails}
             onClose={handleCloseMovieDetails}
             onPlay={handlePlayFromDetails}
+          />
+        )}
+        {showTVDetails && selectedTVShowForDetails && (
+          // Find the selected media object to get imdbId
+          <TVDetailsPopup
+            tmdbId={selectedTVShowForDetails}
+            imdbId={mediaResults.find(m => m.tmdb === selectedTVShowForDetails)?.imdb || undefined}
+            onClose={handleCloseTVDetails}
+            onPlay={handlePlayTVFromDetails}
           />
         )}
       </AnimatePresence>
