@@ -1,5 +1,15 @@
 "use client"
 
+// Set default OMDB API key and omdbEnabled for first-time users on page load (not just when settings dialog is opened)
+if (typeof window !== "undefined") {
+  if (!localStorage.getItem("omdbApiKey")) {
+    localStorage.setItem("omdbApiKey", "9f603783")
+  }
+  if (!localStorage.getItem("omdbEnabled")) {
+    localStorage.setItem("omdbEnabled", "true")
+  }
+}
+
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { X, Download, Check, AlertTriangle, Info, RefreshCw, Trash2, Settings2 } from "lucide-react"
@@ -102,15 +112,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   // Load settings from localStorage on component mount
   useEffect(() => {
     try {
-      // Set default OMDB API key for first-time users
-      if (typeof window !== "undefined" && !localStorage.getItem("omdbApiKey")) {
-        localStorage.setItem("omdbApiKey", "9f603783")
-        setOmdbApiKey("9f603783")
-      }
-      // Set omdbEnabled to true for first-time users
-      if (typeof window !== "undefined" && !localStorage.getItem("omdbEnabled")) {
-        localStorage.setItem("omdbEnabled", "true")
-      }
       const savedOmdbApiKey = localStorage.getItem("omdbApiKey")
       if (savedOmdbApiKey !== null) {
         setOmdbApiKey(savedOmdbApiKey)
