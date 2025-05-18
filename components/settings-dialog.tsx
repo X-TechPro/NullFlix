@@ -107,6 +107,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         localStorage.setItem("omdbApiKey", "9f603783")
         setOmdbApiKey("9f603783")
       }
+      // Set omdbEnabled to true for first-time users
+      if (typeof window !== "undefined" && !localStorage.getItem("omdbEnabled")) {
+        localStorage.setItem("omdbEnabled", "true")
+      }
       const savedOmdbApiKey = localStorage.getItem("omdbApiKey")
       if (savedOmdbApiKey !== null) {
         setOmdbApiKey(savedOmdbApiKey)
