@@ -74,9 +74,9 @@ export default function BookmarksArea({
                   className="relative aspect-[2/3] w-full overflow-hidden cursor-pointer"
                   onClick={() => onMediaSelect(item)}
                 >
-                  {item.Poster && item.Poster !== "N/A" ? (
+                  {((item.Poster && item.Poster !== "N/A") || (item.poster && item.poster !== "N/A")) ? (
                     <Image
-                      src={getHighResolutionPoster(item.Poster)}
+                      src={getHighResolutionPoster(item.Poster || item.poster)}
                       alt={item.title || item.Title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"

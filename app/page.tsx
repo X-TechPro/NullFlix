@@ -349,7 +349,52 @@ export default function Home() {
                 <Button
                   className="mt-6 bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 h-auto text-base rounded-full transition-colors duration-300"
                   onClick={() => {
-                    setQuery("action")
+                    // Pick a random keyword from a list
+                    const keywords = [
+                      "action",
+                      "comedy",
+                      "drama",
+                      "thriller",
+                      "romance",
+                      "sci-fi",
+                      "fantasy",
+                      "adventure",
+                      "animation",
+                      "mystery",
+                      "crime",
+                      "family",
+                      "horror",
+                      "documentary",
+                      "superhero",
+                      "history",
+                      "music",
+                      "sports",
+                      "war",
+                      "western",
+                      "biography",
+                      "kids",
+                      "teen",
+                      "classic",
+                      "holiday",
+                      "space",
+                      "future",
+                      "magic",
+                      "robot",
+                      "spy",
+                      "detective",
+                      "zombie",
+                      "vampire",
+                      "heist",
+                      "courtroom",
+                      "medical",
+                      "political",
+                      "nature",
+                      "travel",
+                      "cooking",
+                      "anime"
+                    ]
+                    const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)]
+                    setQuery(randomKeyword)
                     const event = { preventDefault: () => {} } as React.FormEvent
                     handleSearch(event)
                   }}
