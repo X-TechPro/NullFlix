@@ -76,11 +76,12 @@ export default function BookmarksArea({
                 >
                   {item.Poster && item.Poster !== "N/A" ? (
                     <Image
-                      src={item.Poster ? getHighResolutionPoster(item.Poster) : "/placeholder.svg"}
+                      src={getHighResolutionPoster(item.Poster)}
                       alt={item.title || item.Title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      unoptimized
                     />
                   ) : (
                     <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-blue-900/40 to-sky-900/40">
