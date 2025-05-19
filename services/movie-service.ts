@@ -22,6 +22,8 @@ export type Provider =
   | "vidsrc.su"
   | "vidsrc.co"
   | "uembed"
+  | "spenembed"
+  | "vidora"
 
 export type ProviderServer =
   | "2embed.cc"
@@ -155,6 +157,10 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://player.vidsrc.co/embed/tv/${mediaId}/${season}/${episode}`
       case "uembed":
         return `https://uembed.site/?id=${mediaId}&season=${season}&episode=${episode}`
+      case "spenembed":
+        return `https://spencerdevs.xyz/tv/${mediaId}/${season}/${episode}?theme=0099ff`
+      case "vidora":
+        return `https://vidora.su/tv/${mediaId}/${season}/${episode}?colour=0099ff&autoplay=true&autonextepisode=true`
       case "embed.su":
       default:
         return `https://embed.su/embed/tv/${mediaId}/${season}/${episode}`
@@ -183,6 +189,10 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://player.vidsrc.co/embed/movie/${mediaId}`
       case "uembed":
         return `https://uembed.site/?id=${mediaId}`
+      case "spenembed":
+        return `https://spencerdevs.xyz/movie/${mediaId}?theme=0099ff`
+      case "vidora":
+        return `https://vidora.su/movie/${mediaId}?colour=0099ff&autoplay=true&autonextepisode=true`
       case "embed.su":
       default:
         return `https://embed.su/embed/movie/${mediaId}`

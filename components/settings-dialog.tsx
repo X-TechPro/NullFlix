@@ -47,10 +47,16 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Best movie provider 🔥",
     },
     {
-      id: "embed.su",
-      name: "Embed.su",
-      url: "https://embed.su/embed/movie/",
-      description: "Second best",
+      id: "spenembed",
+      name: "SpenEmbed",
+      url: "https://spencerdevs.xyz/movie/{imdb_id}?theme=0099ff",
+      description: "Fast and clean 🔥",
+    },
+    {
+      id: "vidora",
+      name: "Vidora",
+      url: "https://vidora.su/movie/{imdb_id}?colour=0099ff&autoplay=true&autonextepisode=true",
+      description: "Fast and clean 🔥",
     },
     {
       id: "vidsrc.co",
@@ -59,16 +65,22 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Good provider 👍",
     },
     {
+      id: "embed.su",
+      name: "Embed.su",
+      url: "https://embed.su/embed/movie/",
+      description: "Good",
+    },
+    {
       id: "vidsrc.cc",
       name: "Vidsrc.cc",
       url: "https://vidsrc.cc/v2/embed/movie/",
-      description: "Normal",
+      description: "Very good",
     },
     {
       id: "autoembed",
       name: "Autoembed",
       url: "https://player.autoembed.cc/embed/movie/",
-      description: "Normal",
+      description: "Very good",
     },
     {
       id: "2embed",
