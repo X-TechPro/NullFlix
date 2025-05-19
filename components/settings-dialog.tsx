@@ -43,49 +43,49 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     {
       id: "pstream",
       name: "P-Stream",
-      url: "https://iframe.pstream.org/media/tmdb-movie-",
+      url: "https://pstream.org/",
       description: "Best movie provider 🔥",
     },
     {
       id: "spenembed",
       name: "SpenEmbed",
-      url: "https://spencerdevs.xyz/movie/{imdb_id}?theme=0099ff",
+      url: "https://spencerdevs.xyz/",
       description: "Fast and clean 🔥",
     },
     {
       id: "vidora",
       name: "Vidora",
-      url: "https://vidora.su/movie/{imdb_id}?colour=0099ff&autoplay=true&autonextepisode=true",
+      url: "https://vidora.su/",
       description: "Fast and clean 🔥",
     },
     {
       id: "vidsrc.co",
       name: "Vidsrc.co",
-      url: "https://player.vidsrc.co/embed/movie/",
+      url: "https://player.vidsrc.co/",
       description: "Good provider 👍",
     },
     {
       id: "embed.su",
       name: "Embed.su",
-      url: "https://embed.su/embed/movie/",
+      url: "https://embed.su/",
       description: "Good",
     },
     {
       id: "vidsrc.cc",
       name: "Vidsrc.cc",
-      url: "https://vidsrc.cc/v2/embed/movie/",
+      url: "https://vidsrc.cc/v2/",
       description: "Very good",
     },
     {
       id: "autoembed",
       name: "Autoembed",
-      url: "https://player.autoembed.cc/embed/movie/",
+      url: "https://player.autoembed.cc/",
       description: "Very good",
     },
     {
       id: "2embed",
       name: "2Embed",
-      url: "https://www.2embed.cc/embed/",
+      url: "https://www.2embed.cc/",
       description: "Multiple servers available",
       hasServers: true,
       servers: [
@@ -96,7 +96,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     {
       id: "vidsrc.xyz",
       name: "Vidsrc.xyz",
-      url: "https://vidsrc.xyz/embed/movie?imdb=",
+      url: "https://vidsrc.xyz/",
       description: "Multiple servers available",
       hasServers: true,
       servers: [
@@ -110,13 +110,13 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     {
       id: "uembed",
       name: "UEmbed",
-      url: "https://uembed.site/?id=",
+      url: "https://uembed.site/",
       description: "Meh. Why not",
     },
     {
       id: "vidsrc.su",
       name: "Vidsrc.su",
-      url: "https://vidsrc.su/embed/movie/",
+      url: "https://vidsrc.su/",
       description: "Worst provider. Might not work",
     },
   ]
