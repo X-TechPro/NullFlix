@@ -5,6 +5,7 @@ import { ArrowLeft, Film, Bookmark, Tv } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
+import { getHighResolutionPoster } from "@/services/omdb-service"
 
 interface BookmarksAreaProps {
   bookmarks: any[]
@@ -75,7 +76,7 @@ export default function BookmarksArea({
                 >
                   {item.Poster && item.Poster !== "N/A" ? (
                     <Image
-                      src={item.Poster || "/placeholder.svg"}
+                      src={item.Poster ? getHighResolutionPoster(item.Poster) : "/placeholder.svg"}
                       alt={item.title || item.Title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
