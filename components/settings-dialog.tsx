@@ -8,6 +8,9 @@ if (typeof window !== "undefined") {
   if (!localStorage.getItem("omdbEnabled")) {
     localStorage.setItem("omdbEnabled", "true")
   }
+  if (!localStorage.getItem("bioapi")) {
+    localStorage.setItem("bioapi", "2SOcK4TddDM1mqEbacc7db55c60d542e17a65e2f19de8f8af")
+  }
 }
 
 import { useState, useEffect } from "react"
