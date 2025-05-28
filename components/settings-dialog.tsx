@@ -29,8 +29,17 @@ interface SettingsDialogProps {
 export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = useState("providers")
   const [omdbApiKey, setOmdbApiKey] = useState("")
-  const [selectedProvider, setSelectedProvider] = useState<string>("embed.su")
-  const [selectedServer, setSelectedServer] = useState<string>("")
+  const [bioApiKey, setBioApiKey] = useState("")
+  const [selectedProvider, setSelectedProvider] = useState<string>(
+    typeof window !== "undefined" && localStorage.getItem("selectedProvider")
+      ? localStorage.getItem("selectedProvider") as string
+      : "pstream"
+  )
+  const [selectedServer, setSelectedServer] = useState<string>(
+    typeof window !== "undefined" && localStorage.getItem("selectedServer")
+      ? localStorage.getItem("selectedServer") as string
+      : ""
+  )
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadStatus, setDownloadStatus] = useState("")
@@ -41,28 +50,40 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   // Provider dictionary
   const providers = [
     {
+      id: "snayer",
+      name: "Snayer",
+      url: "https://snayer.vercel.app/",
+      description: "Clean and open source scraper (Recommended)",
+    },
+    {
       id: "pstream",
       name: "P-Stream",
       url: "https://pstream.org/",
-      description: "Best movie provider 🔥",
+      description: "Best 🔥 (Recommended)",
+    },
+    {
+      id: "uembed",
+      name: "UEmbed",
+      url: "https://uembed.site/",
+      description: "Good 🔥",
+    },
+    {
+      id: "vidsrc.co",
+      name: "Vidsrc.co",
+      url: "https://vidsrc.co/",
+      description: "Good 👍",
     },
     {
       id: "spenembed",
       name: "SpenEmbed",
       url: "https://spencerdevs.xyz/",
-      description: "Fast and clean 🔥",
+      description: "Slick UI",
     },
     {
       id: "vidora",
       name: "Vidora",
       url: "https://vidora.su/",
-      description: "Fast and clean 🔥",
-    },
-    {
-      id: "vidsrc.co",
-      name: "Vidsrc.co",
-      url: "https://player.vidsrc.co/",
-      description: "Good provider 👍",
+      description: "Slick UI",
     },
     {
       id: "embed.su",
@@ -73,19 +94,19 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     {
       id: "vidsrc.cc",
       name: "Vidsrc.cc",
-      url: "https://vidsrc.cc/v2/",
-      description: "Very good",
+      url: "https://vidsrc.cc/",
+      description: "Good 👍",
     },
     {
       id: "autoembed",
       name: "Autoembed",
-      url: "https://player.autoembed.cc/",
-      description: "Very good",
+      url: "https://autoembed.cc/",
+      description: "Good 👍",
     },
     {
       id: "2embed",
       name: "2Embed",
-      url: "https://www.2embed.cc/",
+      url: "https://2embed.cc/",
       description: "Multiple servers available",
       hasServers: true,
       servers: [
@@ -108,16 +129,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       ],
     },
     {
-      id: "uembed",
-      name: "UEmbed",
-      url: "https://uembed.site/",
-      description: "Meh. Why not",
-    },
-    {
       id: "vidsrc.su",
       name: "Vidsrc.su",
       url: "https://vidsrc.su/",
-      description: "Worst provider. Might not work",
+      description: "Worst provider. Doesn't work for now.",
     },
   ]
 
@@ -137,6 +152,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       const savedServer = localStorage.getItem("selectedServer")
       if (savedServer) {
         setSelectedServer(savedServer)
+      }
+
+      const savedBioApiKey = localStorage.getItem("bioapi")
+      if (savedBioApiKey !== null) {
+        setBioApiKey(savedBioApiKey)
       }
 
       // Check if database is initialized
@@ -174,105 +194,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     }
   }
 
-  const handleDownloadDatabase = async () => {
-    setIsDownloading(true)
-    setDownloadProgress(0)
-    setDownloadStatus("Preparing to download movie database...")
-
+  const handleSaveBioApi = () => {
     try {
-      const response = await fetch("/api/download-data")
-      const reader = response.body?.getReader()
-
-      if (!reader) {
-        throw new Error("Failed to get reader from response")
-      }
-
-      const contentLength = Number(response.headers.get("Content-Length")) || 0
-      let receivedLength = 0
-      const chunks = []
-
-      while (true) {
-        const { done, value } = await reader.read()
-
-        if (done) {
-          break
-        }
-
-        chunks.push(value)
-        receivedLength += value.length
-
-        // Calculate progress
-        const progress = contentLength ? Math.round((receivedLength / contentLength) * 100) : 0
-        setDownloadProgress(progress)
-        setDownloadStatus(`Downloading movie database... ${progress}%`)
-      }
-
-      // Concatenate chunks
-      const allChunks = new Uint8Array(receivedLength)
-      let position = 0
-      for (const chunk of chunks) {
-        allChunks.set(chunk, position)
-        position += chunk.length
-      }
-
-      // Parse the JSON data
-      const jsonString = new TextDecoder("utf-8").decode(allChunks)
-      const data = JSON.parse(jsonString)
-
-      // Process the data
-      setDownloadStatus("Processing movie data...")
-      await processMovieData(data)
-
-      setDownloadStatus("Database download and processing complete!")
-      setHasDatabase(true)
-      setHasTVDatabase(true)
-    } catch (error) {
-      console.error("Error downloading database:", error)
-      setDownloadStatus(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)
-    } finally {
-      setTimeout(() => {
-        setIsDownloading(false)
-        setDownloadProgress(0)
-      }, 2000)
-    }
-  }
-
-  const processMovieData = async (data: any) => {
-    try {
-      // Import the database utility functions
-      const { storeMovies, storeTVShows } = await import("@/utils/db")
-
-      // Store movies
-      if (data.movies && data.movies.length > 0) {
-        setDownloadStatus(`Storing ${data.movies.length} movies in database...`)
-        await storeMovies(data.movies)
-      }
-
-      // Store TV shows
-      if (data.tvShows && data.tvShows.length > 0) {
-        setDownloadStatus(`Storing ${data.tvShows.length} TV shows in database...`)
-        await storeTVShows(data.tvShows)
-      }
-
-      return true
-    } catch (error) {
-      console.error("Error processing movie data:", error)
-      throw error
-    }
-  }
-
-  const handleClearDatabase = async () => {
-    setIsClearing(true)
-    try {
-      await clearDatabase()
-      setHasDatabase(false)
-      setHasTVDatabase(false)
-      setDownloadStatus("Database cleared successfully.")
-    } catch (error) {
-      console.error("Error clearing database:", error)
-      setDownloadStatus(`Error clearing database: ${error instanceof Error ? error.message : "Unknown error"}`)
-    } finally {
-      setIsClearing(false)
+      localStorage.setItem("bioapi", bioApiKey)
+    } catch (e) {
+      console.error("Error saving Browserless.io API key:", e)
     }
   }
 
@@ -309,8 +235,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
               <TabsTrigger value="providers" className="flex-1 data-[state=active]:bg-sky-600">
                 Providers
               </TabsTrigger>
-              <TabsTrigger value="general" className="flex-1 data-[state=active]:bg-sky-600">
-                OMDB API
+              <TabsTrigger value="settings" className="flex-1 data-[state=active]:bg-sky-600">
+                Settings
+              </TabsTrigger>
+              <TabsTrigger value="about" className="flex-1 data-[state=active]:bg-sky-600">
+                About
               </TabsTrigger>
             </TabsList>
 
@@ -387,7 +316,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
               </div>
             </TabsContent>
 
-            <TabsContent value="general" className="space-y-4">
+            <TabsContent value="settings" className="space-y-4">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="omdb-api-key" className="text-white">
@@ -409,6 +338,15 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                       Save
                     </Button>
                   </div>
+                  <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300 mb-2">
+                    <div className="flex gap-2">
+                      <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <p>
+                        OMDB API provides movie information and posters. Without it, the site won't work.
+                        You get 1000 free requests per day.
+                      </p>
+                    </div>
+                  </div>
                   <p className="text-xs text-gray-400">
                     Get a free API key at{" "}
                     <a
@@ -420,17 +358,65 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                       omdbapi.com
                     </a>
                   </p>
-                </div>
-
-                <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300">
-                  <div className="flex gap-2">
-                    <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <p>
-                      OMDB API provides movie information and posters. Without it, you'll need to download the database
-                      for basic functionality.
+                  <hr className="my-2 border-gray-700" />
+                  <div className="space-y-2">
+                    <Label htmlFor="browserless-api-key" className="text-white">
+                      Browserless.io API Key
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="browserless-api-key"
+                        value={bioApiKey}
+                        onChange={e => setBioApiKey(e.target.value)}
+                        placeholder="Enter your Browserless.io API key"
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
+                      <Button
+                        type="button"
+                        className="bg-sky-600 hover:bg-sky-700 text-white"
+                        onClick={handleSaveBioApi}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Get a free API key at{" "}
+                      <a
+                        href="https://www.browserless.io/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sky-400 hover:underline"
+                      >
+                        browserless.io
+                      </a>
                     </p>
+                    <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300 mt-2">
+                      <div className="flex gap-2">
+                        <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                        <p>
+                          Browserless.io API is used for advanced scraping (Snayer). Without it, some features may be limited or unavailable.
+                          You have 1000 free API calls per month. If you run out, you can switch providers.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="about" className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-white">About NullFlix</h3>
+                <p className="text-gray-300 text-sm">
+                  NullFlix is a free and open source movie streaming platform designed for simplicity and accessibility.<br />
+                  Built with Next.js and Tailwind CSS.<br />
+                  <br />
+                  <b>NullFlix's Repo:</b> <a href="https://github.com/X-TechPro/NullFlix" className="text-sky-400 hover:underline">https://github.com/X-TechPro/NullFlix</a><br />
+                  <b>Snayer's Repo:</b> <a href="https://github.com/X-TechPro/snayer" className="text-sky-400 hover:underline">https://github.com/X-TechPro/snayer</a>
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  &copy; {new Date().getFullYear()} NullFlix. This project is for educational/demo purposes only.
+                </p>
               </div>
             </TabsContent>
           </Tabs>
@@ -439,7 +425,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         <div className="sticky bottom-0 flex justify-end p-4 bg-gray-800 border-t border-gray-700">
           <Button onClick={onClose} className="bg-sky-600 hover:bg-sky-700 text-white">
             <Check size={16} className="mr-2" />
-            Save & Close
+            Close
           </Button>
         </div>
       </motion.div>

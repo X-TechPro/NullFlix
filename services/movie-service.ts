@@ -24,6 +24,7 @@ export type Provider =
   | "uembed"
   | "spenembed"
   | "vidora"
+  | "snayer"
 
 export type ProviderServer =
   | "2embed.cc"
@@ -161,6 +162,11 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://spencerdevs.xyz/tv/${mediaId}/${season}/${episode}?theme=0099ff`
       case "vidora":
         return `https://vidora.su/tv/${mediaId}/${season}/${episode}?colour=0099ff&autoplay=true&autonextepisode=true`
+      case "snayer": {
+        // Snayer TV API (not documented, fallback to movie for now)
+        const bioapi = localStorage.getItem("bioapi") || ""
+        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}`
+      }
       case "embed.su":
       default:
         return `https://embed.su/embed/tv/${mediaId}/${season}/${episode}`
@@ -193,6 +199,10 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://spencerdevs.xyz/movie/${mediaId}?theme=0099ff`
       case "vidora":
         return `https://vidora.su/movie/${mediaId}?colour=0099ff&autoplay=true&autonextepisode=true`
+      case "snayer": {
+        const bioapi = localStorage.getItem("bioapi") || ""
+        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}`
+      }
       case "embed.su":
       default:
         return `https://embed.su/embed/movie/${mediaId}`
