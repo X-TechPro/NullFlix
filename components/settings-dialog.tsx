@@ -77,6 +77,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Good 👍",
     },
     {
+      id: "vidfast",
+      name: "VidFast",
+      url: "https://vidfast.pro/",
+      description: "Fast and modern UI",
+    },
+    {
       id: "spenembed",
       name: "SpenEmbed",
       url: "https://spencerdevs.xyz/",

@@ -13,6 +13,7 @@ export interface Media {
 }
 
 export type Provider =
+  | "snayer"
   | "pstream"
   | "embed.su"
   | "vidsrc.cc"
@@ -24,7 +25,7 @@ export type Provider =
   | "uembed"
   | "spenembed"
   | "vidora"
-  | "snayer"
+  | "vidfast"
 
 export type ProviderServer =
   | "2embed.cc"
@@ -167,6 +168,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         const bioapi = localStorage.getItem("bioapi") || ""
         return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}`
       }
+      case "vidfast":
+        return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
       case "embed.su":
       default:
         return `https://embed.su/embed/tv/${mediaId}/${season}/${episode}`
@@ -203,6 +206,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         const bioapi = localStorage.getItem("bioapi") || ""
         return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}`
       }
+      case "vidfast":
+        return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`
       case "embed.su":
       default:
         return `https://embed.su/embed/movie/${mediaId}`
