@@ -5,7 +5,7 @@
 const TV_CACHE_PREFIX = "tv-episodes-"
 
 interface TVShowStructure {
-  tmdbId: number
+  tmdbId: string // was number
   seasons: {
     [seasonNumber: number]: number[] // Array of valid episode numbers
   }
@@ -24,7 +24,7 @@ async function isValidUrl(url: string): Promise<boolean> {
 }
 
 // Get the base URL for a TV show
-function getTVShowBaseUrl(tmdbId: number, provider = "embed.su"): string {
+function getTVShowBaseUrl(tmdbId: string, provider = "embed.su"): string {
   // Get the provider from localStorage
   try {
     const savedProvider = localStorage.getItem("selectedProvider")
@@ -57,7 +57,7 @@ function getTVShowBaseUrl(tmdbId: number, provider = "embed.su"): string {
 }
 
 // Get URL for a specific episode
-function getEpisodeUrl(tmdbId: number, season: number, episode: number, provider = "embed.su"): string {
+function getEpisodeUrl(tmdbId: string, season: number, episode: number, provider = "embed.su"): string {
   // Get the provider from localStorage
   try {
     const savedProvider = localStorage.getItem("selectedProvider")
@@ -90,7 +90,7 @@ function getEpisodeUrl(tmdbId: number, season: number, episode: number, provider
 }
 
 // Get cached TV show structure
-export function getCachedTVStructure(tmdbId: number): TVShowStructure | null {
+export function getCachedTVStructure(tmdbId: string): TVShowStructure | null {
   try {
     const cached = localStorage.getItem(`${TV_CACHE_PREFIX}${tmdbId}`)
     if (cached) {
@@ -113,7 +113,7 @@ function saveTVStructureToCache(structure: TVShowStructure): void {
 
 // Helper to find valid seasons
 async function findValidSeasons(
-  tmdbId: number,
+  tmdbId: string,
   provider: string,
   maxSeason: number,
   onProgress: (message: string, progress: number) => void
@@ -138,7 +138,7 @@ async function findValidSeasons(
 
 // Helper to find valid episodes for a season
 async function findValidEpisodes(
-  tmdbId: number,
+  tmdbId: string,
   season: number,
   provider: string,
   maxEpisode: number
@@ -162,7 +162,7 @@ async function findValidEpisodes(
 
 // Enumerate episodes for a TV show
 export async function enumerateTVShow(
-  tmdbId: number,
+  tmdbId: string,
   onProgress: (message: string, progress: number) => void,
 ): Promise<TVShowStructure> {
   // Check cache first

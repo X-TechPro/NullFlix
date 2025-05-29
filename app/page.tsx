@@ -40,7 +40,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false)
   const [mediaResults, setMediaResults] = useState<Media[]>([])
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null)
-  const [selectedTVShow, setSelectedTVShow] = useState<number | null>(null)
+  const [selectedTVShow, setSelectedTVShow] = useState<string | null>(null)
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -48,7 +48,7 @@ export default function Home() {
   const [showMovieDetails, setShowMovieDetails] = useState(false)
   const [selectedMediaForDetails, setSelectedMediaForDetails] = useState<string | null>(null)
   const [showTVDetails, setShowTVDetails] = useState(false)
-  const [selectedTVShowForDetails, setSelectedTVShowForDetails] = useState<number | null>(null)
+  const [selectedTVShowForDetails, setSelectedTVShowForDetails] = useState<string | null>(null)
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -144,7 +144,7 @@ export default function Home() {
   }
 
   // Update the isBookmarked function to check all possible IDs
-  const isBookmarked = (mediaId: string, tmdbId?: number) => {
+  const isBookmarked = (mediaId: string, tmdbId?: string) => {
     return bookmarks.some(
       (item) => item.id === mediaId || item.imdbID === mediaId || (tmdbId && item.tmdbID === tmdbId),
     )
@@ -158,14 +158,10 @@ export default function Home() {
   }
 
   const handleMediaSelect = (media: Media) => {
-    // OMDB API is always enabled, so skip checks
-
     if (media.type === "movie") {
-      // Show movie details popup first
       setSelectedMediaForDetails(media.imdb || media.id)
       setShowMovieDetails(true)
     } else if (media.type === "tv") {
-      // Show TV details popup instead of episode selector
       setSelectedTVShowForDetails(media.tmdb)
       setShowTVDetails(true)
     }
@@ -198,7 +194,7 @@ export default function Home() {
     setSelectedTVShowForDetails(null)
   }
 
-  const handlePlayTVFromDetails = (tmdbId: number) => {
+  const handlePlayTVFromDetails = (tmdbId: string) => {
     setShowTVDetails(false)
     setSelectedTVShow(tmdbId)
   }
@@ -466,7 +462,7 @@ export default function Home() {
         )}
         {selectedTVShow && selectedSeason && selectedEpisode && (
           <MoviePlayer
-            mediaId={selectedTVShow.toString()}
+            mediaId={selectedTVShow}
             mediaType="tv"
             season={selectedSeason}
             episode={selectedEpisode}
@@ -480,15 +476,14 @@ export default function Home() {
             onPlay={handlePlayFromDetails}
           />
         )}
-        {showTVDetails && selectedTVShowForDetails && (
-          // Find the selected media object to get imdbId
+        {showTVDetails && selectedTVShowForDetails ? (
           <TVDetailsPopup
             tmdbId={selectedTVShowForDetails}
-            imdbId={mediaResults.find(m => m.tmdb === selectedTVShowForDetails)?.imdb || undefined}
+            imdbId={mediaResults.find(m => m.tmdb === selectedTVShowForDetails && m.type === "tv")?.imdb || undefined}
             onClose={handleCloseTVDetails}
             onPlay={handlePlayTVFromDetails}
           />
-        )}
+        ) : null}
       </AnimatePresence>
     </main>
   )

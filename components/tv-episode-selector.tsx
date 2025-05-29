@@ -13,7 +13,7 @@ import {
 } from "@/services/tv-episode-enumerator"
 
 interface TVEpisodeSelectorProps {
-  tmdbId: number
+  tmdbId: string
   onSelectEpisode: (season: number, episode: number) => void
   onClose: () => void
 }
@@ -37,7 +37,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
       setError(null)
 
       // Load TV show details
-      const show = await getTVShowDetails(tmdbId)
+      const show = await getTVShowDetails(Number(tmdbId))
       setTVShow(show)
 
       // Check if we have cached episode data and aren't forcing renumeration
@@ -93,6 +93,12 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
 
   // Function to handle forced reloading of episode data
   const handleReload = () => {
+    // Clear cache for this show
+    try {
+      localStorage.removeItem(`tv-episodes-${tmdbId}`)
+    } catch (e) {
+      console.error("Error clearing TV episode cache:", e)
+    }
     loadTVShow(true) // Force renumeration
   }
 

@@ -9,10 +9,10 @@ import TVEpisodeSelector from "@/components/tv-episode-selector"
 import { fetchMovieDetailsByIMDB, getHighResolutionPoster } from "@/services/omdb-service"
 
 interface TVDetailsPopupProps {
-  tmdbId: number
+  tmdbId: string
   imdbId?: string // allow passing imdbId
   onClose: () => void
-  onPlay: (tmdbId: number) => void
+  onPlay: (tmdbId: string) => void
 }
 
 export default function TVDetailsPopup({ tmdbId, imdbId, onClose, onPlay }: TVDetailsPopupProps) {
@@ -42,7 +42,7 @@ export default function TVDetailsPopup({ tmdbId, imdbId, onClose, onPlay }: TVDe
           })
         } else {
           // fallback to local DB
-          const details = await getTVShowDetails(tmdbId)
+          const details = await getTVShowDetails(Number(tmdbId))
           setTVShow({
             poster: details.poster
               ? getHighResolutionPoster(details.poster)

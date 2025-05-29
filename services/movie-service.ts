@@ -1,10 +1,11 @@
 import { searchMediaInDB, getTVShowByTMDB, isDatabaseInitialized, isTVDatabaseInitialized } from "@/utils/db"
+import { searchMoviesViaOMDB as omdbSearchMoviesViaOMDB } from "@/services/omdb-service"
 
 export interface Media {
   id: string
   title: string
   imdb?: string
-  tmdb: number
+  tmdb: string // changed from number to string
   year?: number
   genre?: string
   type: "movie" | "tv"
@@ -36,35 +37,6 @@ export type ProviderServer =
   | "vidsrc.me"
   | "vidsrc.net"
 
-async function searchMoviesViaOMDB(query: string): Promise<any[]> {
-  const apiKey = localStorage.getItem("omdbApiKey")
-  if (!apiKey) {
-    console.error("OMDB API key not found")
-    return []
-  }
-
-  try {
-    const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}`
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      throw new Error(`OMDB API request failed with status: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    if (data.Response === "True" && Array.isArray(data.Search)) {
-      return data.Search
-    } else {
-      console.log("OMDB API returned no results:", data.Error || "Unknown error")
-      return []
-    }
-  } catch (error) {
-    console.error("Error fetching from OMDB API:", error)
-    return []
-  }
-}
-
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return []
 
@@ -76,7 +48,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
   if (isOMDBEnabled && apiKey) {
     try {
       console.log("Searching with OMDB API...")
-      const omdbResults = await searchMoviesViaOMDB(query)
+      const omdbResults = await omdbSearchMoviesViaOMDB(query)
 
       if (omdbResults.length > 0) {
         // Convert OMDB results to our Media format
@@ -84,7 +56,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
           id: result.imdbID,
           title: result.Title,
           imdb: result.imdbID,
-          tmdb: result.imdbID,
+          tmdb: result.imdbID, // Use imdbID as tmdb for OMDB results
           year: Number.parseInt(result.Year) || undefined,
           type: result.Type === "series" ? "tv" : "movie",
           poster: result.Poster !== "N/A" ? result.Poster : undefined,
