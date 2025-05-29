@@ -80,7 +80,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       id: "vidfast",
       name: "VidFast",
       url: "https://vidfast.pro/",
-      description: "Fast and modern UI",
+      description: "Fast and modern UI 👍",
     },
     {
       id: "spenembed",
@@ -421,7 +421,8 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   Built with Next.js and Tailwind CSS.<br />
                   <br />
                   <b>NullFlix's Repo:</b> <a href="https://github.com/X-TechPro/NullFlix" className="text-sky-400 hover:underline">https://github.com/X-TechPro/NullFlix</a><br />
-                  <b>Snayer's Repo:</b> <a href="https://github.com/X-TechPro/snayer" className="text-sky-400 hover:underline">https://github.com/X-TechPro/snayer</a>
+                  <b>Snayer's Repo:</b> <a href="https://github.com/X-TechPro/snayer" className="text-sky-400 hover:underline">https://github.com/X-TechPro/snayer</a><br />
+                  <b>Telegram:</b> <a href="https://t.me/nullflix" className="text-sky-400 hover:underline">https://t.me/nullflix</a>
                 </p>
                 <p className="text-xs text-gray-500 mt-2">
                   &copy; {new Date().getFullYear()} NullFlix. This project is for educational/demo purposes only.
