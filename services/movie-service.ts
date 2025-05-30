@@ -138,7 +138,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "snayer": {
         // Snayer TV API (not documented, fallback to movie for now)
         const bioapi = localStorage.getItem("bioapi") || ""
-        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}${title ? `&title=${encodeURIComponent(title)}` : ''}`
+        const snayerTitle = localStorage.getItem("snayerTitle") || ""
+        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}${snayerTitle ? `&title=${encodeURIComponent(snayerTitle)}` : ''}`
       }
       case "vidfast":
         return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
@@ -176,7 +177,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidora.su/movie/${mediaId}?colour=0099ff&autoplay=true&autonextepisode=true`
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
-        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}${title ? `&title=${encodeURIComponent(title)}` : ''}`
+        const snayerTitle = localStorage.getItem("snayerTitle") || ""
+        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}${snayerTitle ? `&title=${encodeURIComponent(snayerTitle)}` : ''}`
       }
       case "vidfast":
         return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`
