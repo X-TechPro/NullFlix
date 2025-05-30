@@ -133,7 +133,13 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
               <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{movieDetails.Plot}</p>
 
               <Button
-                onClick={onPlay}
+                onClick={() => {
+                  // Save the movie title to localStorage for snayer provider
+                  if (typeof window !== "undefined" && movieDetails && (movieDetails as OMDBResponse).Title) {
+                    localStorage.setItem("snayerTitle", (movieDetails as OMDBResponse).Title)
+                  }
+                  onPlay()
+                }}
                 className="bg-sky-600 hover:bg-sky-700 text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
@@ -143,7 +149,12 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
           </div>
         ) : (
           <div className="flex items-center justify-center h-96">
-            <Button onClick={onPlay} className="bg-sky-600 hover:bg-sky-700">
+            <Button onClick={() => {
+              if (typeof window !== "undefined" && movieDetails && (movieDetails as OMDBResponse).Title) {
+                localStorage.setItem("snayerTitle", (movieDetails as OMDBResponse).Title)
+              }
+              onPlay()
+            }} className="bg-sky-600 hover:bg-sky-700">
               Play Movie
             </Button>
           </div>
