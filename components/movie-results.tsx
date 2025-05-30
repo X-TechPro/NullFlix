@@ -9,7 +9,7 @@ import Image from "next/image"
 interface MovieResultsProps {
   results: any[]
   toggleBookmark: (movie: any) => void
-  isBookmarked: (id: string) => boolean
+  isBookmarked: (id: string, tmdbId?: string) => boolean
 }
 
 export default function MovieResults({ results, toggleBookmark, isBookmarked }: MovieResultsProps) {

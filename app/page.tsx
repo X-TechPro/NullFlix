@@ -452,7 +452,14 @@ export default function Home() {
 
       <AnimatePresence>
         {showSettings && <SettingsDialog isOpen={showSettings} onClose={() => setShowSettings(false)} />}
-        {selectedMovie && <MoviePlayer mediaId={selectedMovie} mediaType="movie" onClose={handleClosePlayer} />}
+        {selectedMovie && (
+          <MoviePlayer 
+            mediaId={selectedMovie} 
+            mediaType="movie" 
+            title={mediaResults.find(m => m.imdb === selectedMovie || m.id === selectedMovie)?.title || bookmarks.find(b => b.imdbID === selectedMovie || b.id === selectedMovie)?.title || ""}
+            onClose={handleClosePlayer} 
+          />
+        )}
         {selectedTVShow && !selectedSeason && (
           <TVEpisodeSelector
             tmdbId={selectedTVShow}
@@ -494,7 +501,7 @@ interface MediaResultsProps {
   onMediaSelect: (media: Media) => void
   onNewSearch: () => void
   toggleBookmark: (media: Media) => void
-  isBookmarked: (id: string, tmdbId?: number) => boolean
+  isBookmarked: (id: string, tmdbId?: string) => boolean
 }
 
 function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBookmarked }: MediaResultsProps) {

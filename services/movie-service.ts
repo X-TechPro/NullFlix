@@ -88,7 +88,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
   }
 }
 
-export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number): string {
+export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number, title?: string): string {
   // Use a try-catch block to handle potential localStorage errors
   let provider: Provider = "pstream"
   let server: ProviderServer | null = null
@@ -138,7 +138,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "snayer": {
         // Snayer TV API (not documented, fallback to movie for now)
         const bioapi = localStorage.getItem("bioapi") || ""
-        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}`
+        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}${title ? `&title=${encodeURIComponent(title)}` : ''}`
       }
       case "vidfast":
         return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
@@ -176,7 +176,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidora.su/movie/${mediaId}?colour=0099ff&autoplay=true&autonextepisode=true`
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
-        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}`
+        return `https://snayer.vercel.app/api/stream?imdb=${mediaId}&api=${bioapi}${title ? `&title=${encodeURIComponent(title)}` : ''}`
       }
       case "vidfast":
         return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`

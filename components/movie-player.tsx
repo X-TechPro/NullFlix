@@ -10,15 +10,16 @@ interface MoviePlayerProps {
   mediaType: "movie" | "tv"
   season?: number
   episode?: number
+  title?: string
   onClose: () => void
 }
 
-export default function MoviePlayer({ mediaId, mediaType, season, episode, onClose }: MoviePlayerProps) {
+export default function MoviePlayer({ mediaId, mediaType, season, episode, title, onClose }: MoviePlayerProps) {
   const [embedUrl, setEmbedUrl] = useState("")
 
   useEffect(() => {
-    setEmbedUrl(getProviderUrl(mediaId, mediaType, season, episode))
-  }, [mediaId, mediaType, season, episode])
+    setEmbedUrl(getProviderUrl(mediaId, mediaType, season, episode, title))
+  }, [mediaId, mediaType, season, episode, title])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
