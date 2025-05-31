@@ -48,7 +48,8 @@ function getTVShowBaseUrl(tmdbId: string, provider = "embed.su"): string {
       return `https://vidsrc.xyz/embed/tv?imdb=${tmdbId}`
     case "snayer": {
       const bioapi = localStorage.getItem("bioapi") || ""
-      return `https://snayer.vercel.app/api/stream?imdb=${tmdbId}&api=${bioapi}`
+      const snayerTitle = localStorage.getItem("snayerTitle") || ""
+      return `https://snayer.vercel.app/api/stream?imdb=${tmdbId}&api=${bioapi}&title=${snayerTitle}`
     }
     case "embed.su":
     default:
@@ -81,7 +82,8 @@ function getEpisodeUrl(tmdbId: string, season: number, episode: number, provider
       return `https://vidsrc.xyz/embed/tv?imdb=${tmdbId}&season=${season}&episode=${episode}`
     case "snayer": {
       const bioapi = localStorage.getItem("bioapi") || ""
-      return `https://snayer.vercel.app/api/stream?imdb=${tmdbId}&season=${season}&episode=${episode}&api=${bioapi}`
+      const snayerTitle = localStorage.getItem("snayerTitle") || ""
+      return `https://snayer.vercel.app/api/tv?imdb=${tmdbId}&s=${season}&e=${episode}&api=${bioapi}&title=${snayerTitle}`
     }
     case "embed.su":
     default:
