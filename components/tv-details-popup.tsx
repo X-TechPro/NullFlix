@@ -4,18 +4,36 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { X, Tv, Calendar, Clock, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getTVShowDetails } from "@/services/movie-service"
-import TVEpisodeSelector from "@/components/tv-episode-selector"
-import { fetchMovieDetailsByIMDB, getHighResolutionPoster } from "@/services/omdb-service"
+import { fetchMovieDetailsByTMDB, getTMDBPoster } from "@/services/tmdb-service"
 
 interface TVDetailsPopupProps {
   tmdbId: string
-  imdbId?: string // allow passing imdbId
   onClose: () => void
   onPlay: (tmdbId: string) => void
 }
 
-export default function TVDetailsPopup({ tmdbId, imdbId, onClose, onPlay }: TVDetailsPopupProps) {
+// Extend TMDBMovie for TV details
+interface TMDBTVDetails {
+  id: string
+  title?: string
+  name?: string
+  original_title?: string
+  original_name?: string
+  overview?: string
+  poster_path?: string
+  backdrop_path?: string
+  media_type?: string
+  release_date?: string
+  first_air_date?: string
+  genre_ids?: number[]
+  genres?: { id: number; name: string }[]
+  popularity?: number
+  vote_average?: number
+  vote_count?: number
+  episode_run_time?: number[]
+}
+
+export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPopupProps) {
   const [tvShow, setTVShow] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,39 +43,16 @@ export default function TVDetailsPopup({ tmdbId, imdbId, onClose, onPlay }: TVDe
       setIsLoading(true)
       setError(null)
       try {
-        // Try OMDB first if imdbId is provided and OMDB is enabled
-        let omdbData = null
-        const isOMDBEnabled = typeof window !== "undefined" && localStorage.getItem("omdbEnabled") === "true"
-        if (imdbId && isOMDBEnabled) {
-          omdbData = await fetchMovieDetailsByIMDB(imdbId)
-        }
-        if (omdbData && omdbData.Response === "True") {
-          setTVShow({
-            poster: omdbData.Poster && omdbData.Poster !== "N/A" ? getHighResolutionPoster(omdbData.Poster) : null,
-            title: omdbData.Title || "",
-            plot: omdbData.Plot || "",
-            genre: omdbData.Genre || "",
-            year: omdbData.Year || "",
-            Runtime: omdbData.Runtime || "",
-          })
-        } else {
-          // fallback to local DB
-          const details = await getTVShowDetails(Number(tmdbId))
-          setTVShow({
-            poster: details.poster
-              ? getHighResolutionPoster(details.poster)
-              : details.poster_path
-              ? getHighResolutionPoster(details.poster_path)
-              : details.image
-              ? getHighResolutionPoster(details.image)
-              : null,
-            title: details.title || details.name || details.original_name || "",
-            plot: details.plot || details.overview || details.description || "",
-            genre: details.genre || (Array.isArray(details.genres) ? details.genres.map((g: any) => g.name).join(", ") : ""),
-            year: details.year || details.first_air_date?.slice(0, 4) || details.release_date?.slice(0, 4) || "",
-            Runtime: details.runtime || details.episode_run_time?.[0] || "",
-          })
-        }
+        const details: TMDBTVDetails | null = await fetchMovieDetailsByTMDB(tmdbId, "tv")
+        if (!details) throw new Error("No details found")
+        setTVShow({
+          poster: details.poster_path ? getTMDBPoster(details.poster_path) : null,
+          title: details.name || details.title || details.original_name || details.original_title || "",
+          plot: details.overview || "",
+          genre: Array.isArray(details.genres) ? details.genres.map((g: any) => g.name).join(", ") : "",
+          year: details.first_air_date?.slice(0, 4) || details.release_date?.slice(0, 4) || "",
+          Runtime: Array.isArray(details.episode_run_time) && details.episode_run_time.length > 0 ? details.episode_run_time[0] : "",
+        })
       } catch (err) {
         setError("Failed to load TV show details")
       } finally {
@@ -65,7 +60,7 @@ export default function TVDetailsPopup({ tmdbId, imdbId, onClose, onPlay }: TVDe
       }
     }
     fetchDetails()
-  }, [tmdbId, imdbId])
+  }, [tmdbId])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2 sm:p-4 overflow-hidden">
@@ -145,7 +140,7 @@ export default function TVDetailsPopup({ tmdbId, imdbId, onClose, onPlay }: TVDe
                 </div>
               )}
 
-              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{tvShow.plot || tvShow.description}</p>
+              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{tvShow.plot}</p>
 
               <Button
                 onClick={() => onPlay(tmdbId)}

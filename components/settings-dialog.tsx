@@ -1,12 +1,9 @@
 "use client"
 
-// Set default OMDB API key and omdbEnabled for first-time users on page load (not just when settings dialog is opened)
+// Set default TMDB API key for first-time users on page load
 if (typeof window !== "undefined") {
-  if (!localStorage.getItem("omdbApiKey")) {
-    localStorage.setItem("omdbApiKey", "9f603783")
-  }
-  if (!localStorage.getItem("omdbEnabled")) {
-    localStorage.setItem("omdbEnabled", "true")
+  if (!localStorage.getItem("tmdbApiKey")) {
+    localStorage.setItem("tmdbApiKey", "YOUR_TMDB_API_KEY")
   }
   if (!localStorage.getItem("bioapi")) {
     localStorage.setItem("bioapi", "2SOcK4TddDM1mqEbacc7db55c60d542e17a65e2f19de8f8af")
@@ -31,7 +28,7 @@ interface SettingsDialogProps {
 
 export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = useState("providers")
-  const [omdbApiKey, setOmdbApiKey] = useState("")
+  const [tmdbApiKey, setTmdbApiKey] = useState("")
   const [bioApiKey, setBioApiKey] = useState("")
   const [selectedProvider, setSelectedProvider] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedProvider")
@@ -148,9 +145,9 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   // Load settings from localStorage on component mount
   useEffect(() => {
     try {
-      const savedOmdbApiKey = localStorage.getItem("omdbApiKey")
-      if (savedOmdbApiKey !== null) {
-        setOmdbApiKey(savedOmdbApiKey)
+      const savedTmdbApiKey = localStorage.getItem("tmdbApiKey")
+      if (savedTmdbApiKey !== null) {
+        setTmdbApiKey(savedTmdbApiKey)
       }
 
       const savedProvider = localStorage.getItem("selectedProvider")
@@ -194,12 +191,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     }
   }, [selectedProvider, selectedServer])
 
-  // Save OMDB settings manually
-  const handleSaveOmdb = () => {
+  // Save TMDB settings manually
+  const handleSaveTmdb = () => {
     try {
-      localStorage.setItem("omdbApiKey", omdbApiKey)
+      localStorage.setItem("tmdbApiKey", tmdbApiKey)
     } catch (e) {
-      console.error("Error saving OMDB settings:", e)
+      console.error("Error saving TMDB settings:", e)
     }
   }
 
@@ -328,21 +325,21 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
             <TabsContent value="settings" className="space-y-4">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="omdb-api-key" className="text-white">
-                    OMDB API Key
+                  <Label htmlFor="tmdb-api-key" className="text-white">
+                    TMDB API Key
                   </Label>
                   <div className="flex gap-2">
                     <Input
-                      id="omdb-api-key"
-                      value={omdbApiKey}
-                      onChange={(e) => setOmdbApiKey(e.target.value)}
-                      placeholder="Enter your OMDB API key"
+                      id="tmdb-api-key"
+                      value={tmdbApiKey}
+                      onChange={(e) => setTmdbApiKey(e.target.value)}
+                      placeholder="Enter your TMDB API key"
                       className="bg-gray-700 border-gray-600 text-white"
                     />
                     <Button
                       type="button"
                       className="bg-sky-600 hover:bg-sky-700 text-white"
-                      onClick={handleSaveOmdb}
+                      onClick={handleSaveTmdb}
                     >
                       Save
                     </Button>
@@ -351,7 +348,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     <div className="flex gap-2">
                       <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <p>
-                        OMDB API provides movie information and posters. Without it, the site won't work.
+                        TMDB API provides movie information and posters. Without it, the site won't work.
                         You get 1000 free requests per day.
                       </p>
                     </div>
@@ -359,12 +356,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   <p className="text-xs text-gray-400">
                     Get a free API key at{" "}
                     <a
-                      href="https://www.omdbapi.com/apikey.aspx"
+                      href="https://www.themoviedb.org/settings/api"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sky-400 hover:underline"
                     >
-                      omdbapi.com
+                      themoviedb.org
                     </a>
                   </p>
                   <hr className="my-2 border-gray-700" />

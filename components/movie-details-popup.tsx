@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { X, Star, Clock, Calendar, Film, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { fetchMovieDetailsByIMDB, getHighResolutionPoster, type OMDBResponse } from "@/services/omdb-service"
+import { fetchMovieDetailsByTMDB, getTMDBPoster } from "@/services/tmdb-service"
 
 interface MovieDetailsPopupProps {
   mediaId: string
@@ -13,7 +13,7 @@ interface MovieDetailsPopupProps {
 }
 
 export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDetailsPopupProps) {
-  const [movieDetails, setMovieDetails] = useState<OMDBResponse | null>(null)
+  const [movieDetails, setMovieDetails] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,7 +23,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
       setError(null)
 
       try {
-        const details = await fetchMovieDetailsByIMDB(mediaId)
+        const details = await fetchMovieDetailsByTMDB(mediaId, "movie")
         setMovieDetails(details)
       } catch (err) {
         console.error("Error fetching movie details:", err)
@@ -36,7 +36,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
     fetchDetails()
   }, [mediaId])
 
-  // If OMDB API is disabled or there's an error, play the movie directly
+  // If TMDB API is disabled or there's an error, play the movie directly
   if (!movieDetails && !isLoading) {
     onPlay()
     return null
@@ -73,10 +73,10 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
           <div className="flex flex-col md:flex-row overflow-hidden">
             {/* Poster */}
             <div className="w-full md:w-1/3 bg-gray-800 max-h-[300px] md:max-h-none">
-              {movieDetails.Poster && movieDetails.Poster !== "N/A" ? (
+              {movieDetails.poster_path ? (
                 <img
-                  src={getHighResolutionPoster(movieDetails.Poster) || "/placeholder.svg"}
-                  alt={movieDetails.Title}
+                  src={getTMDBPoster(movieDetails.poster_path) || "/placeholder.svg"}
+                  alt={movieDetails.title}
                   className="w-full h-full object-cover max-h-[300px] md:max-h-none"
                 />
               ) : (
@@ -89,54 +89,54 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
             {/* Details */}
             <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 break-words">
-                {movieDetails.Title}
+                {movieDetails.title}
               </h2>
 
               <div className="flex flex-wrap gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-300">
-                {movieDetails.Released && movieDetails.Released !== "N/A" && (
+                {movieDetails.release_date && movieDetails.release_date !== "N/A" && (
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-1 text-sky-400" />
-                    <span>{movieDetails.Released}</span>
+                    <span>{new Date(movieDetails.release_date).toLocaleDateString()}</span>
                   </div>
                 )}
 
-                {movieDetails.Runtime && movieDetails.Runtime !== "N/A" && (
+                {movieDetails.runtime && movieDetails.runtime !== "N/A" && (
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 mr-1 text-sky-400" />
-                    <span>{movieDetails.Runtime}</span>
+                    <span>{movieDetails.runtime} minutes</span>
                   </div>
                 )}
 
-                {movieDetails.imdbRating && movieDetails.imdbRating !== "N/A" && (
+                {movieDetails.vote_average && movieDetails.vote_average !== "N/A" && (
                   <div className="flex items-center">
                     <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                    <span>{movieDetails.imdbRating}/10</span>
+                    <span>{movieDetails.vote_average}/10</span>
                   </div>
                 )}
               </div>
 
-              {movieDetails.Genre && movieDetails.Genre !== "N/A" && (
+              {movieDetails.genres && movieDetails.genres.length > 0 && (
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-2">
-                    {movieDetails.Genre.split(", ").map((genre) => (
+                    {movieDetails.genres.map((genre: any) => (
                       <span
-                        key={genre}
+                        key={genre.id}
                         className="px-2 py-1 text-xs bg-gray-800 text-sky-400 rounded-md border border-gray-700"
                       >
-                        {genre}
+                        {genre.name}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{movieDetails.Plot}</p>
+              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{movieDetails.overview}</p>
 
               <Button
                 onClick={() => {
                   // Save the movie title to localStorage for snayer provider
-                  if (typeof window !== "undefined" && movieDetails && (movieDetails as OMDBResponse).Title) {
-                    localStorage.setItem("snayerTitle", (movieDetails as OMDBResponse).Title)
+                  if (typeof window !== "undefined" && movieDetails && movieDetails.title) {
+                    localStorage.setItem("snayerTitle", movieDetails.title)
                   }
                   onPlay()
                 }}
@@ -150,8 +150,8 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
         ) : (
           <div className="flex items-center justify-center h-96">
             <Button onClick={() => {
-              if (typeof window !== "undefined" && movieDetails && (movieDetails as OMDBResponse).Title) {
-                localStorage.setItem("snayerTitle", (movieDetails as OMDBResponse).Title)
+              if (typeof window !== "undefined" && movieDetails && movieDetails.title) {
+                localStorage.setItem("snayerTitle", movieDetails.title)
               }
               onPlay()
             }} className="bg-sky-600 hover:bg-sky-700">

@@ -5,7 +5,6 @@ import { ArrowLeft, Film, Bookmark, Tv } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
-import { getHighResolutionPoster } from "@/services/omdb-service"
 
 interface BookmarksAreaProps {
   bookmarks: any[]
@@ -74,10 +73,10 @@ export default function BookmarksArea({
                   className="relative aspect-[2/3] w-full overflow-hidden cursor-pointer"
                   onClick={() => onMediaSelect(item)}
                 >
-                  {((item.Poster && item.Poster !== "N/A") || (item.poster && item.poster !== "N/A")) ? (
+                  {((item.poster)) ? (
                     <Image
-                      src={getHighResolutionPoster(item.Poster || item.poster)}
-                      alt={item.title || item.Title}
+                      src={item.poster}
+                      alt={item.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"

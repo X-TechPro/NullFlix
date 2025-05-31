@@ -76,7 +76,7 @@ export default function Home() {
       e.preventDefault()
       if (!query.trim()) return
 
-      // OMDB API is always enabled, so skip checks
+      // TMDB API is always enabled, so skip checks
 
       setSearchInitiated(true)
       setIsSearching(true)
@@ -103,8 +103,7 @@ export default function Home() {
       const bookmarkItem = {
         // Essential identification
         id: media.id,
-        imdbID: media.imdb || media.id, // For movies
-        tmdbID: media.tmdb, // For TV shows
+        tmdbID: media.tmdb || media.id, // For movies
 
         // Display information
         title: media.title,
@@ -126,16 +125,14 @@ export default function Home() {
       const exists = prev.some(
         (item) =>
           item.id === media.id ||
-          (media.imdb && item.imdbID === media.imdb) ||
-          (media.tmdb && item.tmdbID === media.tmdb),
+          (media.tmdb && item.tmdbID === media.tmdb)
       )
 
       if (exists) {
         return prev.filter(
           (item) =>
             item.id !== media.id &&
-            (media.imdb ? item.imdbID !== media.imdb : true) &&
-            (media.tmdb ? item.tmdbID !== media.tmdb : true),
+            (media.tmdb ? item.tmdbID !== media.tmdb : true)
         )
       } else {
         return [...prev, bookmarkItem]
@@ -146,7 +143,7 @@ export default function Home() {
   // Update the isBookmarked function to check all possible IDs
   const isBookmarked = (mediaId: string, tmdbId?: string) => {
     return bookmarks.some(
-      (item) => item.id === mediaId || item.imdbID === mediaId || (tmdbId && item.tmdbID === tmdbId),
+      (item) => item.id === mediaId || item.tmdbID === mediaId || (tmdbId && item.tmdbID === tmdbId),
     )
   }
 
@@ -159,7 +156,7 @@ export default function Home() {
 
   const handleMediaSelect = (media: Media) => {
     if (media.type === "movie") {
-      setSelectedMediaForDetails(media.imdb || media.id)
+      setSelectedMediaForDetails(media.tmdb || media.id)
       setShowMovieDetails(true)
     } else if (media.type === "tv") {
       setSelectedTVShowForDetails(media.tmdb)
@@ -433,11 +430,11 @@ export default function Home() {
               onMediaSelect={(media) => {
                 // Handle both old and new bookmark formats
                 if (media.mediaType === "tv" || media.type === "tv") {
-                  setSelectedTVShow(media.tmdbID || media.tmdb || Number.parseInt(media.imdbID))
+                  setSelectedTVShow(media.tmdbID || media.tmdb || Number.parseInt(media.tmdbID))
                 } else {
-                  // OMDB API is always enabled, so skip checks
+                  // TMDB API is always enabled, so skip checks
                   // Show movie details popup first
-                  setSelectedMediaForDetails(media.imdbID || media.imdb || media.id)
+                  setSelectedMediaForDetails(media.tmdbID || media.tmdb || media.id)
                   setShowMovieDetails(true)
                 }
               }}
@@ -456,7 +453,7 @@ export default function Home() {
           <MoviePlayer 
             mediaId={selectedMovie} 
             mediaType="movie" 
-            title={mediaResults.find(m => m.imdb === selectedMovie || m.id === selectedMovie)?.title || bookmarks.find(b => b.imdbID === selectedMovie || b.id === selectedMovie)?.title || ""}
+            title={mediaResults.find(m => m.tmdb === selectedMovie || m.id === selectedMovie)?.title || bookmarks.find(b => b.tmdbID === selectedMovie || b.id === selectedMovie)?.title || ""}
             onClose={handleClosePlayer} 
           />
         )}
@@ -486,7 +483,7 @@ export default function Home() {
         {showTVDetails && selectedTVShowForDetails ? (
           <TVDetailsPopup
             tmdbId={selectedTVShowForDetails}
-            imdbId={mediaResults.find(m => m.tmdb === selectedTVShowForDetails && m.type === "tv")?.imdb || undefined}
+            imdbId={mediaResults.find(m => m.tmdb === selectedTVShowForDetails && m.type === "tv")?.tmdb || undefined}
             onClose={handleCloseTVDetails}
             onPlay={handlePlayTVFromDetails}
           />
@@ -618,10 +615,9 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                       </span>
                     )}
                     <span className="px-2 py-1 text-xs text-sky-400 bg-black/50 border border-sky-900/30 rounded-md">
-                      {item.type === "tv" ? `IMDB: ${item.imdb}` : `IMDB: ${item.imdb}`}
+                      TMDB: {item.tmdb || item.tmdbID}
                     </span>
                   </div>
-                  {item.genre && <p className="mt-2 text-xs text-gray-400 truncate">{item.genre}</p>}
 
                   {/* Media type badge */}
                   <div className="absolute top-2 left-2">

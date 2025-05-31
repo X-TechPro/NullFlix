@@ -34,17 +34,17 @@ export default function MovieResults({ results, toggleBookmark, isBookmarked }: 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {results.map((movie, index) => (
           <motion.div
-            key={movie.imdbID || index}
+            key={movie.id || index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
             <Card className="overflow-hidden bg-gray-800/80 border-gray-700/30 backdrop-blur-md hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 group">
               <div className="relative aspect-[2/3] w-full overflow-hidden">
-                {movie.Poster && movie.Poster !== "N/A" ? (
+                {movie.poster ? (
                   <Image
-                    src={movie.Poster || "/placeholder.svg"}
-                    alt={movie.Title}
+                    src={movie.poster}
+                    alt={movie.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -55,20 +55,20 @@ export default function MovieResults({ results, toggleBookmark, isBookmarked }: 
                   </div>
                 )}
                 <motion.button
-                  className={`absolute top-2 right-2 p-2 rounded-full ${isBookmarked(movie.imdbID) ? "bg-cyan-600 text-white" : "bg-black/70 text-white/70 hover:bg-cyan-900/80"} transition-colors duration-300`}
+                  className={`absolute top-2 right-2 p-2 rounded-full ${isBookmarked(movie.id) ? "bg-cyan-600 text-white" : "bg-black/70 text-white/70 hover:bg-cyan-900/80"} transition-colors duration-300`}
                   onClick={() => toggleBookmark(movie)}
                   whileHover={{ scale: 1.1, boxShadow: "0 0 8px rgba(6, 182, 212, 0.5)" }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Bookmark className="w-4 h-4" fill={isBookmarked(movie.imdbID) ? "currentColor" : "none"} />
+                  <Bookmark className="w-4 h-4" fill={isBookmarked(movie.id) ? "currentColor" : "none"} />
                 </motion.button>
               </div>
               <CardContent className="p-4">
-                <h3 className="text-lg font-medium text-white line-clamp-1">{movie.Title}</h3>
-                <p className="text-sm text-blue-300">{movie.Year}</p>
+                <h3 className="text-lg font-medium text-white line-clamp-1">{movie.title}</h3>
+                <p className="text-sm text-blue-300">{movie.year}</p>
                 <div className="flex items-center mt-2">
                   <span className="px-2 py-1 text-xs text-cyan-400 bg-black/50 border border-cyan-900/30 rounded-md">
-                    {movie.Type || "movie"}
+                    {movie.type || "movie"}
                   </span>
                 </div>
               </CardContent>

@@ -4,13 +4,13 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { X, ChevronDown, Tv, Play, Calendar, Clock, AlertCircle, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getTVShowDetails } from "@/services/movie-service"
 import {
-  enumerateTVShow,
+  getFullTVShowDetails,
   getCachedTVStructure,
+  setCachedTVStructure,
   getAllSeasons,
   getEpisodesForSeason,
-} from "@/services/tv-episode-enumerator"
+} from "@/services/tv-details"
 
 interface TVEpisodeSelectorProps {
   tmdbId: string
@@ -24,7 +24,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [seasons, setSeasons] = useState<number[]>([])
-  const [episodes, setEpisodes] = useState<number[]>([])
+  const [episodes, setEpisodes] = useState<any[]>([])
   const [enumerating, setEnumerating] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState("")
@@ -36,42 +36,37 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
       setLoading(true)
       setError(null)
 
-      // Load TV show details
-      const show = await getTVShowDetails(Number(tmdbId))
-      setTVShow(show)
+      // Load TV show details (title, etc)
+      // Optionally, you can fetch more details if needed
+      // const show = await getTVShowDetails(Number(tmdbId))
+      // setTVShow(show)
 
       // Check if we have cached episode data and aren't forcing renumeration
       const cachedStructure = getCachedTVStructure(tmdbId)
       if (cachedStructure && !forceRenumerate) {
         setTvStructure(cachedStructure)
+        setTVShow({ title: cachedStructure.name })
         const availableSeasons = getAllSeasons(cachedStructure)
         setSeasons(availableSeasons)
-
-        // Auto-select first season if available
         if (availableSeasons.length > 0) {
           setSelectedSeason(availableSeasons[0])
           setEpisodes(getEpisodesForSeason(cachedStructure, availableSeasons[0]))
         }
-
         setLoading(false)
         return
       }
 
-      // If no cached data or forcing renumeration, start enumeration
       setEnumerating(true)
-      setProgressMessage("Starting episode enumeration...")
+      setProgressMessage("Fetching all seasons and episodes from TMDB...")
       setProgress(0)
 
-      const structure = await enumerateTVShow(tmdbId, (message, progress) => {
-        setProgressMessage(message)
-        setProgress(progress)
-      })
-
+      const structure = await getFullTVShowDetails(tmdbId)
+      if (!structure) throw new Error("Failed to fetch TV show structure")
       setTvStructure(structure)
+      setTVShow({ title: structure.name })
+      setCachedTVStructure(tmdbId, structure)
       const availableSeasons = getAllSeasons(structure)
       setSeasons(availableSeasons)
-
-      // Auto-select first season if available
       if (availableSeasons.length > 0) {
         setSelectedSeason(availableSeasons[0])
         setEpisodes(getEpisodesForSeason(structure, availableSeasons[0]))
@@ -79,11 +74,9 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
     } catch (err) {
       console.error("Error loading TV show:", err)
       setError("Failed to load TV show details")
-
-      // Set default seasons and episodes even on error
       const defaultSeasons = Array.from({ length: 3 }, (_, i) => i + 1)
       setSeasons(defaultSeasons)
-      setEpisodes(Array.from({ length: 10 }, (_, i) => i + 1))
+      setEpisodes([])
       setSelectedSeason(1)
     } finally {
       setLoading(false)
@@ -195,16 +188,34 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
               {selectedSeason && (
                 <div>
                   <h3 className="mb-3 text-lg font-medium text-white">Episodes</h3>
-                  <div className="grid grid-cols-5 gap-2">
-                    {episodes.map((episode) => (
+                  <div className="flex flex-col items-center gap-3">
+                    {episodes.map((episode: any) => (
                       <Button
-                        key={episode}
-                        onClick={() => onSelectEpisode(selectedSeason, episode)}
-                        className="flex items-center justify-center p-2 h-12 bg-gray-700 hover:bg-sky-600 text-white relative group"
+                        key={episode.episode_number}
+                        onClick={() => onSelectEpisode(selectedSeason, episode.episode_number)}
+                        className="w-full max-w-full flex items-stretch gap-3 p-0 bg-gray-700 hover:bg-sky-600 text-white relative group min-h-[80px] text-left rounded-lg shadow-md overflow-hidden"
+                        style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                       >
-                        <span>{episode}</span>
-                        <div className="absolute inset-0 flex items-center justify-center bg-sky-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <Play size={14} className="mr-1" />
+                        {episode.still_path ? (
+                          <img
+                            src={`https://image.tmdb.org/t/p/w185${episode.still_path}`}
+                            alt={episode.name}
+                            className="h-full w-24 object-cover rounded-l-lg flex-shrink-0"
+                            style={{ minHeight: '80px', maxHeight: '220px', alignSelf: 'stretch' }}
+                          />
+                        ) : (
+                          <div className="h-full w-24 bg-gray-900 rounded-l-lg flex-shrink-0" style={{ minHeight: '80px', maxHeight: '220px', alignSelf: 'stretch' }} />
+                        )}
+                        <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
+                          <div className="font-semibold text-white mb-1 break-words whitespace-normal">
+                            {episode.episode_number}. {episode.name}
+                          </div>
+                          <div className="text-xs text-gray-300 whitespace-normal break-words">
+                            {episode.overview || "No description."}
+                          </div>
+                        </div>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <Play size={16} className="mr-1" />
                           <span>Play</span>
                         </div>
                       </Button>

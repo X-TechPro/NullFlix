@@ -6,7 +6,7 @@ NullFlix is a free movie streaming platform designed for simplicity and accessib
 
 - **Free Movie Streaming**: Watch movies without any subscription or payment.
 - **Modern UI**: Built with Next.js and Tailwind CSS for a fast, responsive, and visually appealing interface.
-- **OMDb API Integration**: Fetches movie data from the OMDb API (limited to 1000 free daily requests; configurable in settings).
+- **TMDB API Integration**: Fetches movie data from the TMDB API (configurable in settings).
 - **Bookmarks & Search**: Easily search for movies and bookmark your favorites.
 - **Settings Customization**: Adjust API usage and other preferences.
 - **Upcoming**: Anime streaming support (coming soon).
@@ -15,7 +15,7 @@ NullFlix is a free movie streaming platform designed for simplicity and accessib
 
 - **Framework**: [Next.js](https://nextjs.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **API**: [OMDb API](https://www.omdbapi.com/)
+- **API**: [TMDB API](https://www.themoviedb.org/documentation/api)
 - **Utilities**: TypeScript, React Hooks
 
 ## Getting Started
@@ -35,8 +35,8 @@ NullFlix is a free movie streaming platform designed for simplicity and accessib
    ```
 4. **Open in browser:**
    - Visit [http://localhost:3000](http://localhost:3000)
-5. **Configure OMDb API Key (Optional):**
-   - Set your OMDb API key in the settings dialog to get more OMDb rates.
+5. **Configure TMDB API Key (Optional):**
+   - Set your TMDB API key in the settings dialog to get more TMDB rates.
 
 ## Project Structure
 

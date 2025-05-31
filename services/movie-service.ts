@@ -1,16 +1,15 @@
 import { searchMediaInDB, getTVShowByTMDB, isDatabaseInitialized, isTVDatabaseInitialized } from "@/utils/db"
-import { searchMoviesViaOMDB as omdbSearchMoviesViaOMDB } from "@/services/omdb-service"
+import { searchMoviesViaTMDB } from "@/services/tmdb-service"
 
 export interface Media {
   id: string
   title: string
-  imdb?: string
-  tmdb: string // changed from number to string
+  tmdb: string // TMDB id as string
   year?: number
   genre?: string
   type: "movie" | "tv"
   seasons?: number[]
-  poster?: string // Add this field for movie posters
+  poster?: string
 }
 
 export type Provider =
@@ -40,46 +39,47 @@ export type ProviderServer =
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return []
 
-  // Check if OMDB API is enabled
-  const isOMDBEnabled = localStorage.getItem("omdbEnabled") === "true"
-  const apiKey = localStorage.getItem("omdbApiKey")
-
-  // If OMDB API is enabled and we have an API key, try to use it first
-  if (isOMDBEnabled && apiKey) {
-    try {
-      console.log("Searching with OMDB API...")
-      const omdbResults = await omdbSearchMoviesViaOMDB(query)
-
-      if (omdbResults.length > 0) {
-        // Convert OMDB results to our Media format
-        const formattedResults: Media[] = omdbResults.map((result) => ({
-          id: result.imdbID,
-          title: result.Title,
-          imdb: result.imdbID,
-          tmdb: result.imdbID, // Use imdbID as tmdb for OMDB results
-          year: Number.parseInt(result.Year) || undefined,
-          type: result.Type === "series" ? "tv" : "movie",
-          poster: result.Poster !== "N/A" ? result.Poster : undefined,
-        }))
-
-        return formattedResults
+  // Use TMDB API for search
+  try {
+    const tmdbResults = await searchMoviesViaTMDB(query)
+    if (tmdbResults.length > 0) {
+      // Grading system: exact match > prefix match > contains > others
+      const normalizedQuery = query.toLowerCase().trim()
+      const scoreMedia = (item: any) => {
+        const title = (item.title || item.name || "").toLowerCase()
+        if (!title) return 0
+        if (title === normalizedQuery) return 120
+        if (title.startsWith(normalizedQuery)) return 100
+        if (title.includes(normalizedQuery)) return 80
+        return 40
       }
-    } catch (error) {
-      console.error("Error searching with OMDB API:", error)
-      // Fall back to local database search if available
+      // Score and sort, then map to Media[]
+      const scored = tmdbResults
+        .map((result: any) => ({
+          score: scoreMedia(result),
+          id: result.id?.toString() || "",
+          title: result.title || result.name || "",
+          tmdb: result.id?.toString() || "",
+          year: result.release_date ? Number(result.release_date.slice(0, 4)) : undefined,
+          genre: Array.isArray(result.genre_ids) ? result.genre_ids.join(",") : "",
+          type: result.media_type === "tv" ? "tv" as const : "movie" as const,
+          poster: result.poster_path ? `https://image.tmdb.org/t/p/w500/${result.poster_path}` : undefined,
+        }))
+        .filter((media) => media.score > 0)
+        .sort((a, b) => b.score - a.score)
+      return scored.map(({score, ...media}) => media)
     }
+  } catch (error) {
+    console.error("Error searching with TMDB API:", error)
   }
 
   // Try to use IndexedDB search as fallback
   try {
-    // Check if database is initialized before searching
     const moviesInitialized = await isDatabaseInitialized()
     const tvInitialized = await isTVDatabaseInitialized()
-
     if (moviesInitialized || tvInitialized) {
       return searchMediaInDB(query)
     } else {
-      // No local database and OMDB failed or returned no results
       return []
     }
   } catch (error) {
@@ -124,7 +124,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         }
       case "vidsrc.xyz":
         const vidsrcDomain = server || "vidsrc.xyz"
-        return `https://${vidsrcDomain}/embed/tv?imdb=${mediaId}&season=${season}&episode=${episode}`
+        return `https://${vidsrcDomain}/embed/tv?tmdb=${mediaId}&season=${season}&episode=${episode}`
       case "vidsrc.su":
         return `https://vidsrc.su/embed/tv/${mediaId}/${season}/${episode}`
       case "vidsrc.co":
@@ -138,7 +138,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
         const snayerTitle = localStorage.getItem("snayerTitle") || ""
-        return `https://snayer.vercel.app/api/tv?imdb=${mediaId}&s=${season}&e=${episode}&api=${bioapi}&title=${snayerTitle}`
+        return `https://snayer.vercel.app/api/tv?tmdb=${mediaId}&s=${season}&e=${episode}&api=${bioapi}&title=${snayerTitle}`
       }
       case "vidfast":
         return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
@@ -163,7 +163,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         }
       case "vidsrc.xyz":
         const vidsrcDomain = server || "vidsrc.xyz"
-        return `https://${vidsrcDomain}/embed/movie?imdb=${mediaId}`
+        return `https://${vidsrcDomain}/embed/movie?tmdb=${mediaId}`
       case "vidsrc.su":
         return `https://vidsrc.su/embed/movie/${mediaId}`
       case "vidsrc.co":
@@ -177,7 +177,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
         const snayerTitle = localStorage.getItem("snayerTitle") || ""
-        return `https://snayer.vercel.app/api/movie?imdb=${mediaId}&api=${bioapi}&title=${snayerTitle}`
+        return `https://snayer.vercel.app/api/movie?tmdb=${mediaId}&api=${bioapi}&title=${snayerTitle}`
       }
       case "vidfast":
         return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`

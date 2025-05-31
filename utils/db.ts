@@ -13,8 +13,7 @@ export function initDB(): Promise<void> {
 // Store movies in memory
 export async function storeMovies(newMovies: any[]): Promise<void> {
   movies = newMovies.map((movie, i) => ({
-    id: movie.imdb || `movie-${i}`,
-    imdb: movie.imdb || `unknown-${i}`,
+    id: movie.tmdb || `movie-${i}`,
     title: movie.title || "Unknown Title",
     tmdb: movie.tmdb || 0,
     year: movie.year || null,
