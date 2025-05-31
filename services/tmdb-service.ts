@@ -17,13 +17,20 @@ export interface TMDBMovie {
 
 // Helper to get TMDB API key
 function getTMDBApiKey(): string | null {
-  if (typeof window !== "undefined") {
-    if (!localStorage.getItem("tmdbApiKey")) {
-      localStorage.setItem("tmdbApiKey", "YOUR_TMDB_API_KEY")
-    }
+  // If running on the server (e.g., in Vercel), prioritize env variable
+  if (typeof window === "undefined") {
+    const apiKey = process.env.TMDB_API_KEY
+    if (!apiKey) console.error("TMDB API key not found in environment variables")
+    return apiKey || null
   }
-  const apiKey = localStorage.getItem("tmdbApiKey")
-  if (!apiKey) console.error("TMDB API key not found")
+
+  // If running in the browser, use localStorage fallback
+  let apiKey = localStorage.getItem("tmdbApiKey")
+  if (!apiKey) {
+    console.warn("TMDB API key not found in localStorage, setting a placeholder.")
+    localStorage.setItem("tmdbApiKey", "YOUR_TMDB_API_KEY")
+    apiKey = "YOUR_TMDB_API_KEY"
+  }
   return apiKey
 }
 
