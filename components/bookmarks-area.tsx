@@ -117,12 +117,10 @@ export default function BookmarksArea({
                       {item.type === "tv" || item.mediaType === "tv" ? "TV Series" : item.Type || "movie"}
                     </span>
 
-                    {/* Show ID information */}
-                    {(item.imdbID || item.tmdbID) && (
+                    {/* Show TMDB ID information */}
+                    {(item.tmdbID || item.tmdb || item.tmdbId) && (
                       <span className="px-2 py-1 text-xs text-gray-400 bg-black/30 border border-gray-700/30 rounded-md ml-2">
-                        {item.type === "tv" || item.mediaType === "tv"
-                          ? `TMDB: ${item.tmdbID || item.tmdb}`
-                          : `IMDB: ${item.imdbID || item.imdb}`}
+                        TMDB: {item.tmdbID || item.tmdb || item.tmdbId}
                       </span>
                     )}
                   </div>

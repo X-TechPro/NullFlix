@@ -196,7 +196,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                         className="w-full max-w-full flex items-stretch gap-3 p-0 bg-gray-700 hover:bg-sky-600 text-white relative group text-left rounded-lg shadow-md overflow-hidden min-h-[80px]"
                         style={{ minHeight: '80px', whiteSpace: 'normal', wordBreak: 'break-word', height: 'auto' }}
                       >
-                        <div className="flex items-center p-2">
+                        <div className="flex items-center p-2 relative">
                           {episode.still_path ? (
                             <img
                               src={`https://image.tmdb.org/t/p/w500${episode.still_path}`}
@@ -209,18 +209,22 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                               No Image
                             </div>
                           )}
+                          {/* Play button overlay on poster */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="w-28 h-20 bg-black/60 rounded-lg absolute" style={{left: '50%', top: '50%', transform: 'translate(-50%, -50%)'}} />
+                            <span className="relative z-10 flex items-center gap-1 px-3 py-1 rounded text-white text-sm font-semibold">
+                              <Play size={18} className="mr-1" />
+                              Play
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                          <div className="font-semibold text-white mb-1 break-words whitespace-normal">
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                          <div className="font-semibold text-white mb-0 break-words whitespace-normal">
                             {episode.episode_number}. {episode.name}
                           </div>
                           <div className="text-xs text-gray-300 whitespace-normal break-words">
                             {episode.overview || "No description."}
                           </div>
-                        </div>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <Play size={16} className="mr-1" />
-                          <span>Play</span>
                         </div>
                       </Button>
                     ))}
