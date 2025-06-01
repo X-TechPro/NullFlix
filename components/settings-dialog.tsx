@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { isDatabaseInitialized, isTVDatabaseInitialized, clearDatabase } from "@/utils/db"
 
 interface SettingsDialogProps {
   isOpen: boolean
@@ -43,9 +42,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadStatus, setDownloadStatus] = useState("")
-  const [hasDatabase, setHasDatabase] = useState(false)
-  const [hasTVDatabase, setHasTVDatabase] = useState(false)
-  const [isClearing, setIsClearing] = useState(false)
 
   // Provider dictionary
   const providers = [
@@ -164,16 +160,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       if (savedBioApiKey !== null) {
         setBioApiKey(savedBioApiKey)
       }
-
-      // Check if database is initialized
-      const checkDatabase = async () => {
-        const moviesInitialized = await isDatabaseInitialized()
-        const tvInitialized = await isTVDatabaseInitialized()
-        setHasDatabase(moviesInitialized)
-        setHasTVDatabase(tvInitialized)
-      }
-
-      checkDatabase()
     } catch (e) {
       console.error("Error loading settings:", e)
     }
@@ -403,6 +389,31 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                           You have 1000 free API calls per month. If you run out, you can switch providers.
                         </p>
                       </div>
+                    </div>
+                    <hr className="my-2 border-gray-700" />
+                    {/* Obliterate Everything Button */}
+                    <div className="mt-4">
+                      <Button
+                        type="button"
+                        className="w-full bg-red-700 hover:bg-red-800 text-white flex items-center justify-center gap-2 border border-red-900 shadow-lg"
+                        onClick={() => {
+                          localStorage.clear()
+                          window.location.reload()
+                        }}
+                      >
+                        <span className="flex items-center">
+                          <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" className="w-6 h-6 mr-2" fill="none">
+                            <g>
+                              <path fill="#CCD6DD" d="M24.187 9.657l5.658-5.654L32 6.16l-5.658 5.655z" />
+                              <circle fill="#31373D" cx="14" cy="22" r="14" />
+                              <path fill="#31373D" d="M19 11.342l5.658-5.657l5.657 5.658L24.657 17z" />
+                              <circle fill="#F18F26" cx="32" cy="4" r="4" />
+                              <circle fill="#FDCB58" cx="32" cy="4" r="2" />
+                            </g>
+                          </svg>
+                          Obliterate Everything
+                        </span>
+                      </Button>
                     </div>
                   </div>
                 </div>

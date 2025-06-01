@@ -193,19 +193,23 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                       <Button
                         key={episode.episode_number}
                         onClick={() => onSelectEpisode(selectedSeason, episode.episode_number)}
-                        className="w-full max-w-full flex items-stretch gap-3 p-0 bg-gray-700 hover:bg-sky-600 text-white relative group min-h-[80px] text-left rounded-lg shadow-md overflow-hidden"
-                        style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
+                        className="w-full max-w-full flex items-stretch gap-3 p-0 bg-gray-700 hover:bg-sky-600 text-white relative group text-left rounded-lg shadow-md overflow-hidden min-h-[80px]"
+                        style={{ minHeight: '80px', whiteSpace: 'normal', wordBreak: 'break-word', height: 'auto' }}
                       >
-                        {episode.still_path ? (
-                          <img
-                            src={`https://image.tmdb.org/t/p/w185${episode.still_path}`}
-                            alt={episode.name}
-                            className="h-full w-24 object-cover rounded-l-lg flex-shrink-0"
-                            style={{ minHeight: '80px', maxHeight: '220px', alignSelf: 'stretch' }}
-                          />
-                        ) : (
-                          <div className="h-full w-24 bg-gray-900 rounded-l-lg flex-shrink-0" style={{ minHeight: '80px', maxHeight: '220px', alignSelf: 'stretch' }} />
-                        )}
+                        <div className="flex items-center p-2">
+                          {episode.still_path ? (
+                            <img
+                              src={`https://image.tmdb.org/t/p/w500${episode.still_path}`}
+                              alt={episode.name}
+                              className="w-28 h-20 object-cover rounded-lg shadow-lg bg-gray-900"
+                              style={{ boxShadow: '0 4px 16px 0 rgba(0,0,0,0.25)' }}
+                            />
+                          ) : (
+                            <div className="w-28 h-20 bg-gray-900 rounded-lg shadow-lg flex items-center justify-center text-gray-600 text-xs">
+                              No Image
+                            </div>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                           <div className="font-semibold text-white mb-1 break-words whitespace-normal">
                             {episode.episode_number}. {episode.name}
