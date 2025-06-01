@@ -134,7 +134,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       id: "vidsrc.su",
       name: "Vidsrc.su",
       url: "https://vidsrc.su/",
-      description: "Worst provider. Doesn't work for now.",
+      description: "Normal",
     },
   ]
 
@@ -414,6 +414,13 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                           Obliterate Everything
                         </span>
                       </Button>
+                      <div className="p-3 bg-red-900/20 border border-red-800/50 rounded-lg text-xs text-red-300 mt-2 flex gap-2 items-start">
+                        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
+                        <p>
+                          <b>Warning:</b> This will wipe <b>all your settings and bookmarks</b>.<br />
+                          Only use this if you encounter bugs or want to reset everything.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
