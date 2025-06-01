@@ -26,11 +26,6 @@ export interface TVShowFullDetails {
 
 // Helper to get TMDB API key
 function getTMDBApiKey(): string | null {
-  // 1. Try environment variable (for Vercel or Node.js)
-  if (typeof process !== "undefined" && process.env && process.env.TMDB_API_KEY) {
-    return process.env.TMDB_API_KEY
-  }
-  // 2. Fallback to localStorage (browser only)
   if (typeof window !== "undefined") {
     return localStorage.getItem("tmdbApiKey")
   }

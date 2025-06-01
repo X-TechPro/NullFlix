@@ -3,7 +3,7 @@
 // Set default TMDB API key for first-time users on page load
 if (typeof window !== "undefined") {
   if (!localStorage.getItem("tmdbApiKey")) {
-    localStorage.setItem("tmdbApiKey", "YOUR_TMDB_API_KEY")
+    localStorage.setItem("tmdbApiKey", "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWFjNjM1ODA4YmRjMDJkZjI2ZDMwMjk0MGI0Y2EzNyIsIm5iZiI6MTc0ODY4NTIxNy43Mjg5OTk5LCJzdWIiOiI2ODNhZDFhMTkyMWI4N2IxYzk1Mzc4ODQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.w-oWdRIxwlXKTpP42Yo87Mld5sqp8uNFpDHgrqB6a3U")
   }
   if (!localStorage.getItem("bioapi")) {
     localStorage.setItem("bioapi", "2SOcK4TddDM1mqEbacc7db55c60d542e17a65e2f19de8f8af")
