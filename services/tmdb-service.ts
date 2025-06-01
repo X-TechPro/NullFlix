@@ -17,14 +17,15 @@ export interface TMDBMovie {
 
 // Helper to get TMDB API key
 function getTMDBApiKey(): string | null {
-  if (typeof window !== "undefined") {
-    if (!localStorage.getItem("tmdbApiKey")) {
-      localStorage.setItem("tmdbApiKey", "YOUR_TMDB_API_KEY")
-    }
+  // 1. Try environment variable (for Vercel or Node.js)
+  if (typeof process !== "undefined" && process.env && process.env.TMDB_API_KEY) {
+    return process.env.TMDB_API_KEY
   }
-  const apiKey = localStorage.getItem("tmdbApiKey")
-  if (!apiKey) console.error("TMDB API key not found")
-  return apiKey
+  // 2. Fallback to localStorage (browser only)
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("tmdbApiKey")
+  }
+  return null
 }
 
 // Generalized fetch function for TMDB
