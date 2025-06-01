@@ -349,7 +349,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                       <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <p>
                         TMDB API provides movie information and posters. Without it, the site won't work.
-                        You get 1000 free requests per day.
                       </p>
                     </div>
                   </div>
