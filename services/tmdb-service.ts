@@ -46,10 +46,19 @@ export async function searchMoviesViaTMDB(query: string): Promise<TMDBMovie[]> {
   const apiKey = getTMDBApiKey()
   if (!apiKey) return []
   try {
-    const url = `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}`
-    const data = await fetchTMDB(url)
-    if (data && Array.isArray(data.results)) return data.results
-    return []
+    const movieUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}`
+    const tvUrl = `https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}`
+    // Fetch both in parallel
+    const [movieData, tvData] = await Promise.all([
+      fetchTMDB(movieUrl),
+      fetchTMDB(tvUrl)
+    ])
+    const movieResults = (movieData && Array.isArray(movieData.results)) ? movieData.results : []
+    const tvResults = (tvData && Array.isArray(tvData.results)) ? tvData.results : []
+    // Add media_type for later distinction
+    const moviesWithType = movieResults.map((m: any) => ({ ...m, media_type: "movie" }))
+    const tvWithType = tvResults.map((t: any) => ({ ...t, media_type: "tv" }))
+    return [...moviesWithType, ...tvWithType]
   } catch (error) {
     console.error("Error searching movies via TMDB:", error)
     return []

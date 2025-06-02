@@ -63,58 +63,9 @@ export async function getTVShowByTMDB(tmdbId: number): Promise<any> {
   }
 }
 
-// Search movies and TV shows in memory
-export async function searchMediaInDB(query: string): Promise<any[]> {
-  const normalizedQuery = query.toLowerCase().trim()
-  const wholeWordRegex = new RegExp(`\\b${normalizedQuery}\\b`, "i")
-  const startsWithRegex = new RegExp(`\\b${normalizedQuery}\\w*`, "i")
-  const containsRegex = new RegExp(`${normalizedQuery}`, "i")
-  const exactTitleRegex = new RegExp(`^${normalizedQuery}$`, "i")
-
-  const scoreMedia = (media: any) => {
-    const title = media.title?.toLowerCase() ?? ""
-    const genre = media.genre?.toLowerCase() ?? ""
-    const year = media.year?.toString() ?? ""
-    const id = media.id?.toLowerCase() ?? ""
-    const haystack = `${title} ${genre} ${year} ${id}`
-    const wordCount = title.trim().split(/\s+/).length
-
-    let baseScore = 0
-    if (exactTitleRegex.test(title)) baseScore = 120
-    else if (wholeWordRegex.test(title)) baseScore = 100
-    else if (startsWithRegex.test(title)) baseScore = 80
-    else if (containsRegex.test(title)) baseScore = 50
-    else if (wholeWordRegex.test(haystack)) baseScore = 40
-    else if (containsRegex.test(haystack)) baseScore = 20
-
-    const penalty = wordCount * 2
-    const finalScore = baseScore - penalty
-
-    return { media, score: finalScore }
-  }
-
-  const scoredMovies = movies.map(scoreMedia).filter(({ score }) => score > 0)
-  const scoredTVShows = tvShows.map(scoreMedia).filter(({ score }) => score > 0)
-
-  return [...scoredMovies, ...scoredTVShows]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 20)
-    .map(({ media }) => media)
-}
-
 // Get metadata from memory
 export async function getMetadata(key: string): Promise<any> {
   return meta[key] ?? null
-}
-
-// Check if the database has been initialized with movies
-export async function isDatabaseInitialized(): Promise<boolean> {
-  return !!(meta["movieCount"] && meta["movieCount"] > 0)
-}
-
-// Check if the TV database has been initialized
-export async function isTVDatabaseInitialized(): Promise<boolean> {
-  return !!(meta["tvCount"] && meta["tvCount"] > 0)
 }
 
 // Clear the in-memory database

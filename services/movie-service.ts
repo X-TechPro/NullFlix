@@ -1,4 +1,4 @@
-import { searchMediaInDB, getTVShowByTMDB, isDatabaseInitialized, isTVDatabaseInitialized } from "@/utils/db"
+import { getTVShowByTMDB } from "@/utils/db"
 import { searchMoviesViaTMDB } from "@/services/tmdb-service"
 
 export interface Media {
@@ -36,57 +36,108 @@ export type ProviderServer =
   | "vidsrc.me"
   | "vidsrc.net"
 
+/**
+ * Revamped searchMedia with:
+ * 1) Penalty for extra words beyond the query: -5 per extra word.
+ * 2) Popularity bonus capped at a maximum of +15.
+ * 3) Runtime bonus/penalty still applied as before.
+ */
 export async function searchMedia(query: string): Promise<Media[]> {
-  if (!query.trim()) return []
+  if (!query.trim()) return [];
 
-  // Use TMDB API for search
-  try {
-    const tmdbResults = await searchMoviesViaTMDB(query)
-    if (tmdbResults.length > 0) {
-      // Grading system: exact match > prefix match > contains > others
-      const normalizedQuery = query.toLowerCase().trim()
-      const scoreMedia = (item: any) => {
-        const title = (item.title || item.name || "").toLowerCase()
-        if (!title) return 0
-        if (title === normalizedQuery) return 120
-        if (title.startsWith(normalizedQuery)) return 100
-        if (title.includes(normalizedQuery)) return 80
-        return 40
-      }
-      // Score and sort, then map to Media[]
-      const scored = tmdbResults
-        .map((result: any) => ({
-          score: scoreMedia(result),
-          id: result.id?.toString() || "",
-          title: result.title || result.name || "",
-          tmdb: result.id?.toString() || "",
-          year: result.release_date ? Number(result.release_date.slice(0, 4)) : undefined,
-          genre: Array.isArray(result.genre_ids) ? result.genre_ids.join(",") : "",
-          type: result.media_type === "tv" ? "tv" as const : "movie" as const,
-          poster: result.poster_path ? `https://image.tmdb.org/t/p/w500/${result.poster_path}` : undefined,
-        }))
-        .filter((media) => media.score > 0)
-        .sort((a, b) => b.score - a.score)
-      return scored.map(({score, ...media}) => media)
-    }
-  } catch (error) {
-    console.error("Error searching with TMDB API:", error)
-  }
+  const q = query.toLowerCase().trim();
+  const queryWordCount = q.split(/\s+/).length;
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  // Try to use IndexedDB search as fallback
   try {
-    const moviesInitialized = await isDatabaseInitialized()
-    const tvInitialized = await isTVDatabaseInitialized()
-    if (moviesInitialized || tvInitialized) {
-      return searchMediaInDB(query)
-    } else {
-      return []
-    }
+    const tmdbResults = await searchMoviesViaTMDB(query);
+    if (!tmdbResults || tmdbResults.length === 0) return [];
+
+    const scored = tmdbResults
+      .map((item: any) => {
+        //  — Use "title" if movie, "name" if TV
+        const rawTitle =
+          item.media_type === 'movie'
+            ? (item.title || '')
+            : (item.name || '');
+        const title = rawTitle.toLowerCase().trim();
+
+        // Drop if query isn't anywhere in title
+        if (!title.includes(q)) {
+          return { media: item, score: Number.NEGATIVE_INFINITY };
+        }
+
+        let score = 0;
+
+        // 1) Starts-with boost
+        if (title.startsWith(q)) {
+          score += 100;
+        }
+
+        // 2) Whole-word boost (if not startsWith)
+        const wholeWordRe = new RegExp(`\\b${escapeRegex(q)}\\b`);
+        if (wholeWordRe.test(title) && !title.startsWith(q)) {
+          score += 50;
+        }
+
+        // 3) Partial-only match penalty (e.g. "carson" when q="cars")
+        if (!wholeWordRe.test(title)) {
+          score -= 80;
+        }
+
+        // 4) Penalty for extra words beyond the query:
+        //    titleWordCount – queryWordCount = extraWords; each extra = -5
+        const titleWordCount = title.split(/\s+/).length;
+        const extraWords = titleWordCount - queryWordCount;
+        if (extraWords > 0) {
+          score -= extraWords * 5;
+        }
+
+        // 5) Popularity bonus: +1 for every 0.5 pop > 2.0, capped at +15
+        if (typeof item.popularity === 'number' && item.popularity > 2) {
+          const rawBonus = Math.floor((item.popularity - 2) / 0.5);
+          const bonus = Math.min(rawBonus, 15);
+          score += bonus;
+        }
+
+        // 6) Runtime bonus/penalty (only for movies)
+        if (item.media_type === 'movie' && typeof item.runtime === 'number') {
+          const rt = item.runtime;
+          if (rt > 100) {
+            score += 50;
+          } else if (rt > 70 && rt < 99) {
+            score += 30;
+          } else if (rt < 49) {
+            score -= 50;
+          }
+          // 50 <= rt <= 69 or 99 <= rt <= 100 → no change
+        }
+
+        return { media: item, score };
+      })
+      .filter((s) => s.score > Number.NEGATIVE_INFINITY)
+      .sort((a, b) => b.score - a.score);
+
+    return scored.map(({ media }) => {
+      const releaseDate = media.release_date || media.first_air_date || '';
+      return {
+        id: media.id?.toString() || '',
+        title: media.title || media.name || '',
+        tmdb: media.id?.toString() || '',
+        year: releaseDate ? Number(releaseDate.slice(0, 4)) : undefined,
+        genre: Array.isArray(media.genre_ids) ? media.genre_ids.join(',') : '',
+        type: media.media_type === 'tv' ? 'tv' : 'movie',
+        poster: media.poster_path
+          ? `https://image.tmdb.org/t/p/w500/${media.poster_path}`
+          : undefined,
+      } as Media;
+    });
   } catch (error) {
-    console.error("Error searching local database:", error)
-    return []
+    console.error('Error searching with TMDB API:', error);
+    return [];
   }
 }
+
 
 export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number, title?: string): string {
   // Use a try-catch block to handle potential localStorage errors
