@@ -42,6 +42,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadStatus, setDownloadStatus] = useState("")
+  const [enableDiscover, setEnableDiscover] = useState<boolean>(
+    typeof window !== "undefined" && localStorage.getItem("enableDiscover") === "true"
+  )
+  const [discoverEnabled, setDiscoverEnabled] = useState(
+    typeof window !== "undefined" && localStorage.getItem("discover") === "true"
+  )
 
   // Provider dictionary
   const providers = [
@@ -160,6 +166,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       if (savedBioApiKey !== null) {
         setBioApiKey(savedBioApiKey)
       }
+
+      const savedEnableDiscover = localStorage.getItem("enableDiscover")
+      if (savedEnableDiscover !== null) {
+        setEnableDiscover(savedEnableDiscover === "true")
+      }
     } catch (e) {
       console.error("Error loading settings:", e)
     }
@@ -191,6 +202,14 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       localStorage.setItem("bioapi", bioApiKey)
     } catch (e) {
       console.error("Error saving Browserless.io API key:", e)
+    }
+  }
+
+  const handleToggleDiscover = (checked: boolean) => {
+    setDiscoverEnabled(checked)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("discover", checked ? "true" : "false")
+      window.dispatchEvent(new Event("storage")) // trigger update in other tabs/components
     }
   }
 
@@ -310,6 +329,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
             <TabsContent value="settings" className="space-y-4">
               <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg mb-4 text-blue-300">
+                  <Label className="text-white text-base font-medium">Enable Discover</Label>
+                  <Switch checked={discoverEnabled} onCheckedChange={handleToggleDiscover} />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="tmdb-api-key" className="text-white">
                     TMDB API Key

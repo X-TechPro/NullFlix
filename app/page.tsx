@@ -16,6 +16,7 @@ import TVEpisodeSelector from "@/components/tv-episode-selector"
 import GlowingSearchBar from "@/components/glowing-search-bar"
 import { searchMedia, type Media } from "@/services/movie-service"
 import TVDetailsPopup from "@/components/tv-details-popup"
+import TrendingMoviesRow from "@/components/trending-movies-row"
 
 // Add Telegram SVG icon component
 const Telegram = (props: React.SVGProps<SVGSVGElement>) => (
@@ -49,6 +50,7 @@ export default function Home() {
   const [selectedMediaForDetails, setSelectedMediaForDetails] = useState<string | null>(null)
   const [showTVDetails, setShowTVDetails] = useState(false)
   const [selectedTVShowForDetails, setSelectedTVShowForDetails] = useState<string | null>(null)
+  const [discoverEnabled, setDiscoverEnabled] = useState(false)
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -70,6 +72,15 @@ export default function Home() {
       console.error("Error saving bookmarks:", e)
     }
   }, [bookmarks])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setDiscoverEnabled(localStorage.getItem("discover") === "true")
+      window.addEventListener("storage", () => {
+        setDiscoverEnabled(localStorage.getItem("discover") === "true")
+      })
+    }
+  }, [])
 
   const handleSearch = useCallback(
     async (e: React.FormEvent) => {
@@ -141,9 +152,11 @@ export default function Home() {
   }
 
   // Update the isBookmarked function to check all possible IDs
-  const isBookmarked = (mediaId: string, tmdbId?: string) => {
+  const isBookmarked = (mediaId: string, tmdbId?: number) => {
     return bookmarks.some(
-      (item) => item.id === mediaId || item.tmdbID === mediaId || (tmdbId && item.tmdbID === tmdbId),
+      (item) =>
+        item.id === mediaId ||
+        (typeof tmdbId !== "undefined" && item.tmdb === String(tmdbId))
     )
   }
 
@@ -196,10 +209,15 @@ export default function Home() {
     setSelectedTVShow(tmdbId)
   }
 
+  // Add handler for trending movie click
+  const handleTrendingMovieClick = (movie: { id: number }) => {
+    setSelectedMediaForDetails(String(movie.id))
+    setShowMovieDetails(true)
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
       <BackgroundShapes />
-
       <div className="container relative z-10 px-4 mx-auto">
         <div className="flex items-center justify-between py-4 mt-4">
           <motion.div
@@ -351,6 +369,7 @@ export default function Home() {
                 <GlowingSearchBar value={query} onChange={setQuery} onSubmit={handleSearch} />
               </motion.div>
 
+              {/* Trending row below search bar, replacing Discover button if enabled */}
               <motion.p
                 className="mt-12 text-lg text-blue-300"
                 initial={{ opacity: 0 }}
@@ -359,68 +378,75 @@ export default function Home() {
               >
                 Welcome, find media to watch here!
               </motion.p>
+              {discoverEnabled && (
+                <div className="mt-10 w-full">
+                  <TrendingMoviesRow onMovieClick={handleTrendingMovieClick} />
+                </div>
+              )}
 
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-              >
-                <Button
-                  className="mt-6 bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 h-auto text-base rounded-full transition-colors duration-300"
-                  onClick={() => {
-                    // Pick a random keyword from a list
-                    const keywords = [
-                      "action",
-                      "comedy",
-                      "drama",
-                      "thriller",
-                      "romance",
-                      "sci-fi",
-                      "fantasy",
-                      "adventure",
-                      "animation",
-                      "mystery",
-                      "crime",
-                      "family",
-                      "horror",
-                      "documentary",
-                      "superhero",
-                      "history",
-                      "music",
-                      "sports",
-                      "war",
-                      "western",
-                      "biography",
-                      "kids",
-                      "teen",
-                      "classic",
-                      "holiday",
-                      "space",
-                      "future",
-                      "magic",
-                      "robot",
-                      "spy",
-                      "detective",
-                      "zombie",
-                      "vampire",
-                      "heist",
-                      "courtroom",
-                      "medical",
-                      "political",
-                      "nature",
-                      "travel",
-                      "cooking",
-                      "anime"
-                    ]
-                    const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)]
-                    setQuery(randomKeyword)
-                    const event = { preventDefault: () => {} } as React.FormEvent
-                    handleSearch(event)
-                  }}
+              {!discoverEnabled && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
                 >
-                  Discover
-                </Button>
-              </motion.div>
+                  <Button
+                    className="mt-6 bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 h-auto text-base rounded-full transition-colors duration-300"
+                    onClick={() => {
+                      // Pick a random keyword from a list
+                      const keywords = [
+                        "action",
+                        "comedy",
+                        "drama",
+                        "thriller",
+                        "romance",
+                        "sci-fi",
+                        "fantasy",
+                        "adventure",
+                        "animation",
+                        "mystery",
+                        "crime",
+                        "family",
+                        "horror",
+                        "documentary",
+                        "superhero",
+                        "history",
+                        "music",
+                        "sports",
+                        "war",
+                        "western",
+                        "biography",
+                        "kids",
+                        "teen",
+                        "classic",
+                        "holiday",
+                        "space",
+                        "future",
+                        "magic",
+                        "robot",
+                        "spy",
+                        "detective",
+                        "zombie",
+                        "vampire",
+                        "heist",
+                        "courtroom",
+                        "medical",
+                        "political",
+                        "nature",
+                        "travel",
+                        "cooking",
+                        "anime"
+                      ]
+                      const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)]
+                      setQuery(randomKeyword)
+                      const event = { preventDefault: () => {} } as React.FormEvent
+                      handleSearch(event)
+                    }}
+                  >
+                    Discover
+                  </Button>
+                </motion.div>
+              )}
             </motion.div>
           ) : (
             <BookmarksArea
@@ -483,7 +509,6 @@ export default function Home() {
         {showTVDetails && selectedTVShowForDetails ? (
           <TVDetailsPopup
             tmdbId={selectedTVShowForDetails}
-            imdbId={mediaResults.find(m => m.tmdb === selectedTVShowForDetails && m.type === "tv")?.tmdb || undefined}
             onClose={handleCloseTVDetails}
             onPlay={handlePlayTVFromDetails}
           />
@@ -498,7 +523,7 @@ interface MediaResultsProps {
   onMediaSelect: (media: Media) => void
   onNewSearch: () => void
   toggleBookmark: (media: Media) => void
-  isBookmarked: (id: string, tmdbId?: string) => boolean
+  isBookmarked: (id: string, tmdbId?: number | undefined) => boolean
 }
 
 function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBookmarked }: MediaResultsProps) {
@@ -535,7 +560,6 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
           New search
         </Button>
       </div>
-
       {media.length === 0 ? (
         <div className="p-8 text-center">
           <p className="text-blue-300">No results found. Try a different search term.</p>
@@ -554,7 +578,7 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                 {/* Bookmark button */}
                 <motion.button
                   className={`absolute top-2 right-2 z-10 p-2 rounded-full ${
-                    isBookmarked(item.id, item.tmdb)
+                    isBookmarked(item.id, item.tmdb ? Number(item.tmdb) : undefined)
                       ? "bg-sky-600 text-white"
                       : "bg-black/70 text-white/70 hover:bg-sky-900/80"
                   } transition-colors duration-300`}
@@ -565,7 +589,7 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                   whileHover={{ scale: 1.1, boxShadow: "0 0 8px rgba(14, 165, 233, 0.5)" }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Bookmark className="w-4 h-4" fill={isBookmarked(item.id, item.tmdb) ? "currentColor" : "none"} />
+                  <Bookmark className="w-4 h-4" fill={isBookmarked(item.id, item.tmdb ? Number(item.tmdb) : undefined) ? "currentColor" : "none"} />
                 </motion.button>
 
                 <div
@@ -615,7 +639,7 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                       </span>
                     )}
                     <span className="px-2 py-1 text-xs text-sky-400 bg-black/50 border border-sky-900/30 rounded-md">
-                      TMDB: {item.tmdb || item.tmdbID}
+                      TMDB: {item.tmdb}
                     </span>
                   </div>
 
