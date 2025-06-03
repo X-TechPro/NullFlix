@@ -25,7 +25,7 @@ export default function TrendingMoviesRow({ onMovieClick }: TrendingMoviesRowPro
         const apiKey = localStorage.getItem("tmdbApiKey")
         if (!apiKey) return
         const res = await fetch(
-          "https://api.themoviedb.org/3/trending/movie/week?language=en-US",
+          "https://api.themoviedb.org/3/trending/movie/day?language=en-US",
           {
             headers: {
               accept: "application/json",

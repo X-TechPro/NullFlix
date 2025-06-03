@@ -12,7 +12,7 @@ const Switch = React.forwardRef<
   <SwitchPrimitives.Root
     className={cn(
       // Use very dark blue note background for both checked and unchecked
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-blue-950 data-[state=unchecked]:bg-blue-950",
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-gray-800 transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-cyan-500/30 data-[state=checked]:to-blue-600/30 data-[state=checked]:shadow-inner data-[state=checked]:shadow-cyan-500/10 data-[state=unchecked]:bg-gray-800/40",
       className,
     )}
     {...props}

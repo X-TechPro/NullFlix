@@ -219,7 +219,9 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
       <BackgroundShapes />
       <div className="container relative z-10 px-4 mx-auto">
-        <div className="flex items-center justify-between py-4 mt-4">
+        <div
+          className={`flex items-center justify-between py-4 mt-4${discoverEnabled ? " mb-20" : ""}`}
+        >
           <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
