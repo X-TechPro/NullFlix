@@ -220,7 +220,7 @@ export default function Home() {
       <BackgroundShapes />
       <div className="container relative z-10 px-4 mx-auto">
         <div
-          className={`flex items-center justify-between py-4 mt-4${discoverEnabled ? " mb-20" : ""}`}
+          className={`flex items-center justify-between py-4 mt-4${discoverEnabled && !searchInitiated ? " mb-20" : ""}`}
         >
           <motion.div
             initial={{ y: -50, opacity: 0 }}
