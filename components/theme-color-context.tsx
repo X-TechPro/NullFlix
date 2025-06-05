@@ -38,7 +38,7 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-text-cyan-400": "#22d3ee", // cyan-400
     "--theme-text-cyan-500": "#06b6d4", // cyan-500
   },
-red: {
+  red: {
     "--theme-primary": "#f87171", // red-400
     "--theme-primary-dark": "#ef4444", // red-500
     "--theme-primary-darker": "#b91c1c", // red-700
@@ -158,7 +158,7 @@ red: {
     "--theme-text-cyan-400": "#818cf8", // indigo-400
     "--theme-text-cyan-500": "#6366f1", // indigo-500
   },
-yellow: {
+  yellow: {
     "--theme-primary": "#fde047",           // yellow-400
     "--theme-primary-dark": "#facc15",       // yellow-500
     "--theme-primary-darker": "#a16207",     // yellow-700
@@ -189,12 +189,12 @@ yellow: {
     "--theme-text-cyan-400": "#fbbf24",      // amber-400
     "--theme-text-cyan-500": "#f59e42",      // orange-500
   },
-black: {
+  black: {
     "--theme-primary": "#64748b",            // slate-400
-    "--theme-primary-dark": "#334155",       // slate-700
+    "--theme-primary-dark": "#21262E",       // slate-700
     "--theme-primary-darker": "#0f172a",     // slate-900
     "--theme-primary-light": "#cbd5e1",      // slate-300
-    "--theme-border": "#0f172a",             // slate-900
+    "--theme-border": "#1A294B",             // slate-900
     "--theme-hover": "#334155",              // slate-700
     "--theme-bg": "#000000",                 // true black
     "--theme-note-bg": "#0f172a",            // slate-900
