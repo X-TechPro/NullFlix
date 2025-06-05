@@ -234,7 +234,7 @@ export default function Home() {
               setQuery("")
             }}
           >
-            <Sparkles className="w-6 h-6 text-sky-400" />
+            <Sparkles className="w-6 h-6 text-[color:var(--theme-primary)]" />
             <h1 className="text-2xl font-bold text-white">NullFlix</h1>
           </motion.div>
 
@@ -249,7 +249,7 @@ export default function Home() {
               href="https://t.me/nullflix"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30 flex items-center justify-center"
+              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30 flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -260,7 +260,7 @@ export default function Home() {
               href="https://github.com/X-TechPro/NullFlix"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30 flex items-center justify-center"
+              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30 flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -271,7 +271,7 @@ export default function Home() {
                 setShowBookmarks(!showBookmarks)
                 setSearchInitiated(false)
               }}
-              className={`p-2 transition-colors rounded-full flex items-center justify-center ${showBookmarks ? "text-sky-400 bg-blue-800/50" : "text-blue-300 hover:text-white hover:bg-blue-800/30"}`}
+              className={`p-2 transition-colors rounded-full flex items-center justify-center ${showBookmarks ? "text-[color:var(--theme-primary)] bg-[color:var(--theme-primary-darker)]/50" : "text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30"}`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -279,7 +279,7 @@ export default function Home() {
             </motion.button>
             <motion.button
               onClick={() => setShowSettings(true)}
-              className="p-2 text-blue-300 transition-colors rounded-full hover:text-white hover:bg-blue-800/30 flex items-center justify-center"
+              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30 flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -297,7 +297,7 @@ export default function Home() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center min-h-[70vh]"
             >
-              <Loader2 className="w-12 h-12 text-sky-500 animate-spin" />
+              <Loader2 className="w-12 h-12 text-[color:var(--theme-primary-dark)] animate-spin" />
               <p className="mt-4 text-lg text-white">Loading media...</p>
             </motion.div>
           ) : error ? (
@@ -309,7 +309,7 @@ export default function Home() {
               className="flex flex-col items-center justify-center min-h-[70vh] text-center"
             >
               <p className="text-xl text-red-400">{error}</p>
-              <Button className="mt-6 bg-sky-600 hover:bg-sky-700 text-white" onClick={() => setError(null)}>
+              <Button className="mt-6 bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white" onClick={() => setError(null)}>
                 Retry
               </Button>
             </motion.div>
@@ -373,7 +373,7 @@ export default function Home() {
 
               {/* Trending row below search bar, replacing Discover button if enabled */}
               <motion.p
-                className="mt-12 text-lg text-blue-300"
+                className="mt-12 text-lg text-[color:var(--theme-primary-light)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
@@ -393,7 +393,7 @@ export default function Home() {
                   transition={{ delay: 0.8, duration: 0.6 }}
                 >
                   <Button
-                    className="mt-6 bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 h-auto text-base rounded-full transition-colors duration-300"
+                    className="mt-6 bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white px-6 py-2 h-auto text-base rounded-full transition-colors duration-300"
                     onClick={() => {
                       // Pick a random keyword from a list
                       const keywords = [
@@ -557,14 +557,14 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
     >
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-white">Search Results</h2>
-        <Button variant="ghost" className="text-blue-300 hover:text-white hover:bg-blue-800/30" onClick={onNewSearch}>
+        <Button variant="ghost" className="text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30" onClick={onNewSearch}>
           <Search className="w-4 h-4 mr-2" />
           New search
         </Button>
       </div>
       {media.length === 0 ? (
         <div className="p-8 text-center">
-          <p className="text-blue-300">No results found. Try a different search term.</p>
+          <p className="text-[color:var(--theme-primary-light)]">No results found. Try a different search term.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -576,13 +576,13 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
               transition={{ delay: index * 0.05 }}
               className="h-full"
             >
-              <div className="overflow-hidden bg-gray-800/80 border-gray-700/30 rounded-lg backdrop-blur-md hover:shadow-lg hover:shadow-sky-500/20 transition-all duration-300 group h-full flex flex-col relative">
+              <div className="overflow-hidden bg-gray-800/80 border-gray-700/30 rounded-lg backdrop-blur-md hover:shadow-lg hover:shadow-[color:var(--theme-primary-dark)]/20 transition-all duration-300 group h-full flex flex-col relative">
                 {/* Bookmark button */}
                 <motion.button
                   className={`absolute top-2 right-2 z-10 p-2 rounded-full ${
                     isBookmarked(item.id, item.tmdb ? Number(item.tmdb) : undefined)
-                      ? "bg-sky-600 text-white"
-                      : "bg-black/70 text-white/70 hover:bg-sky-900/80"
+                      ? "bg-[color:var(--theme-primary-dark)] text-white"
+                      : "bg-black/70 text-white/70 hover:bg-[color:var(--theme-primary-darker)]/80"
                   } transition-colors duration-300`}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -636,11 +636,11 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                   </div>
                   <div className="flex flex-wrap gap-2 mt-auto">
                     {item.year && (
-                      <span className="px-2 py-1 text-xs text-sky-400 bg-black/50 border border-sky-900/30 rounded-md">
+                      <span className="px-2 py-1 text-xs text-[color:var(--theme-primary-light)] bg-black/50 rounded-md">
                         {item.year}
                       </span>
                     )}
-                    <span className="px-2 py-1 text-xs text-sky-400 bg-black/50 border border-sky-900/30 rounded-md">
+                    <span className="px-2 py-1 text-xs text-[color:var(--theme-primary-light)] bg-black/50 rounded-md">
                       TMDB: {item.tmdb}
                     </span>
                   </div>
@@ -649,7 +649,7 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                   <div className="absolute top-2 left-2">
                     <span
                       className={`px-2 py-1 text-xs rounded-md ${
-                        item.type === "tv" ? "bg-sky-600/70 text-white" : "bg-blue-600/70 text-white"
+                        item.type === "tv" ? "bg-[color:var(--theme-primary-dark)]/70 text-white" : "bg-[color:var(--theme-primary)]/70 text-white"
                       }`}
                     >
                       {item.type === "tv" ? "TV Series" : "Movie"}

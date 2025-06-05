@@ -51,7 +51,7 @@ export default function TrendingMoviesRow({ onMovieClick }: TrendingMoviesRowPro
     <div className="w-full mb-8">
       <div className="mb-2">
         <h2 className="text-xl font-bold text-white text-left">Trending</h2>
-        <div className="h-1 w-20 bg-sky-500 rounded-full mt-1 mx-0" />
+        <div className="h-1 w-20 bg-[color:var(--theme-primary-dark)] rounded-full mt-1 mx-0" />
       </div>
       <div className="overflow-x-auto hide-scrollbar">
         <div className="flex gap-4">
@@ -64,7 +64,7 @@ export default function TrendingMoviesRow({ onMovieClick }: TrendingMoviesRowPro
               transition={{ duration: 0.3 }}
               onClick={() => onMovieClick && onMovieClick(movie)}
             >
-              <div className="aspect-[2/3] w-full overflow-hidden bg-gray-800 rounded-lg border border-gray-700/40 shadow-lg group-hover:shadow-sky-500/20 transition-all duration-300 relative">
+              <div className="aspect-[2/3] w-full overflow-hidden bg-gray-800 rounded-lg border border-gray-700/40 shadow-lg group-hover:shadow-[color:var(--theme-primary)]/20 transition-all duration-300 relative">
                 {movie.poster_path ? (
                   <img
                     src={getTMDBPoster(movie.poster_path)}
@@ -72,8 +72,8 @@ export default function TrendingMoviesRow({ onMovieClick }: TrendingMoviesRowPro
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="flex items-center justify-center w-full h-full bg-blue-900/40">
-                    <Film className="w-10 h-10 text-blue-300/50" />
+                  <div className="flex items-center justify-center w-full h-full bg-[color:var(--theme-primary-darker)]/40">
+                    <Film className="w-10 h-10 text-[color:var(--theme-primary-light)]/50" />
                   </div>
                 )}
               </div>
@@ -81,7 +81,7 @@ export default function TrendingMoviesRow({ onMovieClick }: TrendingMoviesRowPro
                 {movie.title}
               </div>
               {movie.release_date && (
-                <div className="text-[10px] text-sky-300 text-center">
+                <div className="text-[10px] text-[color:var(--theme-primary-light)] text-center">
                   {movie.release_date.slice(0, 4)}
                 </div>
               )}

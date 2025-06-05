@@ -30,7 +30,7 @@ export default function BookmarksArea({
     >
       <Button
         variant="ghost"
-        className="mb-6 text-blue-300 hover:text-white hover:bg-blue-800/30"
+        className="mb-6 text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30"
         onClick={onBack} // Use the onBack prop instead of reloading
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -43,7 +43,7 @@ export default function BookmarksArea({
         transition={{ delay: 0.2 }}
         className="flex items-center gap-2 mb-6"
       >
-        <Bookmark className="w-5 h-5 text-sky-400" />
+        <Bookmark className="w-5 h-5 text-[color:var(--theme-primary)]" />
         <h2 className="text-2xl font-bold text-white">Your Bookmarks</h2>
       </motion.div>
 
@@ -54,8 +54,8 @@ export default function BookmarksArea({
           transition={{ delay: 0.3 }}
           className="p-12 text-center"
         >
-          <p className="text-blue-300">You haven't bookmarked any media yet.</p>
-          <p className="mt-2 text-blue-300/70">
+          <p className="text-[color:var(--theme-primary-light)]">You haven't bookmarked any media yet.</p>
+          <p className="mt-2 text-[color:var(--theme-primary-light)]/70">
             Search for movies or TV shows and click the bookmark icon to save them here.
           </p>
         </motion.div>
@@ -68,7 +68,7 @@ export default function BookmarksArea({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="overflow-hidden bg-gray-800/80 border-gray-700/30 backdrop-blur-md hover:shadow-lg hover:shadow-sky-500/20 transition-all duration-300 group relative">
+              <Card className="overflow-hidden bg-gray-800/80 border-gray-700/30 backdrop-blur-md hover:shadow-lg transition-all duration-300 group relative" style={{ boxShadow: '0 4px 24px 0 var(--theme-primary-dark), 0 1.5px 6px 0 rgba(0,0,0,0.08)' }}>
                 <div
                   className="relative aspect-[2/3] w-full overflow-hidden cursor-pointer"
                   onClick={() => onMediaSelect(item)}
@@ -83,21 +83,21 @@ export default function BookmarksArea({
                       unoptimized
                     />
                   ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-blue-900/40 to-sky-900/40">
+                    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[color:var(--theme-primary-darker)]/40 to-[color:var(--theme-primary-dark)]/40">
                       {item.type === "tv" || item.mediaType === "tv" ? (
-                        <Tv className="w-16 h-16 text-blue-300/50" />
+                        <Tv className="w-16 h-16 text-[color:var(--theme-primary-light)]/50" />
                       ) : (
-                        <Film className="w-16 h-16 text-blue-300/50" />
+                        <Film className="w-16 h-16 text-[color:var(--theme-primary-light)]/50" />
                       )}
                     </div>
                   )}
                   <motion.button
-                    className="absolute top-2 right-2 p-2 rounded-full bg-sky-600 text-white transition-colors duration-300"
+                    className="absolute top-2 right-2 p-2 rounded-full bg-[color:var(--theme-primary)] text-white transition-colors duration-300"
                     onClick={(e) => {
                       e.stopPropagation()
                       toggleBookmark(item)
                     }}
-                    whileHover={{ scale: 1.1, boxShadow: "0 0 8px rgba(14, 165, 233, 0.5)" }}
+                    whileHover={{ scale: 1.1, boxShadow: `0 0 8px var(--theme-primary)` }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <Bookmark className="w-4 h-4" fill="currentColor" />
@@ -105,13 +105,13 @@ export default function BookmarksArea({
                 </div>
                 <CardContent className="p-4 cursor-pointer" onClick={() => onMediaSelect(item)}>
                   <h3 className="text-lg font-medium text-white line-clamp-1">{item.title || item.Title}</h3>
-                  <p className="text-sm text-blue-300">{item.year || item.Year}</p>
+                  <p className="text-sm text-[color:var(--theme-primary-light)]">{item.year || item.Year}</p>
                   <div className="flex items-center mt-2">
                     <span
                       className={`px-2 py-1 text-xs ${
                         item.type === "tv" || item.mediaType === "tv"
-                          ? "text-sky-400 bg-black/50 border border-sky-900/30"
-                          : "text-blue-400 bg-black/50 border border-blue-900/30"
+                          ? "text-[color:var(--theme-primary)] bg-black/50 border border-[color:var(--theme-primary-darker)]/30"
+                          : "text-[color:var(--theme-primary-light)] bg-black/50 border border-[color:var(--theme-primary-darker)]/30"
                       } rounded-md`}
                     >
                       {item.type === "tv" || item.mediaType === "tv" ? "TV Series" : item.Type || "movie"}

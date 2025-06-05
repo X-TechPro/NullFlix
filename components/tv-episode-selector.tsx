@@ -116,7 +116,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
       >
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
           <div className="flex items-center gap-2">
-            <Tv className="w-5 h-5 text-sky-400" />
+            <Tv className="w-5 h-5 text-[color:var(--theme-primary-light)]" />
             <h2 className="text-xl font-bold text-white truncate">
               {loading ? "Loading..." : tvShow?.title || "Select Episode"}
             </h2>
@@ -132,12 +132,12 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
         <div className="p-4">
           {loading || enumerating ? (
             <div className="flex flex-col items-center justify-center p-8">
-              <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <div className="w-8 h-8 border-4 border-[color:var(--theme-primary-dark)] border-t-transparent rounded-full animate-spin mb-4"></div>
               <p className="text-white text-center mb-2">{progressMessage}</p>
 
               {/* Progress bar */}
               <div className="w-full bg-gray-700 rounded-full h-2.5 mb-4">
-                <div className="bg-sky-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                <div className="bg-[color:var(--theme-primary-dark)] h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
               </div>
 
               <p className="text-gray-400 text-sm text-center">
@@ -151,7 +151,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
               <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
               <p className="text-red-400">{error}</p>
               <div className="flex justify-between mt-4">
-                <Button className="bg-sky-600 hover:bg-sky-700 text-white" onClick={handleReload}>
+                <Button className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white" onClick={handleReload}>
                   <RefreshCw size={16} className="mr-2" />
                   Try Again
                 </Button>
@@ -193,7 +193,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                       <Button
                         key={episode.episode_number}
                         onClick={() => onSelectEpisode(selectedSeason, episode.episode_number)}
-                        className="w-full max-w-full flex items-stretch gap-3 p-0 bg-gray-700 hover:bg-sky-600 text-white relative group text-left rounded-lg shadow-md overflow-hidden min-h-[80px]"
+                        className="w-full max-w-full flex items-stretch gap-3 p-0 bg-gray-700 hover:bg-[color:var(--theme-bg-sky-600)] text-white relative group text-left rounded-lg shadow-md overflow-hidden min-h-[80px]"
                         style={{ minHeight: '80px', whiteSpace: 'normal', wordBreak: 'break-word', height: 'auto' }}
                       >
                         <div className="flex items-center p-2 relative">
@@ -232,7 +232,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                 </div>
               )}
 
-              <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300">
+              <div className="mt-4 p-3 bg-[color:var(--theme-bg-blue-600)]/20 border border-[color:var(--theme-border)]/30 rounded-lg text-xs text-[color:var(--theme-text-blue-300)]">
                 <p>
                   Note: If an episode doesn't load, try another episode or season. Not all episodes may be available.
                 </p>
@@ -245,7 +245,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
           <Button
             onClick={handleReload}
             disabled={loading || enumerating}
-            className="bg-sky-600 hover:bg-sky-700 text-white"
+            className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white"
           >
             <RefreshCw size={16} className="mr-2" />
             Reload Links

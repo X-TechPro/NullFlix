@@ -59,45 +59,70 @@ export default function BackgroundShapes() {
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {shapes.map((shape, index) => (
-        <motion.div
-          key={`shape-${index}`}
-          className={`absolute ${shape.size} ${shape.position} rounded-full ${shape.type === "square" ? "rounded-lg" : ""} ${shape.type === "triangle" ? "triangle" : ""} ${shape.color} backdrop-blur-xl`}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{
-            opacity: [0.5, 1, 0.5],
-            scale: [1, 1.1, 1],
-            rotate: [0, shape.type === "square" ? 10 : 0, 0],
-          }}
-          transition={{
-            duration: 8,
-            delay: shape.delay,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
-          style={
-            shape.type === "triangle"
-              ? {
-                  width: 0,
-                  height: 0,
-                  backgroundColor: "transparent",
-                  borderLeft: "25px solid transparent",
-                  borderRight: "25px solid transparent",
-                  borderBottom: "50px solid rgba(34, 211, 238, 0.2)",
-                }
-              : {}
+      {shapes.map((shape, index) => {
+        // Map color classes to theme variables
+        let style = {}
+        let colorClass = shape.color
+        let opacity = 0.12 // Make all shapes dimmer
+        if (colorClass.startsWith("bg-blue-")) {
+          const match = colorClass.match(/bg-blue-(\d{3})/)
+          if (match) {
+            style = { backgroundColor: `var(--theme-bg-blue-${match[1]})`, opacity }
           }
-        />
-      ))}
+        } else if (colorClass.startsWith("bg-cyan-")) {
+          const match = colorClass.match(/bg-cyan-(\d{3})/)
+          if (match) {
+            style = { backgroundColor: `var(--theme-bg-cyan-${match[1]})`, opacity }
+          }
+        } else if (colorClass.startsWith("bg-sky-")) {
+          const match = colorClass.match(/bg-sky-(\d{3})/)
+          if (match) {
+            style = { backgroundColor: `var(--theme-bg-sky-${match[1]})`, opacity }
+          }
+        } else if (colorClass.startsWith("border-t-cyan-")) {
+          const match = colorClass.match(/border-t-cyan-(\d{3})/)
+          if (match) {
+            style = {
+              width: 0,
+              height: 0,
+              backgroundColor: "transparent",
+              borderLeft: "25px solid transparent",
+              borderRight: "25px solid transparent",
+              borderBottom: `50px solid ${`var(--theme-bg-cyan-${match[1]})`}`,
+              opacity,
+            }
+          }
+        }
+        return (
+          <motion.div
+            key={`shape-${index}`}
+            className={`absolute ${shape.size} ${shape.position} rounded-full ${shape.type === "square" ? "rounded-lg" : ""} ${shape.type === "triangle" ? "triangle" : ""} backdrop-blur-xl`}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{
+              opacity: [opacity, opacity * 1.5, opacity],
+              scale: [1, 1.1, 1],
+              rotate: [0, shape.type === "square" ? 10 : 0, 0],
+            }}
+            transition={{
+              duration: 8,
+              delay: shape.delay,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+            }}
+            style={style}
+          />
+        )
+      })}
 
       {movieIcons.map((icon, index) => (
         <motion.svg
           key={`icon-${index}`}
-          className={`absolute ${icon.position} w-12 h-12 text-cyan-500/30`}
+          className={`absolute ${icon.position} w-12 h-12`}
+          style={{ color: 'var(--theme-bg-cyan-900)', opacity: 0.38 }}
           viewBox="0 0 24 24"
           initial={{ opacity: 0, rotate: -10 }}
           animate={{
-            opacity: [0.2, 0.5, 0.2],
+            opacity: [0.28, 0.42, 0.28],
             rotate: [0, 10, 0],
             scale: [1, 1.1, 1],
             y: [0, -10, 0],

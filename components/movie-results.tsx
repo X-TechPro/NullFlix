@@ -22,7 +22,7 @@ export default function MovieResults({ results, toggleBookmark, isBookmarked }: 
     >
       <Button
         variant="ghost"
-        className="mb-6 text-blue-300 hover:text-white hover:bg-blue-800/30"
+        className="mb-6 text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30"
         onClick={() => window.location.reload()}
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -50,14 +50,14 @@ export default function MovieResults({ results, toggleBookmark, isBookmarked }: 
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                   />
                 ) : (
-                  <div className="flex items-center justify-center w-full h-full bg-blue-800/50">
-                    <Film className="w-16 h-16 text-blue-300/50" />
+                  <div className="flex items-center justify-center w-full h-full bg-[color:var(--theme-primary-darker)]/50">
+                    <Film className="w-16 h-16 text-[color:var(--theme-primary-light)]/50" />
                   </div>
                 )}
                 <motion.button
-                  className={`absolute top-2 right-2 p-2 rounded-full ${isBookmarked(movie.id) ? "bg-cyan-600 text-white" : "bg-black/70 text-white/70 hover:bg-cyan-900/80"} transition-colors duration-300`}
+                  className={`absolute top-2 right-2 p-2 rounded-full ${isBookmarked(movie.id) ? "bg-[color:var(--theme-primary)] text-white" : "bg-black/70 text-white/70 hover:bg-[color:var(--theme-primary-dark)]/80"} transition-colors duration-300`}
                   onClick={() => toggleBookmark(movie)}
-                  whileHover={{ scale: 1.1, boxShadow: "0 0 8px rgba(6, 182, 212, 0.5)" }}
+                  whileHover={{ scale: 1.1, boxShadow: `0 0 8px var(--theme-primary)` }}
                   whileTap={{ scale: 0.9 }}
                 >
                   <Bookmark className="w-4 h-4" fill={isBookmarked(movie.id) ? "currentColor" : "none"} />
@@ -65,9 +65,9 @@ export default function MovieResults({ results, toggleBookmark, isBookmarked }: 
               </div>
               <CardContent className="p-4">
                 <h3 className="text-lg font-medium text-white line-clamp-1">{movie.title}</h3>
-                <p className="text-sm text-blue-300">{movie.year}</p>
+                <p className="text-sm text-[color:var(--theme-primary-light)]">{movie.year}</p>
                 <div className="flex items-center mt-2">
-                  <span className="px-2 py-1 text-xs text-cyan-400 bg-black/50 border border-cyan-900/30 rounded-md">
+                  <span className="px-2 py-1 text-xs text-[color:var(--theme-primary)] bg-black/50 border border-[color:var(--theme-primary-darker)]/30 rounded-md">
                     {movie.type || "movie"}
                   </span>
                 </div>
@@ -79,7 +79,7 @@ export default function MovieResults({ results, toggleBookmark, isBookmarked }: 
 
       {results.length === 0 && (
         <div className="p-8 text-center">
-          <p className="text-blue-300">No results found. Try a different search term.</p>
+          <p className="text-[color:var(--theme-primary-light)]">No results found. Try a different search term.</p>
         </div>
       )}
     </motion.div>

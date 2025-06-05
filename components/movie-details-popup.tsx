@@ -59,13 +59,13 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
 
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[color:var(--theme-primary-dark)]"></div>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-96 text-center p-4">
             <Film className="w-16 h-16 text-red-500 mb-4" />
             <p className="text-xl text-red-400 mb-4">{error}</p>
-            <Button onClick={onPlay} className="bg-sky-600 hover:bg-sky-700">
+            <Button onClick={onPlay} className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)]">
               Play Anyway
             </Button>
           </div>
@@ -95,14 +95,14 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
               <div className="flex flex-wrap gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-300">
                 {movieDetails.release_date && movieDetails.release_date !== "N/A" && (
                   <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1 text-sky-400" />
+                    <Calendar className="w-4 h-4 mr-1 text-[color:var(--theme-primary-light)]" />
                     <span>{new Date(movieDetails.release_date).toLocaleDateString()}</span>
                   </div>
                 )}
 
                 {movieDetails.runtime && movieDetails.runtime !== "N/A" && (
                   <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1 text-sky-400" />
+                    <Clock className="w-4 h-4 mr-1 text-[color:var(--theme-primary-light)]" />
                     <span>{movieDetails.runtime} minutes</span>
                   </div>
                 )}
@@ -121,7 +121,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
                     {movieDetails.genres.map((genre: any) => (
                       <span
                         key={genre.id}
-                        className="px-2 py-1 text-xs bg-gray-800 text-sky-400 rounded-md border border-gray-700"
+                        className="px-2 py-1 text-xs bg-gray-800 text-[color:var(--theme-primary-light)] rounded-md border border-gray-700"
                       >
                         {genre.name}
                       </span>
@@ -140,7 +140,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
                   }
                   onPlay()
                 }}
-                className="bg-sky-600 hover:bg-sky-700 text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
+                className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
                 Play Movie
@@ -154,7 +154,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
                 localStorage.setItem("snayerTitle", movieDetails.title)
               }
               onPlay()
-            }} className="bg-sky-600 hover:bg-sky-700">
+            }} className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)]">
               Play Movie
             </Button>
           </div>

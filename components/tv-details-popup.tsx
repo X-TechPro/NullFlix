@@ -79,7 +79,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
 
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[color:var(--theme-primary-dark)]"></div>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-96 text-center p-4">
@@ -115,12 +115,12 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
               <div className="flex flex-wrap gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-300">
                 {tvShow.year && (
                   <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1 text-sky-400" />
+                    <Calendar className="w-4 h-4 mr-1 text-[color:var(--theme-primary-light)]" />
                     <span>{tvShow.year}</span>
                   </div>
                 )}
                 <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1 text-sky-400" />
+                  <Clock className="w-4 h-4 mr-1 text-[color:var(--theme-primary-light)]" />
                   <span>{tvShow.Runtime}</span>
                 </div>
               </div>
@@ -131,7 +131,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                     {tvShow.genre.split(", ").map((genre: string) => (
                       <span
                         key={genre}
-                        className="px-2 py-1 text-xs bg-gray-800 text-sky-400 rounded-md border border-gray-700"
+                        className="px-2 py-1 text-xs bg-gray-800 text-[color:var(--theme-primary-light)] rounded-md border border-gray-700"
                       >
                         {genre}
                       </span>
@@ -144,7 +144,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
 
               <Button
                 onClick={() => onPlay(tmdbId)}
-                className="bg-sky-600 hover:bg-sky-700 text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
+                className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
                 Play

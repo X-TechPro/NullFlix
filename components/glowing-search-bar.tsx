@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, type RefObject } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,7 @@ export default function GlowingSearchBar({
   placeholder = "What do you want to watch?",
   className = "",
 }: GlowingSearchBarProps) {
+  // Fix typing for searchBarRef and useMouseGlow
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
@@ -34,7 +35,7 @@ export default function GlowingSearchBar({
   }, [])
 
   // Use our custom hook for the glow effect - only for the input part
-  const { isHovering, glowPosition, radius, intensity, color, falloff } = useMouseGlow(searchBarRef, {
+  const { isHovering, glowPosition, radius, intensity, color, falloff } = useMouseGlow(searchBarRef as unknown as React.RefObject<HTMLElement>, {
     radius: 200,
     intensity: 0.15, // Further reduced intensity
     color: "255, 255, 255",
@@ -52,7 +53,7 @@ export default function GlowingSearchBar({
   const handleMouseLeave = () => setIsHoveringContainer(false)
 
   // Border style when hovering
-  const hoverBorder = isHoveringContainer ? "border-gray-500" : "border-sky-900/30"
+  const hoverBorder = isHoveringContainer ? "border-gray-500" : "border-[color:var(--theme-border)]/30"
 
   return (
     <form onSubmit={onSubmit} className={`relative w-full ${className}`}>
@@ -74,7 +75,7 @@ export default function GlowingSearchBar({
             ref={inputRef}
             type="text"
             placeholder={placeholder}
-            className={`w-full py-6 pl-12 pr-4 text-lg bg-white/10 backdrop-blur-md text-white placeholder:text-blue-300/70 focus-visible:ring-sky-500 rounded-l-full transition-all duration-300 relative z-10 ${hoverBorder}`}
+            className={`w-full py-6 pl-12 pr-4 text-lg bg-white/10 backdrop-blur-md text-white placeholder:text-[color:var(--theme-primary-light)]/70 focus-visible:ring-[color:var(--theme-primary-dark)] rounded-l-full transition-all duration-300 relative z-10 ${hoverBorder} border-0`}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             style={{
@@ -82,19 +83,19 @@ export default function GlowingSearchBar({
               boxShadow: enhancedShadow,
               borderRight: isHoveringContainer
                 ? "1px solid rgba(107, 114, 128, 0.5)"
-                : "1px solid rgba(8, 47, 73, 0.3)",
+                : "1px solid var(--theme-border)",
             }}
           />
 
           <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20">
-            <Search className="h-5 w-5 text-blue-300" />
+            <Search className="h-5 w-5 text-[color:var(--theme-primary-light)]" />
           </div>
         </div>
 
         {/* Button - separate from the glow effect */}
         <Button
           type="submit"
-          className={`rounded-r-full bg-sky-600 hover:bg-sky-700 text-white px-6 h-auto relative z-10 transition-all duration-300 ${isHoveringContainer ? "border-gray-500" : "border-sky-900/30"}`}
+          className={`rounded-r-full bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-primary-darker)] text-white px-6 h-auto relative z-10 transition-all duration-300 ${isHoveringContainer ? "border-gray-500" : "border-[color:var(--theme-border)]/30"}`}
           style={{
             boxShadow: baseShadow, // Always use base shadow for button
             borderLeft: "none", // Remove left border to avoid double border with input

@@ -19,6 +19,9 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
+import { ThemeProvider as ThemeColorProvider, useThemeColor, THEME_COLORS_META } from "@/components/theme-color-context"
+import type { ThemeColor } from "@/components/theme-color-context"
 
 interface SettingsDialogProps {
   isOpen: boolean
@@ -26,6 +29,7 @@ interface SettingsDialogProps {
 }
 
 export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
+  const { theme, setTheme } = useThemeColor()
   const [activeTab, setActiveTab] = useState("providers")
   const [tmdbApiKey, setTmdbApiKey] = useState("")
   const [bioApiKey, setBioApiKey] = useState("")
@@ -171,6 +175,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       if (savedEnableDiscover !== null) {
         setEnableDiscover(savedEnableDiscover === "true")
       }
+
+      const savedTheme = localStorage.getItem("theme")
+      if (savedTheme) {
+        setTheme(savedTheme as ThemeColor)
+      }
     } catch (e) {
       console.error("Error loading settings:", e)
     }
@@ -225,7 +234,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       >
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
           <div className="flex items-center gap-2">
-            <Settings2 className="w-5 h-5 text-sky-400" />
+            <Settings2 className="w-5 h-5 text-[color:var(--theme-primary-light)]" />
             <h2 className="text-xl font-bold text-white">Settings</h2>
           </div>
           <button
@@ -243,13 +252,13 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
             onValueChange={setActiveTab}
           >
             <TabsList className="w-full mb-4 bg-gray-700">
-              <TabsTrigger value="providers" className="flex-1 data-[state=active]:bg-sky-600">
+              <TabsTrigger value="providers" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary-dark)]">
                 Providers
               </TabsTrigger>
-              <TabsTrigger value="settings" className="flex-1 data-[state=active]:bg-sky-600">
+              <TabsTrigger value="settings" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary-dark)]">
                 Settings
               </TabsTrigger>
-              <TabsTrigger value="about" className="flex-1 data-[state=active]:bg-sky-600">
+              <TabsTrigger value="about" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary-dark)]">
                 About
               </TabsTrigger>
             </TabsList>
@@ -270,12 +279,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         }}
                         className={`w-full text-left rounded-lg border p-3 transition-colors ${
                           selectedProvider === provider.id
-                            ? "border-sky-500 bg-sky-950/40"
-                            : "border-gray-700 bg-gray-800 hover:border-sky-700"
+                            ? "border-[color:var(--theme-primary-dark)] bg-[color:var(--theme-bg)]/40"
+                            : "border-gray-700 bg-gray-800 hover:border-[color:var(--theme-primary-darker)]"
                         }`}
                       >
                         <div className="font-semibold text-white">{provider.name}</div>
-                        <div className="text-xs text-sky-400 truncate">
+                        <div className="text-xs text-[color:var(--theme-primary)] truncate">
                           <a href={provider.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
                             {provider.url}
                           </a>
@@ -301,8 +310,8 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                               onClick={() => setSelectedServer(server.id)}
                               className={`px-3 py-1 rounded-md border text-sm transition-colors ${
                                 selectedServer === server.id
-                                  ? "border-sky-500 bg-sky-900 text-white"
-                                  : "border-gray-700 bg-gray-800 text-gray-300 hover:border-sky-700"
+                                  ? "border-[color:var(--theme-primary-dark)] bg-[color:var(--theme-primary-darker)] text-white"
+                                  : "border-gray-700 bg-gray-800 text-gray-300 hover:border-[color:var(--theme-primary-darker)]"
                               }`}
                             >
                               {server.name}
@@ -315,7 +324,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   return null
                 })()}
 
-                <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300">
+                <div className="p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-border)] rounded-lg text-xs text-[color:var(--theme-primary-light)]">
                   <div className="flex gap-2">
                     <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <p>
@@ -329,9 +338,39 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
             <TabsContent value="settings" className="space-y-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg mb-4 text-blue-300">
+                <div className="flex items-center justify-between p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-border)] rounded-lg mb-4 text-[color:var(--theme-primary-light)]">
                   <Label className="text-white text-base font-medium">Enable Discover</Label>
                   <Switch checked={discoverEnabled} onCheckedChange={handleToggleDiscover} />
+                </div>
+
+                {/* Theme Selector */}
+                <div className="space-y-2">
+                  <Label className="text-white text-base font-medium">Theme Color</Label>
+                  <div className="flex gap-3 flex-wrap">
+                    {Object.entries(THEME_COLORS_META).map(([key, value]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        aria-label={key}
+                        onClick={() => setTheme(key as ThemeColor)}
+                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${
+                          theme === key
+                            ? 'border-[color:var(--theme-primary-dark)] scale-110 shadow-lg'
+                            : ''
+                        }`}
+                        style={{
+                          background: value['--theme-primary'],
+                          borderColor: value['--theme-primary-light'],
+                          opacity: theme === key ? 1 : 0.8,
+                          transform: theme === key ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        {theme === key && (
+                          <Check className="text-white" size={20} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -348,13 +387,13 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     />
                     <Button
                       type="button"
-                      className="bg-sky-600 hover:bg-sky-700 text-white"
+                      className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-button-hover)] text-white"
                       onClick={handleSaveTmdb}
                     >
                       Save
                     </Button>
                   </div>
-                  <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300 mb-2">
+                  <div className="p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-border)] rounded-lg text-xs text-[color:var(--theme-text-blue-300)] mt-2">
                     <div className="flex gap-2">
                       <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <p>
@@ -368,12 +407,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                       href="https://www.themoviedb.org/settings/api"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sky-400 hover:underline"
+                      className="text-[color:var(--theme-primary-light)] hover:underline"
                     >
                       themoviedb.org
                     </a>
                   </p>
-                  <hr className="my-2 border-gray-700" />
+                  <hr className="my-2 border-[color:var(--theme-border)]" />
                   <div className="space-y-2">
                     <Label htmlFor="browserless-api-key" className="text-white">
                       Browserless.io API Key
@@ -388,7 +427,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                       />
                       <Button
                         type="button"
-                        className="bg-sky-600 hover:bg-sky-700 text-white"
+                        className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-button-hover)] text-white"
                         onClick={handleSaveBioApi}
                       >
                         Save
@@ -400,12 +439,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         href="https://www.browserless.io/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sky-400 hover:underline"
+                        className="text-[color:var(--theme-primary-light)] hover:underline"
                       >
                         browserless.io
                       </a>
                     </p>
-                    <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-lg text-xs text-blue-300 mt-2">
+                    <div className="p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-border)] rounded-lg text-xs text-[color:var(--theme-text-blue-300)] mt-2">
                       <div className="flex gap-2">
                         <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                         <p>
@@ -414,7 +453,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         </p>
                       </div>
                     </div>
-                    <hr className="my-2 border-gray-700" />
+                    <hr className="my-2 border-[color:var(--theme-border)]" />
                     {/* Obliterate Everything Button */}
                     <div className="mt-4">
                       <Button
@@ -458,9 +497,9 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   NullFlix is a free and open source movie streaming platform designed for simplicity and accessibility.<br />
                   Built with Next.js and Tailwind CSS.<br />
                   <br />
-                  <b>NullFlix's Repo:</b> <a href="https://github.com/X-TechPro/NullFlix" className="text-sky-400 hover:underline">https://github.com/X-TechPro/NullFlix</a><br />
-                  <b>Snayer's Repo:</b> <a href="https://github.com/X-TechPro/snayer" className="text-sky-400 hover:underline">https://github.com/X-TechPro/snayer</a><br />
-                  <b>Telegram:</b> <a href="https://t.me/nullflix" className="text-sky-400 hover:underline">https://t.me/nullflix</a>
+                  <b>NullFlix's Repo:</b> <a href="https://github.com/X-TechPro/NullFlix" className="text-[color:var(--theme-primary-light)] hover:underline">https://github.com/X-TechPro/NullFlix</a><br />
+                  <b>Snayer's Repo:</b> <a href="https://github.com/X-TechPro/snayer" className="text-[color:var(--theme-primary-light)] hover:underline">https://github.com/X-TechPro/snayer</a><br />
+                  <b>Telegram:</b> <a href="https://t.me/nullflix" className="text-[color:var(--theme-primary-light)] hover:underline">https://t.me/nullflix</a>
                 </p>
                 <p className="text-xs text-gray-500 mt-2">
                   &copy; {new Date().getFullYear()} NullFlix. This project is for educational/demo purposes only.
@@ -471,7 +510,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         </div>
 
         <div className="sticky bottom-0 flex justify-end p-4 bg-gray-800 border-t border-gray-700">
-          <Button onClick={onClose} className="bg-sky-600 hover:bg-sky-700 text-white">
+          <Button onClick={onClose} className="bg-[color:var(--theme-primary-dark)] hover:bg-[color:var(--theme-button-hover)] text-white">
             <Check size={16} className="mr-2" />
             Close
           </Button>
