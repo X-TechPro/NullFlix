@@ -649,7 +649,7 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
                   <div className="absolute top-2 left-2">
                     <span
                       className={`px-2 py-1 text-xs rounded-md ${
-                        item.type === "tv" ? "bg-[color:var(--theme-primary-dark)]/70 text-white" : "bg-[color:var(--theme-primary)]/70 text-white"
+                        item.type === "tv" ? "bg-[color:var(--theme-primary-dark)] text-white" : "bg-[color:var(--theme-primary)] text-white"
                       }`}
                     >
                       {item.type === "tv" ? "TV Series" : "Movie"}

@@ -251,7 +251,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="w-full mb-4 bg-gray-700">
+            <TabsList className="text-white w-full mb-4 bg-gray-700">
               <TabsTrigger value="providers" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary-dark)]">
                 Providers
               </TabsTrigger>
@@ -458,7 +458,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     <div className="mt-4">
                       <Button
                         type="button"
-                        className="w-full bg-red-700 hover:bg-red-800 text-white flex items-center justify-center gap-2 border border-red-900 shadow-lg"
+                        className="w-full bg-red-700 hover:bg-red-800 text-red-200 flex items-center justify-center gap-2 border border-red-900 shadow-lg"
                         onClick={() => {
                           localStorage.clear()
                           window.location.reload()
