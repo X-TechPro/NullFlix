@@ -30,7 +30,7 @@ export default function BookmarksArea({
     >
       <Button
         variant="ghost"
-        className="mb-6 text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30"
+        className="mb-6 text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]"
         onClick={onBack} // Use the onBack prop instead of reloading
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -55,7 +55,7 @@ export default function BookmarksArea({
           className="p-12 text-center"
         >
           <p className="text-[color:var(--theme-primary-light)]">You haven't bookmarked any media yet.</p>
-          <p className="mt-2 text-[color:var(--theme-primary-light)]/70">
+          <p className="mt-2 text-[color:var(--theme-primary-light)]">
             Search for movies or TV shows and click the bookmark icon to save them here.
           </p>
         </motion.div>
@@ -68,7 +68,7 @@ export default function BookmarksArea({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="overflow-hidden bg-gray-800/80 border-gray-700/30 backdrop-blur-md hover:shadow-lg transition-all duration-300 group relative" style={{ boxShadow: '0 4px 24px 0 var(--theme-primary-dark), 0 1.5px 6px 0 rgba(0,0,0,0.08)' }}>
+              <Card className="overflow-hidden bg-gray-800/80 border-gray-700/30 backdrop-blur-md hover:shadow-lg transition-all duration-300 group relative" style={{ boxShadow: '0 2px 24px 0 var(--theme-bg-blue-400), 0 1.5px 6px 0 rgba(0,0,0,0.08)' }}>
                 <div
                   className="relative aspect-[2/3] w-full overflow-hidden cursor-pointer"
                   onClick={() => onMediaSelect(item)}
@@ -83,11 +83,11 @@ export default function BookmarksArea({
                       unoptimized
                     />
                   ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[color:var(--theme-primary-darker)]/40 to-[color:var(--theme-primary-dark)]/40">
+                    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[color:var(--theme-primary-darker)] to-[color:var(--theme-primary-dark)]">
                       {item.type === "tv" || item.mediaType === "tv" ? (
-                        <Tv className="w-16 h-16 text-[color:var(--theme-primary-light)]/50" />
+                        <Tv className="w-16 h-16 text-[color:var(--theme-primary-light)]" />
                       ) : (
-                        <Film className="w-16 h-16 text-[color:var(--theme-primary-light)]/50" />
+                        <Film className="w-16 h-16 text-[color:var(--theme-primary-light)]" />
                       )}
                     </div>
                   )}
@@ -110,8 +110,8 @@ export default function BookmarksArea({
                     <span
                       className={`px-2 py-1 text-xs ${
                         item.type === "tv" || item.mediaType === "tv"
-                          ? "text-[color:var(--theme-primary)] bg-black/50 border border-[color:var(--theme-primary-darker)]/30"
-                          : "text-[color:var(--theme-primary-light)] bg-black/50 border border-[color:var(--theme-primary-darker)]/30"
+                          ? "text-[color:var(--theme-primary)] bg-black/50 border border-[color:var(--theme-border)]"
+                          : "text-[color:var(--theme-primary-light)] bg-black/50 border border-[color:var(--theme-border)]"
                       } rounded-md`}
                     >
                       {item.type === "tv" || item.mediaType === "tv" ? "TV Series" : item.Type || "movie"}
@@ -119,7 +119,7 @@ export default function BookmarksArea({
 
                     {/* Show TMDB ID information */}
                     {(item.tmdbID || item.tmdb || item.tmdbId) && (
-                      <span className="px-2 py-1 text-xs text-gray-400 bg-black/30 border border-gray-700/30 rounded-md ml-2">
+                      <span className="px-2 py-1 text-xs text-[color:var(--theme-primary)] bg-black/50 border border-[color:var(--theme-border)] rounded-md ml-2">
                         TMDB: {item.tmdbID || item.tmdb || item.tmdbId}
                       </span>
                     )}

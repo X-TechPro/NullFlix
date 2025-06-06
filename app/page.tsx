@@ -249,7 +249,7 @@ export default function Home() {
               href="https://t.me/nullflix"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30 flex items-center justify-center"
+              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)] flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -260,7 +260,7 @@ export default function Home() {
               href="https://github.com/X-TechPro/NullFlix"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30 flex items-center justify-center"
+              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)] flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -271,7 +271,7 @@ export default function Home() {
                 setShowBookmarks(!showBookmarks)
                 setSearchInitiated(false)
               }}
-              className={`p-2 transition-colors rounded-full flex items-center justify-center ${showBookmarks ? "text-[color:var(--theme-primary)] bg-[color:var(--theme-primary-darker)]/50" : "text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30"}`}
+              className={`p-2 transition-colors rounded-full flex items-center justify-center ${showBookmarks ? "text-[color:var(--theme-primary)] bg-[color:var(--theme-primary-darker)]" : "text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]"}`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -279,7 +279,7 @@ export default function Home() {
             </motion.button>
             <motion.button
               onClick={() => setShowSettings(true)}
-              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30 flex items-center justify-center"
+              className="p-2 text-[color:var(--theme-primary-light)] transition-colors rounded-full hover:text-white hover:bg-[color:var(--theme-primary-darker)] flex items-center justify-center"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -557,7 +557,7 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
     >
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-white">Search Results</h2>
-        <Button variant="ghost" className="text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]/30" onClick={onNewSearch}>
+        <Button variant="ghost" className="text-[color:var(--theme-primary-light)] hover:text-white hover:bg-[color:var(--theme-primary-darker)]" onClick={onNewSearch}>
           <Search className="w-4 h-4 mr-2" />
           New search
         </Button>
@@ -576,13 +576,13 @@ function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark, isBoo
               transition={{ delay: index * 0.05 }}
               className="h-full"
             >
-              <div className="overflow-hidden bg-gray-800/80 border-gray-700/30 rounded-lg backdrop-blur-md hover:shadow-lg hover:shadow-[color:var(--theme-primary-dark)]/20 transition-all duration-300 group h-full flex flex-col relative">
+              <div className="overflow-hidden bg-gray-800/80 border-gray-700/30 rounded-lg backdrop-blur-md hover:shadow-lg hover:shadow-[color:var(--theme-primary-dark)] transition-all duration-300 group h-full flex flex-col relative">
                 {/* Bookmark button */}
                 <motion.button
                   className={`absolute top-2 right-2 z-10 p-2 rounded-full ${
                     isBookmarked(item.id, item.tmdb ? Number(item.tmdb) : undefined)
                       ? "bg-[color:var(--theme-primary-dark)] text-white"
-                      : "bg-black/70 text-white/70 hover:bg-[color:var(--theme-primary-darker)]/80"
+                      : "bg-black/70 text-white/70 hover:bg-[color:var(--theme-primary-darker)]"
                   } transition-colors duration-300`}
                   onClick={(e) => {
                     e.stopPropagation()
