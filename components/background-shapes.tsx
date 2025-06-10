@@ -4,22 +4,22 @@ import { motion } from "framer-motion"
 
 export default function BackgroundShapes() {
   const shapes = [
-    { type: "circle", size: "w-24 h-24", color: "bg-blue-500/20", position: "top-20 left-[10%]", delay: 0 },
-    { type: "square", size: "w-32 h-32", color: "bg-cyan-500/20", position: "top-40 right-[15%]", delay: 0.2 },
+    { type: "circle", size: "w-24 h-24", color: "bg-[color:var(--theme-shape1)]", position: "top-20 left-[10%]", delay: 0 },
+    { type: "square", size: "w-32 h-32", color: "bg-[color:var(--theme-shape2)]", position: "top-40 right-[15%]", delay: 0.2 },
     {
       type: "triangle",
       size: "w-20 h-20",
-      color: "border-t-cyan-400/20",
+      color: "border-t-[color:var(--theme-shape3)]",
       position: "bottom-40 left-[20%]",
       delay: 0.4,
     },
-    { type: "circle", size: "w-40 h-40", color: "bg-blue-500/20", position: "bottom-20 right-[25%]", delay: 0.6 },
-    { type: "square", size: "w-16 h-16", color: "bg-cyan-400/20", position: "top-[30%] left-[30%]", delay: 0.8 },
-    { type: "circle", size: "w-12 h-12", color: "bg-blue-400/20", position: "bottom-[35%] right-[5%]", delay: 1 },
+    { type: "circle", size: "w-40 h-40", color: "bg-[color:var(--theme-shape1)]", position: "bottom-20 right-[25%]", delay: 0.6 },
+    { type: "square", size: "w-16 h-16", color: "bg-[color:var(--theme-shape4)]", position: "top-[30%] left-[30%]", delay: 0.8 },
+    { type: "circle", size: "w-12 h-12", color: "bg-[color:var(--theme-shape4)]", position: "bottom-[35%] right-[5%]", delay: 1 },
     // Add more shapes for enhanced background
-    { type: "circle", size: "w-20 h-20", color: "bg-blue-600/20", position: "top-[60%] left-[5%]", delay: 1.2 },
-    { type: "square", size: "w-24 h-24", color: "bg-cyan-600/20", position: "bottom-[10%] left-[40%]", delay: 1.4 },
-    { type: "circle", size: "w-36 h-36", color: "bg-blue-600/20", position: "top-[10%] right-[30%]", delay: 1.6 },
+    { type: "circle", size: "w-20 h-20", color: "bg-[color:var(--theme-shape5)]", position: "top-[60%] left-[5%]", delay: 1.2 },
+    { type: "square", size: "w-24 h-24", color: "bg-[color:var(--theme-shape6)]", position: "bottom-[10%] left-[40%]", delay: 1.4 },
+    { type: "circle", size: "w-36 h-36", color: "bg-[color:var(--theme-shape5)]", position: "top-[10%] right-[30%]", delay: 1.6 },
   ]
 
   // Movie-related icons as SVG paths

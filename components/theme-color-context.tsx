@@ -22,6 +22,16 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-button-hover": "#0369a1", // sky-700
     "--theme-shadow": "#0E95E9B3", // between blue and cyan
 
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#3b82f633", // blue-500/20
+    "--theme-shape2": "#06b6d433", // cyan-500/20
+    "--theme-shape3": "#22d3ee33", // cyan-400/20
+    "--theme-shape4": "#60a5fa33", // blue-400/20
+    "--theme-shape5": "#2563eb33", // blue-600/20
+    "--theme-shape6": "#0ea5e933", // cyan-600/20
+    "--theme-shape7": "#38bdf833", // blue-400/20 (lighter)
+    // Add more as needed
+
     // Provider container
     "--theme-container-bg-on": "#082f4966", // bg-sky-950/40
     "--theme-container-border-on": "#0ea5e9", // border-sky-500
@@ -49,6 +59,15 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-hover": "#b91c1c4d", // red-700/30
     "--theme-button-hover": "#b91c1c", // red-700
     "--theme-shadow": "#F87171B3", // red-400/70
+
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#f8717133", // red-400/20
+    "--theme-shape2": "#fb718533", // rose-400/20
+    "--theme-shape3": "#fca5a533", // red-300/20
+    "--theme-shape4": "#fca5a533", // red-300/20 (lighter)
+    "--theme-shape5": "#be123c33", // rose-700/20
+    "--theme-shape6": "#f43f5e33", // rose-500/20
+    "--theme-shape7": "#f8717133", // red-400/20 (lighter)
 
     // Provider container
     "--theme-container-bg-on": "#450a0a66", // bg-red-950/40
@@ -78,6 +97,15 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-button-hover": "#15803d", // green-700
     "--theme-shadow": "#4ADE80B3", // green-400/70
 
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#4ade8033", // green-400/20
+    "--theme-shape2": "#6ee7b733", // emerald-300/20
+    "--theme-shape3": "#bbf7d033", // green-200/20
+    "--theme-shape4": "#bbf7d033", // green-200/20 (lighter)
+    "--theme-shape5": "#16a34a33", // green-600/20
+    "--theme-shape6": "#22d3ee33", // cyan-400/20
+    "--theme-shape7": "#4ade8033", // green-400/20 (lighter)
+
     // Provider container
     "--theme-container-bg-on": "#052e1666", // bg-green-950/40
     "--theme-container-border-on": "#22d3ee", // border-cyan-400
@@ -105,6 +133,15 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-hover": "#be185d4d", // pink-700/30
     "--theme-button-hover": "#be185d", // pink-700
     "--theme-shadow": "#F472B6B3", // pink-400/70
+
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#f472b633", // pink-400/20
+    "--theme-shape2": "#fb718533", // rose-400/20
+    "--theme-shape3": "#f9a8d433", // pink-300/20
+    "--theme-shape4": "#f9a8d433", // pink-300/20 (lighter)
+    "--theme-shape5": "#be185d33", // pink-700/20
+    "--theme-shape6": "#ec489933", // pink-500/20
+    "--theme-shape7": "#f472b633", // pink-400/20 (lighter)
 
     // Provider container
     "--theme-container-bg-on": "#50072466", // bg-pink-950/40
@@ -134,6 +171,15 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-button-hover": "#6d28d9", // purple-700
     "--theme-shadow": "#A78BFA99", // purple-400/60
 
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#a78bfa33", // purple-400/20
+    "--theme-shape2": "#a5b4fc33", // indigo-300/20
+    "--theme-shape3": "#c4b5fd33", // purple-300/20
+    "--theme-shape4": "#c4b5fd33", // purple-300/20 (lighter)
+    "--theme-shape5": "#7c3aed33", // purple-600/20
+    "--theme-shape6": "#8b5cf633", // violet-500/20
+    "--theme-shape7": "#a78bfa33", // purple-400/20 (lighter)
+
     // Provider container
     "--theme-container-bg-on": "#2e106566", // bg-purple-950/40
     "--theme-container-border-on": "#a21caf", // border-fuchsia-700
@@ -162,6 +208,15 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-button-hover": "#ca8a04", // yellow-600
     "--theme-shadow": "#FDE047B3", // yellow-300/70
 
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#fde04733", // yellow-300/20
+    "--theme-shape2": "#fdba7433", // orange-300/20
+    "--theme-shape3": "#fef08a33", // yellow-200/20
+    "--theme-shape4": "#fef08a33", // yellow-200/20 (lighter)
+    "--theme-shape5": "#eab30833", // yellow-500/20
+    "--theme-shape6": "#f59e4233", // orange-400/20
+    "--theme-shape7": "#fde04733", // yellow-300/20 (lighter)
+
     // Provider container
     "--theme-container-bg-on": "#42200666", // bg-yellow-950/40
     "--theme-container-border-on": "#facc15", // border-yellow-400
@@ -189,6 +244,15 @@ const THEME_COLORS: Record<ThemeColor, Record<string, string>> = {
     "--theme-hover": "#18181b4d", // zinc-900/30
     "--theme-button-hover": "#27272a", // zinc-800
     "--theme-shadow": "#18181b99", // zinc-900/60
+
+    // Shape background colors for background-shapes.tsx
+    "--theme-shape1": "#52525b33", // zinc-600/20
+    "--theme-shape2": "#71717a33", // zinc-500/20
+    "--theme-shape3": "#a1a1aa33", // zinc-400/20
+    "--theme-shape4": "#a1a1aa33", // zinc-400/20 (lighter)
+    "--theme-shape5": "#18181b33", // zinc-900/20
+    "--theme-shape6": "#27272a33", // zinc-800/20
+    "--theme-shape7": "#52525b33", // zinc-600/20 (lighter)
 
     // Provider container
     "--theme-container-bg-on": "#09090b66", // zinc-950/40
