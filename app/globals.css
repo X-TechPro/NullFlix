@@ -142,3 +142,37 @@
   justify-content: center;
   width: 100%;
 }
+
+/* Poster hover overlay and text styles */
+.poster-hover-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.group:hover .poster-hover-overlay {
+  opacity: 1;
+}
+
+.poster-hover-text {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  pointer-events: none;
+  user-select: none;
+}

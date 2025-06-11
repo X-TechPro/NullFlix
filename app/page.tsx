@@ -17,6 +17,7 @@ import GlowingSearchBar from "@/components/glowing-search-bar"
 import { searchMedia, type Media } from "@/services/movie-service"
 import TVDetailsPopup from "@/components/tv-details-popup"
 import TrendingMoviesRow from "@/components/trending-movies-row"
+import { fetchMovieDetailsByTMDB } from "@/services/tmdb-service"
 
 // Add Telegram SVG icon component
 const Telegram = (props: React.SVGProps<SVGSVGElement>) => (
@@ -79,6 +80,30 @@ export default function Home() {
       window.addEventListener("storage", () => {
         setDiscoverEnabled(localStorage.getItem("discover") === "true")
       })
+    }
+  }, [])
+
+  // Check for ?watch=tmdb_id in the URL on page load
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const watchId = params.get("watch")
+      if (watchId) {
+        // Try to fetch as movie, if not found, try as TV
+        fetchMovieDetailsByTMDB(watchId, "movie").then((movie) => {
+          if (movie && movie.id) {
+            setSelectedMediaForDetails(watchId)
+            setShowMovieDetails(true)
+          } else {
+            fetchMovieDetailsByTMDB(watchId, "tv").then((tv) => {
+              if (tv && tv.id) {
+                setSelectedTVShowForDetails(watchId)
+                setShowTVDetails(true)
+              }
+            })
+          }
+        })
+      }
     }
   }, [])
 

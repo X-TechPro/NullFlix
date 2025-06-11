@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { X, Star, Clock, Calendar, Film, Play } from "lucide-react"
+import { X, Star, Clock, Calendar, Film, Play, Share2, CircleCheckBig } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { fetchMovieDetailsByTMDB, getTMDBPoster } from "@/services/tmdb-service"
+import { useToast } from "@/hooks/use-toast"
 
 interface MovieDetailsPopupProps {
   mediaId: string
@@ -16,6 +17,8 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
   const [movieDetails, setMovieDetails] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -56,7 +59,6 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
         >
           <X size={20} />
         </button>
-
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
@@ -72,13 +74,38 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
         ) : movieDetails ? (
           <div className="flex flex-col md:flex-row overflow-hidden">
             {/* Poster */}
-            <div className="w-full md:w-1/3 bg-gray-800 max-h-[300px] md:max-h-none">
+            <div className="w-full md:w-1/3 bg-gray-800 max-h-[300px] md:max-h-none relative group flex items-center justify-center">
               {movieDetails.poster_path ? (
-                <img
-                  src={getTMDBPoster(movieDetails.poster_path) || "/placeholder.svg"}
-                  alt={movieDetails.title}
-                  className="w-full h-full object-cover max-h-[300px] md:max-h-none"
-                />
+                <>
+                  <img
+                    src={getTMDBPoster(movieDetails.poster_path) || "/placeholder.svg"}
+                    alt={movieDetails.title}
+                    className="w-full h-full object-cover max-h-[300px] md:max-h-none"
+                  />
+                  {/* Hover overlay for share */}
+                  <button
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 cursor-pointer"
+                    onClick={() => {
+                      const url = `${window.location.origin}${window.location.pathname}?watch=${mediaId}`
+                      navigator.clipboard.writeText(url)
+                      setCopied(true);
+                      toast({ title: "Link copied!", description: "Share this link to watch directly." })
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                  >
+                    {copied ? (
+                      <>
+                        <CircleCheckBig className="w-8 h-8 text-green-400 mb-2" />
+                        <span className="text-green-400 font-semibold text-base">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-8 h-8 text-white mb-2" />
+                        <span className="text-white font-semibold text-base">Share this movie</span>
+                      </>
+                    )}
+                  </button>
+                </>
               ) : (
                 <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-gray-800">
                   <Film className="w-20 h-20 text-gray-600" />
@@ -87,7 +114,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
             </div>
 
             {/* Details */}
-            <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col">
+            <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col relative">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 break-words">
                 {movieDetails.title}
               </h2>
@@ -131,7 +158,10 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
               )}
 
               <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{movieDetails.overview}</p>
-
+              {/* Move hover text here, bottom left under description */}
+              <span className="absolute left-4 bottom-4 text-xs text-white/80 bg-black/60 px-2 py-1 rounded shadow z-20 select-none">
+                Hover the poster
+              </span>
               <Button
                 onClick={() => {
                   // Save the movie title to localStorage for snayer provider
