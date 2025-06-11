@@ -55,7 +55,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDet
       >
         <button
           onClick={onClose}
-          className="absolute z-10 p-2 text-white bg-black/50 rounded-full top-4 right-4 hover:bg-black/80"
+          className="absolute z-20 p-2 text-white bg-black/50 rounded-full top-2 right-2 hover:bg-black/80"
         >
           <X size={20} />
         </button>
