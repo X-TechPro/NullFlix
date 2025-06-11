@@ -50,6 +50,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
   const normalize = (s: string) =>
     s
       .toLowerCase()
+      .replace(/&/g, 'and') // Replace & with 'and'
       .replace(/[^a-z0-9]+/gi, ' ')
       .replace(/\s+/g, ' ')
       .trim();
