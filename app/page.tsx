@@ -534,6 +534,7 @@ export default function Home() {
           />
         ) : null}
       </AnimatePresence>
+      <Analytics />
     </main>
   )
 }
