@@ -106,7 +106,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                   <button
                     className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 cursor-pointer"
                     onClick={() => {
-                      const url = `${window.location.origin}${window.location.pathname}?watch=${tmdbId}`
+                      const url = `${window.location.origin}${window.location.pathname}?tv=${tmdbId}`
                       navigator.clipboard.writeText(url)
                       setCopied(true);
                       toast({ title: "Link copied!", description: "Share this link to watch directly." })

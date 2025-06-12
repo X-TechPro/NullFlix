@@ -83,26 +83,18 @@ export default function Home() {
     }
   }, [])
 
-  // Check for ?watch=tmdb_id in the URL on page load
+  // Check for ?movie= or ?tv= in the URL on page load
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search)
-      const watchId = params.get("watch")
-      if (watchId) {
-        // Try to fetch as movie, if not found, try as TV
-        fetchMovieDetailsByTMDB(watchId, "movie").then((movie) => {
-          if (movie && movie.id) {
-            setSelectedMediaForDetails(watchId)
-            setShowMovieDetails(true)
-          } else {
-            fetchMovieDetailsByTMDB(watchId, "tv").then((tv) => {
-              if (tv && tv.id) {
-                setSelectedTVShowForDetails(watchId)
-                setShowTVDetails(true)
-              }
-            })
-          }
-        })
+      const movieId = params.get("movie")
+      const tvId = params.get("tv")
+      if (movieId) {
+        setSelectedMediaForDetails(movieId)
+        setShowMovieDetails(true)
+      } else if (tvId) {
+        setSelectedTVShowForDetails(tvId)
+        setShowTVDetails(true)
       }
     }
   }, [])
