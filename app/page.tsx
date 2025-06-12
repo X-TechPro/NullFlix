@@ -2,6 +2,7 @@
 
 import type React from "react"
 
+import { Analytics } from "@vercel/analytics/next"
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Sparkles, Github, Settings, Bookmark, Loader2, Film, AlertCircle, Tv } from "lucide-react"
