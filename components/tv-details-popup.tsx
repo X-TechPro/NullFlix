@@ -173,7 +173,13 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                 Hover the poster
               </span>
               <Button
-                onClick={() => onPlay(tmdbId)}
+                onClick={() => {
+                  // Save the movie title to localStorage for snayer provider
+                  if (typeof window !== "undefined" && tvShow && tvShow.title) {
+                    localStorage.setItem("snayerTitle", tvShow.title)
+                  }
+                  onPlay(tmdbId)
+                }}
                 className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)] text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
