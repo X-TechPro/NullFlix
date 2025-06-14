@@ -16,6 +16,7 @@ export type Provider =
   | "snayerm"
   | "snayer"
   | "pstream"
+  | "1anime"
   | "embed.su"
   | "vidsrc.cc"
   | "autoembed"
@@ -27,6 +28,7 @@ export type Provider =
   | "spenembed"
   | "vidora"
   | "vidfast"
+  | "superembed"
 
 export type ProviderServer =
   | "2embed.cc"
@@ -175,6 +177,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
     switch (provider) {
       case "pstream":
         return `https://iframe.pstream.org/embed/tmdb-tv-${mediaId}/${season}/${episode}`
+      case "1anime":
+        return `https://flix.1ani.me/embed/tmdb-tv-${mediaId}/${season}/${episode}`
       case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${season}/${episode}`
       case "autoembed":
@@ -209,6 +213,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       }
       case "vidfast":
         return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
+      case "superembed":
+        return `https://multiembed.mov/directstream.php?video_id=${mediaId}&tmdb=1&s=${season}&e=${episode}`
       case "embed.su":
       default:
         return `https://embed.su/embed/tv/${mediaId}/${season}/${episode}`
@@ -218,6 +224,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
     switch (provider) {
       case "pstream":
         return `https://iframe.pstream.org/media/tmdb-movie-${mediaId}`
+      case "1anime":
+        return `https://flix.1ani.me/embed/tmdb-movie-${mediaId}`
       case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/movie/${mediaId}`
       case "autoembed":
@@ -252,6 +260,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       }
       case "vidfast":
         return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`
+      case "superembed":
+        return `https://multiembed.mov/directstream.php?video_id=${mediaId}&tmdb=1`
       case "embed.su":
       default:
         return `https://embed.su/embed/movie/${mediaId}`

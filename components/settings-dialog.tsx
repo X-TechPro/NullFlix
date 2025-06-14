@@ -73,6 +73,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Best 🔥 (Recommended)",
     },
     {
+      id: "1anime",
+      name: "1Anime",
+      url: "https://1anime.app/",
+      description: "Good 🔥",
+    },
+    {
       id: "uembed",
       name: "UEmbed",
       url: "https://uembed.site/",
@@ -119,6 +125,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       name: "Autoembed",
       url: "https://autoembed.cc/",
       description: "Good 👍",
+    },
+    {
+      id: "superembed",
+      name: "SuperEmbed",
+      url: "https://superembed.stream/",
+      description: "Tons of ads",
     },
     {
       id: "2embed",
