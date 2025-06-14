@@ -42,7 +42,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             className="w-full h-full border-0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-forms"
+            // sandbox="allow-scripts allow-same-origin allow-forms"
           ></iframe>
         )}
       </motion.div>
