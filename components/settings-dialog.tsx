@@ -64,19 +64,19 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       id: "snayer",
       name: "Snayer",
       url: "https://snayer.vercel.app/",
-      description: "Clean and better quality (Recommended)",
-    },
-    {
-      id: "pstream",
-      name: "P-Stream",
-      url: "https://pstream.org/",
-      description: "Best 🔥 (Recommended)",
+      description: "Clean and better quality 🔥 (Recommended)",
     },
     {
       id: "1anime",
       name: "1Anime",
       url: "https://1anime.app/",
-      description: "Good 🔥",
+      description: "Best 🔥 (Recommended)",
+    },
+    {
+      id: "pstream",
+      name: "P-Stream",
+      url: "https://pstream.org/",
+      description: "Second Best 🔥",
     },
     {
       id: "uembed",
