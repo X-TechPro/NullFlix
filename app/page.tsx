@@ -53,6 +53,7 @@ export default function Home() {
   const [showTVDetails, setShowTVDetails] = useState(false)
   const [selectedTVShowForDetails, setSelectedTVShowForDetails] = useState<string | null>(null)
   const [discoverEnabled, setDiscoverEnabled] = useState(false)
+  const [cardRect, setCardRect] = useState<DOMRect | null>(null)
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -190,7 +191,7 @@ export default function Home() {
       setSelectedMediaForDetails(media.tmdb || media.id)
       setShowMovieDetails(true)
     } else if (media.type === "tv") {
-      setSelectedTVShowForDetails(media.tmdb)
+      setSelectedTVShowForDetails(media.tmdb || media.id)
       setShowTVDetails(true)
     }
   }
@@ -228,9 +229,10 @@ export default function Home() {
   }
 
   // Add handler for trending movie click
-  const handleTrendingMovieClick = (movie: { id: number }) => {
+  const handleTrendingMovieClick = (movie: { id: number; _cardRect?: DOMRect }) => {
     setSelectedMediaForDetails(String(movie.id))
     setShowMovieDetails(true)
+    setCardRect(movie._cardRect || null)
   }
 
   return (
@@ -476,7 +478,8 @@ export default function Home() {
               onMediaSelect={(media) => {
                 // Handle both old and new bookmark formats
                 if (media.mediaType === "tv" || media.type === "tv") {
-                  setSelectedTVShow(media.tmdbID || media.tmdb || Number.parseInt(media.tmdbID))
+                  setSelectedTVShowForDetails(media.tmdbID || media.tmdb || media.id)
+                  setShowTVDetails(true)
                 } else {
                   // TMDB API is always enabled, so skip checks
                   // Show movie details popup first
@@ -524,6 +527,7 @@ export default function Home() {
             mediaId={selectedMediaForDetails}
             onClose={handleCloseMovieDetails}
             onPlay={handlePlayFromDetails}
+            cardRect={cardRect}
           />
         )}
         {showTVDetails && selectedTVShowForDetails ? (
