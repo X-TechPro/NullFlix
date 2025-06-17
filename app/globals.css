@@ -176,3 +176,27 @@
   pointer-events: none;
   user-select: none;
 }
+
+/* globals.css */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* dark background */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155; /* cyan handle #0284c7*/
+  border-radius: 10px;
+  border: 2px solid transparent; /* padding-like space */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* brighter on hover #0ea5e9*/
+}
+
+::-webkit-scrollbar-track {
+  background-color: #0c1221;
+}
