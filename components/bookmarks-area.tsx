@@ -110,7 +110,7 @@ export default function BookmarksArea({
                     <span
                       className={`px-2 py-1 text-xs ${
                         item.type === "tv" || item.mediaType === "tv"
-                          ? "text-[color:var(--theme-primary-light)] bg-black/50 border border-slate-700"
+                          ? "text-[color:var(--theme-secondary-light)] bg-black/50 border border-slate-700"
                           : "text-[color:var(--theme-secondary-light)] bg-black/50 border border-slate-700"
                       } rounded-md`}
                     >
