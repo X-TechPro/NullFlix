@@ -229,7 +229,7 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
             >
               <div className="overflow-y-auto flex flex-col md:flex-row h-full">
                 {/* Poster section */}
-                <div className="md:sticky md:top-0 md:h-[90vh] md:overflow-hidden">
+                <div className="md:sticky md:top-0 md:overflow-hidden">
                   <motion.div
                     layoutId={`poster-${selectedMedia.id}`}
                     className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform"
@@ -238,10 +238,6 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
                       src={movieDetails?.poster_path ? getTMDBPoster(movieDetails.poster_path) : (selectedMedia.poster || "/placeholder.svg")}
                       alt={selectedMedia.title}
                       className="w-full h-full object-cover"
-                    />
-                    <motion.div
-                      layoutId={`overlay-${selectedMedia.id}`}
-                      className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transform-gpu will-change-transform"
                     />
                     {/* Close button for mobile */}
                     <motion.button
@@ -347,7 +343,7 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
                       initial={{ opacity: 0, y: 40, scale: 0.9 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{ delay: 0.18, duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                      className="flex justify-end pt-4 border-t border-slate-700 md:border-t-0 md:pt-0 transform-gpu will-change-transform"
+                      className="flex justify-end pt-4 md:pt-0 transform-gpu will-change-transform"
                     >
                       <Button
                         size="lg"
