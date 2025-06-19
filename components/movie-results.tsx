@@ -235,13 +235,23 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
                 <div className="md:sticky md:top-0 md:overflow-hidden">
                   <motion.div
                     layoutId={`poster-${selectedMedia.id}`}
-                    className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform group" // <-- add group here
+                    className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform group"
                   >
                     <img
                       src={movieDetails?.poster_path ? getTMDBPoster(movieDetails.poster_path) : (selectedMedia.poster || "/placeholder.svg")}
                       alt={selectedMedia.title}
                       className="w-full h-full object-cover"
                     />
+                    {/* Mobile close button moved outside share overlay and given higher z-index */}
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.2, duration: 0.2 }}
+                      className="absolute top-4 right-4 md:hidden bg-black/50 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/70 transition-colors duration-150 transform-gpu z-30"
+                      onClick={() => setSelectedMedia(null)}
+                    >
+                      <X className="w-6 h-6" />
+                    </motion.button>
                     {/* Hover overlay for share */}
                     <button
                       className="absolute z-20 inset-0 flex flex-col items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
@@ -265,16 +275,6 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
                         </>
                       )}
                     </button>
-                    {/* Close button for mobile */}
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2, duration: 0.2 }}
-                      className="absolute top-4 right-4 md:hidden bg-black/50 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/70 transition-colors duration-150 transform-gpu"
-                      onClick={() => setSelectedMedia(null)}
-                    >
-                      <X className="w-6 h-6" />
-                    </motion.button>
                   </motion.div>
                 </div>
                 {/* Content section */}
