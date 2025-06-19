@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Play, Star, Clock, Tv, Film } from "lucide-react"
+import { X, Play, Star, Clock, Tv, Film, Share2, CircleCheckBig } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Media } from "@/services/movie-service"
 import { fetchMovieDetailsByTMDB, getTMDBPoster } from "@/services/tmdb-service"
 import MoviePlayer from "@/components/movie-player"
 import TVEpisodeSelector from "@/components/tv-episode-selector"
+import { useToast } from "@/hooks/use-toast"
 
 export interface MediaResultsProps {
   media: Media[]
@@ -22,6 +23,8 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
   const [playerMedia, setPlayerMedia] = useState<{ id: string, type: "movie" | "tv", title?: string } | null>(null)
   const [showEpisodeSelector, setShowEpisodeSelector] = useState(false)
   const [episodeSelectorTmdbId, setEpisodeSelectorTmdbId] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   // Fetch and cache all movie details on mount or when media changes
   useEffect(() => {
@@ -232,13 +235,36 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
                 <div className="md:sticky md:top-0 md:overflow-hidden">
                   <motion.div
                     layoutId={`poster-${selectedMedia.id}`}
-                    className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform"
+                    className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform group" // <-- add group here
                   >
                     <img
                       src={movieDetails?.poster_path ? getTMDBPoster(movieDetails.poster_path) : (selectedMedia.poster || "/placeholder.svg")}
                       alt={selectedMedia.title}
                       className="w-full h-full object-cover"
                     />
+                    {/* Hover overlay for share */}
+                    <button
+                      className="absolute z-20 inset-0 flex flex-col items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                      onClick={() => {
+                        const url = `${window.location.origin}${window.location.pathname}?movie=${selectedMedia.tmdb || selectedMedia.id}`
+                        navigator.clipboard.writeText(url)
+                        setCopied(true);
+                        toast({ title: "Link copied!", description: "Share this link to watch directly." })
+                        setTimeout(() => setCopied(false), 1500);
+                      }}
+                    >
+                      {copied ? (
+                        <>
+                          <CircleCheckBig className="w-8 h-8 text-green-400 mb-2" />
+                          <span className="text-green-400 font-semibold text-base">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-8 h-8 text-white mb-2" />
+                          <span className="text-white font-semibold text-base">Share this movie</span>
+                        </>
+                      )}
+                    </button>
                     {/* Close button for mobile */}
                     <motion.button
                       initial={{ opacity: 0, scale: 0.8 }}
