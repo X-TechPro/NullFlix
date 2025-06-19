@@ -127,7 +127,7 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {media.map((item, index) => (
+          {media.slice(0, 12).map((item, index) => (
             <motion.div
               key={item.id || index}
               layoutId={`card-${item.id}`}
