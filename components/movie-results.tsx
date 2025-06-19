@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import type { Media } from "@/services/movie-service"
 import { fetchMovieDetailsByTMDB, getTMDBPoster } from "@/services/tmdb-service"
 import MoviePlayer from "@/components/movie-player"
+import TVEpisodeSelector from "@/components/tv-episode-selector"
 
 export interface MediaResultsProps {
   media: Media[]
@@ -19,6 +20,8 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
   const [movieDetails, setMovieDetails] = useState<any | null>(null)
   const [showPlayer, setShowPlayer] = useState(false)
   const [playerMedia, setPlayerMedia] = useState<{ id: string, type: "movie" | "tv", title?: string } | null>(null)
+  const [showEpisodeSelector, setShowEpisodeSelector] = useState(false)
+  const [episodeSelectorTmdbId, setEpisodeSelectorTmdbId] = useState<string | null>(null)
 
   // Fetch and cache all movie details on mount or when media changes
   useEffect(() => {
@@ -55,11 +58,29 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
 
   // Play button logic (copy from movie-details-popup)
   const handlePlay = (media: Media, details?: any) => {
+    if (media.type === "tv") {
+      setEpisodeSelectorTmdbId((media.tmdb || media.id).toString())
+      setShowEpisodeSelector(true)
+      setSelectedMedia(null)
+      return
+    }
     if (typeof window !== "undefined" && (details?.title || media.title)) {
       localStorage.setItem("snayerTitle", details?.title || media.title)
     }
     setPlayerMedia({ id: media.tmdb || media.id, type: media.type, title: details?.title || media.title })
     setShowPlayer(true)
+  }
+
+  // Handle episode selection from TVEpisodeSelector
+  const handleSelectEpisode = (season: number, episode: number) => {
+    if (episodeSelectorTmdbId) {
+      setPlayerMedia({ id: episodeSelectorTmdbId, type: "tv", title: undefined })
+      setShowPlayer(true)
+      setShowEpisodeSelector(false)
+      setEpisodeSelectorTmdbId(null)
+      // Optionally, you can store season/episode in localStorage or pass as props to MoviePlayer if needed
+      // For now, just play the show (MoviePlayer may need to be updated to accept season/episode)
+    }
   }
 
   return (
@@ -77,6 +98,16 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
             mediaType={playerMedia.type}
             title={playerMedia.title}
             onClose={() => { setShowPlayer(false); setPlayerMedia(null) }}
+          />
+        )}
+      </AnimatePresence>
+      {/* TV Episode Selector modal */}
+      <AnimatePresence>
+        {showEpisodeSelector && episodeSelectorTmdbId && (
+          <TVEpisodeSelector
+            tmdbId={episodeSelectorTmdbId}
+            onSelectEpisode={handleSelectEpisode}
+            onClose={() => { setShowEpisodeSelector(false); setEpisodeSelectorTmdbId(null) }}
           />
         )}
       </AnimatePresence>
