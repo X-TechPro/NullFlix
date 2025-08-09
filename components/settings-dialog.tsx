@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeProvider as ThemeColorProvider, useThemeColor, THEME_COLORS_META } from "@/components/theme-color-context"
 import type { ThemeColor } from "@/components/theme-color-context"
+import { url } from "inspector"
 
 interface SettingsDialogProps {
   isOpen: boolean
@@ -54,12 +55,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
   // Provider dictionary
   const providers = [
-    {
+    /*{
       id: "snayerm",
       name: "Snayer - Madplay",
       url: "https://snayer.vercel.app/",
       description: "Clean and fast 🔥 (Recommended)",
-    },
+    },*/
     {
       id: "snayer",
       name: "Snayer",
@@ -67,15 +68,21 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Clean and better quality 🔥 (Recommended)",
     },
     {
-      id: "1anime",
-      name: "1Anime",
-      url: "https://1anime.app/",
-      description: "Best 🔥 (Recommended)",
+      id: "videasy",
+      name: "VidEasy",
+      url: "https://videasy.net/",
+      description: "Good quality 🔥",
     },
     {
       id: "pstream",
       name: "P-Stream",
       url: "https://pstream.org/",
+      description: "Best 🔥",
+    },
+    {
+      id: "1anime",
+      name: "1Anime",
+      url: "https://1anime.app/",
       description: "Second Best 🔥",
     },
     {
@@ -96,7 +103,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       url: "https://vidfast.pro/",
       description: "Fast and modern UI 👍",
     },
-    {
+    /*{
       id: "spenembed",
       name: "SpenEmbed",
       url: "https://spencerdevs.xyz/",
@@ -113,7 +120,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       name: "Embed.su",
       url: "https://embed.su/",
       description: "Good",
-    },
+    },*/
     {
       id: "vidsrc.cc",
       name: "Vidsrc.cc",
@@ -126,12 +133,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       url: "https://autoembed.cc/",
       description: "Good 👍",
     },
-    {
+    /*{
       id: "superembed",
       name: "SuperEmbed",
       url: "https://superembed.stream/",
       description: "Tons of ads",
-    },
+    },*/
     {
       id: "2embed",
       name: "2Embed",
@@ -156,13 +163,13 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         { id: "vidsrc.me", name: "vidsrc.me" },
         { id: "vidsrc.net", name: "vidsrc.net" },
       ],
-    },
+    },/*
     {
       id: "vidsrc.su",
       name: "Vidsrc.su",
       url: "https://vidsrc.su/",
       description: "Normal",
-    },
+    },*/
   ]
 
   // Load settings from localStorage on component mount

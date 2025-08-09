@@ -15,6 +15,7 @@ export interface Media {
 export type Provider =
   | "snayerm"
   | "snayer"
+  | "videasy"
   | "pstream"
   | "1anime"
   | "embed.su"
@@ -155,7 +156,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
 
 export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number, title?: string): string {
   // Use a try-catch block to handle potential localStorage errors
-  let provider: Provider = "snayerm"
+  let provider: Provider = "snayer"
   let server: ProviderServer | null = null
 
   try {
@@ -179,6 +180,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://iframe.pstream.org/embed/tmdb-tv-${mediaId}/${season}/${episode}`
       case "1anime":
         return `https://flix.1ani.me/embed/tmdb-tv-${mediaId}/${season}/${episode}`
+      case "videasy":
+        return `https://player.videasy.net/tv/${mediaId}/${season}/${episode}`
       case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${season}/${episode}`
       case "autoembed":
@@ -195,7 +198,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "vidsrc.su":
         return `https://vidsrc.su/embed/tv/${mediaId}/${season}/${episode}`
       case "vidsrc.co":
-        return `https://player.vidsrc.co/embed/tv/${mediaId}/${season}/${episode}`
+        return `https://player.vidpro.top/embed/tv/${mediaId}/${season}/${episode}`
       case "uembed":
         return `https://uembed.site/?id=${mediaId}&season=${season}&episode=${episode}`
       case "spenembed":
@@ -226,6 +229,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://iframe.pstream.org/media/tmdb-movie-${mediaId}`
       case "1anime":
         return `https://flix.1ani.me/embed/tmdb-movie-${mediaId}`
+      case "videasy":
+        return `https://player.videasy.net/movie/${mediaId}`
       case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/movie/${mediaId}`
       case "autoembed":
@@ -242,7 +247,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "vidsrc.su":
         return `https://vidsrc.su/embed/movie/${mediaId}`
       case "vidsrc.co":
-        return `https://player.vidsrc.co/embed/movie/${mediaId}`
+        return `https://player.vidpro.top/embed/movie/${mediaId}`
       case "uembed":
         return `https://uembed.site/?id=${mediaId}`
       case "spenembed":

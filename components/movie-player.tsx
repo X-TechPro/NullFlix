@@ -15,11 +15,20 @@ interface MoviePlayerProps {
 }
 
 export default function MoviePlayer({ mediaId, mediaType, season, episode, title, onClose }: MoviePlayerProps) {
-  const [embedUrl, setEmbedUrl] = useState("")
+  const [embedUrl, setEmbedUrl] = useState("");
+  const [provider, setProvider] = useState<string | null>(null);
 
   useEffect(() => {
-    setEmbedUrl(getProviderUrl(mediaId, mediaType, season, episode, title))
-  }, [mediaId, mediaType, season, episode, title])
+    // Get provider from localStorage (sync with getProviderUrl logic)
+    let prov: string | null = null;
+    try {
+      prov = localStorage.getItem("selectedProvider");
+    } catch (e) {
+      prov = null;
+    }
+    setProvider(prov || "snayerm");
+    setEmbedUrl(getProviderUrl(mediaId, mediaType, season, episode, title));
+  }, [mediaId, mediaType, season, episode, title]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
@@ -42,10 +51,12 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             className="w-full h-full border-0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            // sandbox="allow-scripts allow-same-origin allow-forms"
+            {...(provider === "videasy"
+              ? { sandbox: "allow-scripts allow-same-origin allow-forms" }
+              : {})}
           ></iframe>
         )}
       </motion.div>
     </div>
-  )
+  );
 }
