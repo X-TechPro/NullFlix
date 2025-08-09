@@ -11,9 +11,10 @@ interface MovieDetailsPopupProps {
   mediaId: string
   onClose: () => void
   onPlay: () => void
+  cardRect?: DOMRect | null
 }
 
-export default function MovieDetailsPopup({ mediaId, onClose, onPlay }: MovieDetailsPopupProps) {
+export default function MovieDetailsPopup({ mediaId, onClose, onPlay, cardRect }: MovieDetailsPopupProps) {
   const [movieDetails, setMovieDetails] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
