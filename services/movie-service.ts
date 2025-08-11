@@ -16,6 +16,7 @@ export type Provider =
   | "snayerm"
   | "snayer"
   | "videasy"
+  | "vidrock"
   | "pstream"
   | "1anime"
   | "embed.su"
@@ -182,6 +183,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://flix.1ani.me/embed/tmdb-tv-${mediaId}/${season}/${episode}`
       case "videasy":
         return `https://player.videasy.net/tv/${mediaId}/${season}/${episode}`
+      case "vidrock":
+        return `https://vidrock.net/tv/${mediaId}/${season}/${episode}`
       case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${season}/${episode}`
       case "autoembed":
@@ -231,6 +234,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://flix.1ani.me/embed/tmdb-movie-${mediaId}`
       case "videasy":
         return `https://player.videasy.net/movie/${mediaId}`
+      case "vidrock":
+        return `https://vidrock.net/movie/${mediaId}`
       case "vidsrc.cc":
         return `https://vidsrc.cc/v2/embed/movie/${mediaId}`
       case "autoembed":

@@ -36,7 +36,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [selectedProvider, setSelectedProvider] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedProvider")
       ? localStorage.getItem("selectedProvider") as string
-      : "pstream"
+      : "videasy"
   )
   const [selectedServer, setSelectedServer] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedServer")
@@ -71,7 +71,19 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       id: "videasy",
       name: "VidEasy",
       url: "https://videasy.net/",
-      description: "Good quality 🔥",
+      description: "🥇 Good quality 🔥",
+    },
+    {
+      id: "vidfast",
+      name: "VidFast",
+      url: "https://vidfast.pro/",
+      description: "🥈 Modern UI 👍",
+    },
+    {
+      id: "vidrock",
+      name: "VidRock",
+      url: "https://vidrock.net/",
+      description: "🥉 Modern UI 👍",
     },
     {
       id: "pstream",
@@ -96,12 +108,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       name: "Vidsrc.co",
       url: "https://vidsrc.co/",
       description: "Good 👍",
-    },
-    {
-      id: "vidfast",
-      name: "VidFast",
-      url: "https://vidfast.pro/",
-      description: "Fast and modern UI 👍",
     },
     /*{
       id: "spenembed",

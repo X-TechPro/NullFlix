@@ -26,7 +26,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
     } catch (e) {
       prov = null;
     }
-    setProvider(prov || "snayerm");
+    setProvider(prov || "videasy");
     setEmbedUrl(getProviderUrl(mediaId, mediaType, season, episode, title));
   }, [mediaId, mediaType, season, episode, title]);
 
@@ -51,9 +51,11 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             className="w-full h-full border-0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            {...(provider === "videasy"
-              ? { sandbox: "allow-scripts allow-same-origin allow-forms" }
-              : {})}
+            {...(
+              ["videasy", "vidrock"].includes(provider ?? "")
+                ? { sandbox: "allow-scripts allow-same-origin allow-forms" }
+                : {}
+            )}
           ></iframe>
         )}
       </motion.div>
