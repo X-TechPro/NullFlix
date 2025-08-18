@@ -47,18 +47,18 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay, cardRect }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2 sm:p-4 overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start md:items-center justify-center p-2 md:p-4 transform-gpu will-change-transform">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-4xl bg-gray-900 rounded-lg shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] flex flex-col shadow-2xl will-change-transform relative"
       >
         <button
           onClick={onClose}
-          className="absolute z-20 p-2 text-white bg-black/50 rounded-full top-2 right-2 hover:bg-black/80"
+          className="absolute z-30 p-2 text-white bg-black/50 backdrop-blur-sm rounded-full top-4 right-4 hover:bg-black/70 transition-colors duration-150"
         >
-          <X size={20} />
+          <X size={24} />
         </button>
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
@@ -68,115 +68,122 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay, cardRect }
           <div className="flex flex-col items-center justify-center h-96 text-center p-4">
             <Film className="w-16 h-16 text-red-500 mb-4" />
             <p className="text-xl text-red-400 mb-4">{error}</p>
-            <Button onClick={onPlay} className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)]">
+            <Button onClick={onPlay} className="bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base">
               Play Anyway
             </Button>
           </div>
         ) : movieDetails ? (
-          <div className="flex flex-col md:flex-row overflow-hidden">
-            {/* Poster */}
-            <div className="w-full md:w-1/3 bg-gray-800 max-h-[300px] md:max-h-none relative group flex items-center justify-center">
-              {movieDetails.poster_path ? (
-                <>
-                  <img
-                    src={getTMDBPoster(movieDetails.poster_path) || "/placeholder.svg"}
-                    alt={movieDetails.title}
-                    className="w-full h-full object-cover max-h-[300px] md:max-h-none"
-                  />
-                  {/* Hover overlay for share */}
-                  <button
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 cursor-pointer"
+          <div className="overflow-y-auto flex flex-col md:flex-row h-full">
+            {/* Poster section */}
+            <div className="md:sticky md:top-0 md:overflow-hidden">
+              <motion.div
+                className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform group"
+              >
+                <img
+                  src={movieDetails.poster_path ? getTMDBPoster(movieDetails.poster_path) : "/placeholder.svg"}
+                  alt={movieDetails.title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Hover overlay for share */}
+                <button
+                  className="absolute z-20 inset-0 flex flex-col items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                  onClick={() => {
+                    const url = `${window.location.origin}${window.location.pathname}?movie=${mediaId}`
+                    navigator.clipboard.writeText(url)
+                    setCopied(true);
+                    toast({ title: "Link copied!", description: "Share this link to watch directly." })
+                    setTimeout(() => setCopied(false), 1500);
+                  }}
+                >
+                  {copied ? (
+                    <>
+                      <CircleCheckBig className="w-8 h-8 text-green-400 mb-2" />
+                      <span className="text-green-400 font-semibold text-base">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-8 h-8 text-white mb-2" />
+                      <span className="text-white font-semibold text-base">Share this movie</span>
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            </div>
+            {/* Content section */}
+            <motion.div
+              className="flex-1 md:overflow-y-auto transform-gpu will-change-transform"
+            >
+              <div className="p-4 md:p-8 flex flex-col justify-between min-h-full">
+                <div>
+                  <div className="flex items-start justify-between mb-2">
+                    <motion.h2
+                      className="text-2xl md:text-4xl font-bold text-white pr-4 transform-gpu will-change-transform"
+                    >
+                      {movieDetails.title}
+                    </motion.h2>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                    {/* Year */}
+                    <div className="flex items-center gap-1 bg-slate-700 px-3 py-1 rounded-full text-slate-200 font-medium text-base md:text-lg will-change-transform">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      {movieDetails.release_date ? new Date(movieDetails.release_date).getFullYear() : "N/A"}
+                    </div>
+                    {/* Rating */}
+                    {movieDetails.vote_average && (
+                      <div className="flex items-center gap-2 bg-slate-700 px-3 py-1 rounded-full transform-gpu will-change-transform">
+                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                        <span className="text-slate-200 font-medium text-sm md:text-base">
+                          {movieDetails.vote_average}
+                        </span>
+                      </div>
+                    )}
+                    {/* Runtime */}
+                    {movieDetails.runtime && (
+                      <div className="flex items-center gap-2 bg-slate-700 px-3 py-1 rounded-full transform-gpu will-change-transform">
+                        <Clock className="w-4 h-4 text-slate-300" />
+                        <span className="text-slate-200 font-medium text-sm md:text-base">
+                          {movieDetails.runtime} min
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Genre tags */}
+                  {movieDetails.genres && movieDetails.genres.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {movieDetails.genres.map((genre: any) => (
+                          <span
+                            key={genre.id}
+                            className="inline-block bg-gradient-to-r from-sky-500 to-blue-500 text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-medium mb-3 md:mb-4 transform-gpu will-change-transform"
+                          >
+                            {genre.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-slate-300 leading-relaxed text-sm md:text-lg transform-gpu will-change-transform">
+                    {movieDetails.overview}
+                  </p>
+                </div>
+                {/* Play button */}
+                <div className="flex justify-end pt-4 md:pt-0 transform-gpu will-change-transform">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base"
                     onClick={() => {
-                      const url = `${window.location.origin}${window.location.pathname}?movie=${mediaId}`
-                      navigator.clipboard.writeText(url)
-                      setCopied(true);
-                      toast({ title: "Link copied!", description: "Share this link to watch directly." })
-                      setTimeout(() => setCopied(false), 1500);
+                      if (typeof window !== "undefined" && movieDetails && movieDetails.title) {
+                        localStorage.setItem("snayerTitle", movieDetails.title)
+                      }
+                      onPlay()
                     }}
                   >
-                    {copied ? (
-                      <>
-                        <CircleCheckBig className="w-8 h-8 text-green-400 mb-2" />
-                        <span className="text-green-400 font-semibold text-base">Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Share2 className="w-8 h-8 text-white mb-2" />
-                        <span className="text-white font-semibold text-base">Share this movie</span>
-                      </>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-gray-800">
-                  <Film className="w-20 h-20 text-gray-600" />
+                    <Play className="w-4 md:w-5 h-4 md:h-5 mr-2 fill-white" />
+                    Play Now
+                  </Button>
                 </div>
-              )}
-            </div>
-
-            {/* Details */}
-            <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col relative">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 break-words">
-                {movieDetails.title}
-              </h2>
-
-              <div className="flex flex-wrap gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-300">
-                {movieDetails.release_date && movieDetails.release_date !== "N/A" && (
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1 text-[color:var(--theme-primary-light)]" />
-                    <span>{new Date(movieDetails.release_date).toLocaleDateString()}</span>
-                  </div>
-                )}
-
-                {movieDetails.runtime && movieDetails.runtime !== "N/A" && (
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1 text-[color:var(--theme-primary-light)]" />
-                    <span>{movieDetails.runtime} minutes</span>
-                  </div>
-                )}
-
-                {movieDetails.vote_average && movieDetails.vote_average !== "N/A" && (
-                  <div className="flex items-center">
-                    <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                    <span>{movieDetails.vote_average}/10</span>
-                  </div>
-                )}
               </div>
-
-              {movieDetails.genres && movieDetails.genres.length > 0 && (
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-2">
-                    {movieDetails.genres.map((genre: any) => (
-                      <span
-                        key={genre.id}
-                        className="px-2 py-1 text-xs bg-gray-800 text-[color:var(--theme-primary-light)] rounded-md border border-gray-700"
-                      >
-                        {genre.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 flex-grow">{movieDetails.overview}</p>
-              {/* Move hover text here, bottom left under description */}
-              <span className="absolute left-4 bottom-4 text-xs text-white/80 bg-black/60 px-2 py-1 rounded shadow z-20 select-none">
-                Hover the poster
-              </span>
-              <Button
-                onClick={() => {
-                  // Save the movie title to localStorage for snayer provider
-                  if (typeof window !== "undefined" && movieDetails && movieDetails.title) {
-                    localStorage.setItem("snayerTitle", movieDetails.title)
-                  }
-                  onPlay()
-                }}
-                className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)] text-white w-full md:w-auto self-end mt-4 flex items-center justify-center gap-2"
-              >
-                <Play className="w-4 h-4" />
-                Play Movie
-              </Button>
-            </div>
+            </motion.div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-96">
@@ -185,8 +192,8 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay, cardRect }
                 localStorage.setItem("snayerTitle", movieDetails.title)
               }
               onPlay()
-            }} className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)]">
-              Play Movie
+            }} className="bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base">
+              Play Now
             </Button>
           </div>
         )}
