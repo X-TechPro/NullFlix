@@ -23,6 +23,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
   const [scrapeStatus, setScrapeStatus] = useState<'processing' | 'complete' | 'failed'>('processing');
   const intervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const checkRef = useRef<number | null>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
   useEffect(() => {
@@ -75,7 +76,62 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           window.clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
+        if (checkRef.current) {
+          window.clearInterval(checkRef.current);
+          checkRef.current = null;
+        }
       }, 35000) as unknown as number;
+
+      // start periodic fetch check every 5s to detect JSON error or page readiness
+      if (checkRef.current) {
+        window.clearInterval(checkRef.current);
+      }
+      checkRef.current = window.setInterval(async () => {
+        try {
+          // attempt to fetch the embed URL; some endpoints return JSON with error
+          const res = await fetch(embedUrl, { cache: 'no-store' });
+          const ct = res.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const json = await res.json();
+            if (json && json.error === 'Failed to retrieve showbox JSON') {
+              // explicit error from backend -> failed
+              setScrapeStatus('failed');
+              if (intervalRef.current) {
+                window.clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
+              if (timeoutRef.current) {
+                window.clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+              }
+              if (checkRef.current) {
+                window.clearInterval(checkRef.current);
+                checkRef.current = null;
+              }
+            }
+          } else if (res.ok) {
+            // non-json ok response likely means page/html is ready -> complete
+            setScrapeStatus('complete');
+            setScrapeProgress(100);
+            if (intervalRef.current) {
+              window.clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            if (timeoutRef.current) {
+              window.clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
+            if (checkRef.current) {
+              window.clearInterval(checkRef.current);
+              checkRef.current = null;
+            }
+            // hide after short delay for UX
+            window.setTimeout(() => setShowScrapePopup(false), 800);
+          }
+        } catch (e) {
+          // network error — ignore and retry on next tick
+        }
+      }, 5000) as unknown as number;
     } else {
       // ensure popup hidden for other providers
       setShowScrapePopup(false);
@@ -89,6 +145,10 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
+      if (checkRef.current) {
+        window.clearInterval(checkRef.current);
+        checkRef.current = null;
+      }
     }
 
     return () => {
@@ -99,6 +159,10 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
+      }
+      if (checkRef.current) {
+        window.clearInterval(checkRef.current);
+        checkRef.current = null;
       }
     };
   }, [provider, embedUrl]);
@@ -138,7 +202,58 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      if (checkRef.current) {
+        window.clearInterval(checkRef.current);
+        checkRef.current = null;
+      }
     }, 35000) as unknown as number;
+
+    // start periodic fetch check every 5s to detect JSON error or page readiness
+    if (checkRef.current) {
+      window.clearInterval(checkRef.current);
+    }
+    checkRef.current = window.setInterval(async () => {
+      try {
+        const res = await fetch(embedUrl, { cache: 'no-store' });
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const json = await res.json();
+          if (json && json.error === 'Failed to retrieve showbox JSON') {
+            setScrapeStatus('failed');
+            if (intervalRef.current) {
+              window.clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            if (timeoutRef.current) {
+              window.clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
+            if (checkRef.current) {
+              window.clearInterval(checkRef.current);
+              checkRef.current = null;
+            }
+          }
+        } else if (res.ok) {
+          setScrapeStatus('complete');
+          setScrapeProgress(100);
+          if (intervalRef.current) {
+            window.clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          if (timeoutRef.current) {
+            window.clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
+          if (checkRef.current) {
+            window.clearInterval(checkRef.current);
+            checkRef.current = null;
+          }
+          window.setTimeout(() => setShowScrapePopup(false), 800);
+        }
+      } catch (e) {
+        // ignore and retry
+      }
+    }, 5000) as unknown as number;
   }
 
   // iframe load handler
