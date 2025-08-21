@@ -112,14 +112,14 @@ export default function BookmarksArea({
                         item.type === "tv" || item.mediaType === "tv"
                           ? "text-[color:var(--theme-secondary-light)] bg-black/50 border border-slate-700"
                           : "text-[color:var(--theme-secondary-light)] bg-black/50 border border-slate-700"
-                      } rounded-md`}
+                      } rounded-full`}
                     >
                       {item.type === "tv" || item.mediaType === "tv" ? "TV Series" : item.Type || "Movie"}
                     </span>
 
                     {/* Show TMDB ID information */}
                     {(item.tmdbID || item.tmdb || item.tmdbId) && (
-                      <span className="px-2 py-1 text-xs text-[color:var(--theme-secondary-light)] bg-black/50 border border-slate-700 rounded-md ml-2">
+                      <span className="px-2 py-1 text-xs text-[color:var(--theme-secondary-light)] bg-black/50 border border-slate-700 rounded-full ml-2">
                         TMDB: {item.tmdbID || item.tmdb || item.tmdbId}
                       </span>
                     )}

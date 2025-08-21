@@ -63,9 +63,9 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     },*/
     {
       id: "snayer",
-      name: "Snayer",
+      name: "Snayer - Showbox",
       url: "https://snayer.vercel.app/",
-      description: "Clean player (BETA) 🔥",
+      description: "Elite player (BETA) 🔥",
     },
     {
       id: "videasy",

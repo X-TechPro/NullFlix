@@ -259,11 +259,15 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://spencerdevs.xyz/movie/${mediaId}?theme=0099ff`
       case "vidora":
         return `https://vidora.su/movie/${mediaId}?colour=0099ff&autoplay=true&autonextepisode=true`
+      /*
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
         const snayerTitle = localStorage.getItem("snayerTitle") || ""
         return `https://snayer.vercel.app/api/movie?tmdb=${mediaId}&api=${bioapi}&title=${snayerTitle}`
       }
+      */
+      case "snayer":
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}`
       case "snayerm": {
         const snayerTitle = localStorage.getItem("snayerTitle") || ""
         return `https://snayer.vercel.app/api/madplay?tmdb=${mediaId}&title=${snayerTitle}`
