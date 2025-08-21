@@ -194,7 +194,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         }
         return np;
       });
-    }, 3000) as unknown as number;
+    }, 2000) as unknown as number;
 
     timeoutRef.current = window.setTimeout(() => {
       setScrapeStatus('failed');
