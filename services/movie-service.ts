@@ -267,7 +267,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       }
       */
       case "snayer": {
-        const bioapi = localStorage.getItem("bioapi") ||
+        const bioapi = localStorage.getItem("bioapi") || ""
         return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${bioapi}`
       }
       case "snayerm": {

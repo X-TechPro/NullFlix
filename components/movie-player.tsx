@@ -24,6 +24,8 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
   const intervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const checkRef = useRef<number | null>(null);
+  const hideTimeoutRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
   useEffect(() => {
@@ -43,16 +45,17 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
   useEffect(() => {
     // Only show for snayer
     if (provider === 'snayer') {
-      // initialize
-      setShowScrapePopup(true);
-      setScrapeProgress(0);
-      setScrapeStatus('processing');
+  // initialize
+  setShowScrapePopup(true);
+  setScrapeProgress(0);
+  setScrapeStatus('processing');
+  startRef.current = Date.now();
 
-      // progress interval ~ every 3s increase by 12 until 100
+  // progress interval ~ every 2s increase by 12 until 100
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);
       }
-      intervalRef.current = window.setInterval(() => {
+  intervalRef.current = window.setInterval(() => {
         setScrapeProgress((p) => {
           const np = Math.min(100, p + 12);
           if (np >= 100 && intervalRef.current) {
@@ -63,7 +66,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           }
           return np;
         });
-      }, 3000) as unknown as number;
+  }, 2000) as unknown as number;
 
       // timeout -> mark failed
       if (timeoutRef.current) {
@@ -82,9 +85,13 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         }
       }, 35000) as unknown as number;
 
-      // start periodic fetch check every 5s to detect JSON error or page readiness
+      // start periodic fetch check every 2s to detect JSON error or page readiness (require status 200)
       if (checkRef.current) {
         window.clearInterval(checkRef.current);
+      }
+      if (hideTimeoutRef.current) {
+        window.clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
       }
       checkRef.current = window.setInterval(async () => {
         try {
@@ -109,8 +116,8 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
                 checkRef.current = null;
               }
             }
-          } else if (res.ok) {
-            // non-json ok response likely means page/html is ready -> complete
+          } else if (res.status === 200) {
+            // page is ready (explicit HTTP 200 required)
             setScrapeStatus('complete');
             setScrapeProgress(100);
             if (intervalRef.current) {
@@ -125,13 +132,20 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               window.clearInterval(checkRef.current);
               checkRef.current = null;
             }
-            // hide after short delay for UX
-            window.setTimeout(() => setShowScrapePopup(false), 800);
+            // ensure popup is visible for at least 30s before hiding
+            const started = startRef.current ?? Date.now();
+            const elapsed = Date.now() - started;
+            const remaining = Math.max(0, 30000 - elapsed);
+            if (hideTimeoutRef.current) {
+              window.clearTimeout(hideTimeoutRef.current);
+              hideTimeoutRef.current = null;
+            }
+            hideTimeoutRef.current = window.setTimeout(() => setShowScrapePopup(false), remaining + 800) as unknown as number;
           }
         } catch (e) {
           // network error — ignore and retry on next tick
         }
-      }, 5000) as unknown as number;
+      }, 2000) as unknown as number;
     } else {
       // ensure popup hidden for other providers
       setShowScrapePopup(false);
@@ -149,6 +163,10 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearInterval(checkRef.current);
         checkRef.current = null;
       }
+      if (hideTimeoutRef.current) {
+        window.clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
     }
 
     return () => {
@@ -164,6 +182,10 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearInterval(checkRef.current);
         checkRef.current = null;
       }
+      if (hideTimeoutRef.current) {
+        window.clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
     };
   }, [provider, embedUrl]);
 
@@ -174,6 +196,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
     setScrapeProgress(0);
     setScrapeStatus('processing');
     setShowScrapePopup(true);
+  startRef.current = Date.now();
 
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
@@ -208,10 +231,15 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
       }
     }, 35000) as unknown as number;
 
-    // start periodic fetch check every 5s to detect JSON error or page readiness
+    // start periodic fetch check every 2s to detect JSON error or page readiness (require status 200)
     if (checkRef.current) {
       window.clearInterval(checkRef.current);
     }
+    if (hideTimeoutRef.current) {
+      window.clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    startRef.current = Date.now();
     checkRef.current = window.setInterval(async () => {
       try {
         const res = await fetch(embedUrl, { cache: 'no-store' });
@@ -233,7 +261,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               checkRef.current = null;
             }
           }
-        } else if (res.ok) {
+        } else if (res.status === 200) {
           setScrapeStatus('complete');
           setScrapeProgress(100);
           if (intervalRef.current) {
@@ -248,12 +276,19 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             window.clearInterval(checkRef.current);
             checkRef.current = null;
           }
-          window.setTimeout(() => setShowScrapePopup(false), 800);
+          const started = startRef.current ?? Date.now();
+          const elapsed = Date.now() - started;
+          const remaining = Math.max(0, 30000 - elapsed);
+          if (hideTimeoutRef.current) {
+            window.clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+          }
+          hideTimeoutRef.current = window.setTimeout(() => setShowScrapePopup(false), remaining + 800) as unknown as number;
         }
       } catch (e) {
         // ignore and retry
       }
-    }, 5000) as unknown as number;
+    }, 2000) as unknown as number;
   }
 
   // iframe load handler
@@ -271,10 +306,24 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
       timeoutRef.current = null;
     }
 
-    // allow a short delay for UX then hide
-    window.setTimeout(() => {
-      setShowScrapePopup(false);
-    }, 800);
+    // For snayer, ensure popup is visible for at least 30s before hiding.
+    if (provider === 'snayer') {
+      const started = startRef.current ?? Date.now();
+      const elapsed = Date.now() - started;
+      const remaining = Math.max(0, 30000 - elapsed);
+      if (hideTimeoutRef.current) {
+        window.clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
+      hideTimeoutRef.current = window.setTimeout(() => {
+        setShowScrapePopup(false);
+      }, remaining + 800) as unknown as number;
+    } else {
+      // non-snayer: allow a short delay for UX then hide
+      window.setTimeout(() => {
+        setShowScrapePopup(false);
+      }, 800);
+    }
   }
 
   return (
