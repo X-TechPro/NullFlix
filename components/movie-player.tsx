@@ -117,7 +117,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               }
             }
           } else if (res.status === 200) {
-            // page is ready (explicit HTTP 200 required)
+            // page is ready (explicit HTTP 200 required) -> hide immediately
             setScrapeStatus('complete');
             setScrapeProgress(100);
             if (intervalRef.current) {
@@ -132,15 +132,11 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               window.clearInterval(checkRef.current);
               checkRef.current = null;
             }
-            // ensure popup is visible for at least 30s before hiding
-            const started = startRef.current ?? Date.now();
-            const elapsed = Date.now() - started;
-            const remaining = Math.max(0, 30000 - elapsed);
             if (hideTimeoutRef.current) {
               window.clearTimeout(hideTimeoutRef.current);
               hideTimeoutRef.current = null;
             }
-            hideTimeoutRef.current = window.setTimeout(() => setShowScrapePopup(false), remaining + 800) as unknown as number;
+            setShowScrapePopup(false);
           }
         } catch (e) {
           // network error — ignore and retry on next tick
@@ -262,6 +258,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             }
           }
         } else if (res.status === 200) {
+          // page is ready -> hide immediately
           setScrapeStatus('complete');
           setScrapeProgress(100);
           if (intervalRef.current) {
@@ -276,14 +273,11 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             window.clearInterval(checkRef.current);
             checkRef.current = null;
           }
-          const started = startRef.current ?? Date.now();
-          const elapsed = Date.now() - started;
-          const remaining = Math.max(0, 30000 - elapsed);
           if (hideTimeoutRef.current) {
             window.clearTimeout(hideTimeoutRef.current);
             hideTimeoutRef.current = null;
           }
-          hideTimeoutRef.current = window.setTimeout(() => setShowScrapePopup(false), remaining + 800) as unknown as number;
+          setShowScrapePopup(false);
         }
       } catch (e) {
         // ignore and retry
@@ -306,18 +300,13 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
       timeoutRef.current = null;
     }
 
-    // For snayer, ensure popup is visible for at least 30s before hiding.
+    // Hide immediately for snayer when iframe loads and page is visible underneath
     if (provider === 'snayer') {
-      const started = startRef.current ?? Date.now();
-      const elapsed = Date.now() - started;
-      const remaining = Math.max(0, 30000 - elapsed);
       if (hideTimeoutRef.current) {
         window.clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = null;
       }
-      hideTimeoutRef.current = window.setTimeout(() => {
-        setShowScrapePopup(false);
-      }, remaining + 800) as unknown as number;
+      setShowScrapePopup(false);
     } else {
       // non-snayer: allow a short delay for UX then hide
       window.setTimeout(() => {
