@@ -266,8 +266,10 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://snayer.vercel.app/api/movie?tmdb=${mediaId}&api=${bioapi}&title=${snayerTitle}`
       }
       */
-      case "snayer":
-        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}`
+      case "snayer": {
+        const bioapi = localStorage.getItem("bioapi") ||
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${bioapi}`
+      }
       case "snayerm": {
         const snayerTitle = localStorage.getItem("snayerTitle") || ""
         return `https://snayer.vercel.app/api/madplay?tmdb=${mediaId}&title=${snayerTitle}`
