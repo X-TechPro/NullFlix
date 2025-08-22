@@ -335,7 +335,7 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
                           >
                             <Clock className="w-4 h-4 text-slate-300" />
                             <span className="text-slate-200 font-medium text-sm md:text-base">
-                              {movieDetails.runtime} min
+                              {Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m
                             </span>
                           </motion.div>
                         )}
