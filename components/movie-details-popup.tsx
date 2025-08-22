@@ -142,7 +142,7 @@ export default function MovieDetailsPopup({ mediaId, onClose, onPlay, cardRect }
                       <div className="flex items-center gap-2 bg-slate-700 px-3 py-1 rounded-full transform-gpu will-change-transform">
                         <Clock className="w-4 h-4 text-slate-300" />
                         <span className="text-slate-200 font-medium text-sm md:text-base">
-                          {movieDetails.runtime} min
+                          {Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m
                         </span>
                       </div>
                     )}

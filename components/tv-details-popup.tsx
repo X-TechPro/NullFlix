@@ -189,7 +189,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                     >
                       <Clock className="w-4 h-4 text-slate-300" />
                       <span className="text-slate-200 font-medium text-sm md:text-base">
-                        {tvShow.Runtime} min
+                        {Math.floor(tvShow.runtime / 60)}h {tvShow.runtime % 60}m
                       </span>
                     </motion.div>
                   )}
