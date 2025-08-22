@@ -23,9 +23,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
   const [scrapeStatus, setScrapeStatus] = useState<'processing' | 'complete' | 'failed'>('processing');
   const intervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
-  const checkRef = useRef<number | null>(null);
-  const hideTimeoutRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
+  // polling removed to avoid hammering API; only use single timeout and one-shot fetch
   const [iframeKey, setIframeKey] = useState(0);
 
   useEffect(() => {
@@ -45,17 +43,17 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
   useEffect(() => {
     // Only show for snayer
     if (provider === 'snayer') {
-  // initialize
-  setShowScrapePopup(true);
-  setScrapeProgress(0);
-  setScrapeStatus('processing');
-  startRef.current = Date.now();
+      // initialize
+      setShowScrapePopup(true);
+      setScrapeProgress(0);
+      setScrapeStatus('processing');
+      
 
-  // progress interval ~ every 2s increase by 12 until 100
+      // progress interval ~ every 2s increase by 12 until 100
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);
       }
-  intervalRef.current = window.setInterval(() => {
+      intervalRef.current = window.setInterval(() => {
         setScrapeProgress((p) => {
           const np = Math.min(100, p + 12);
           if (np >= 100 && intervalRef.current) {
@@ -66,9 +64,9 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           }
           return np;
         });
-  }, 2000) as unknown as number;
+    }, 2000) as unknown as number;
 
-      // timeout -> mark failed
+      // timeout -> mark failed (35s)
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
       }
@@ -79,29 +77,15 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           window.clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
-        if (checkRef.current) {
-          window.clearInterval(checkRef.current);
-          checkRef.current = null;
-        }
       }, 35000) as unknown as number;
-
-      // start periodic fetch check every 2s to detect JSON error or page readiness (require status 200)
-      if (checkRef.current) {
-        window.clearInterval(checkRef.current);
-      }
-      if (hideTimeoutRef.current) {
-        window.clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = null;
-      }
-      checkRef.current = window.setInterval(async () => {
+      // One-shot fetch to verify endpoint readiness (do not poll)
+      (async () => {
         try {
-          // attempt to fetch the embed URL; some endpoints return JSON with error
           const res = await fetch(embedUrl, { cache: 'no-store' });
           const ct = res.headers.get('content-type') || '';
           if (ct.includes('application/json')) {
             const json = await res.json();
             if (json && json.error === 'Failed to retrieve showbox JSON') {
-              // explicit error from backend -> failed
               setScrapeStatus('failed');
               if (intervalRef.current) {
                 window.clearInterval(intervalRef.current);
@@ -111,13 +95,9 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
                 window.clearTimeout(timeoutRef.current);
                 timeoutRef.current = null;
               }
-              if (checkRef.current) {
-                window.clearInterval(checkRef.current);
-                checkRef.current = null;
-              }
             }
           } else if (res.status === 200) {
-            // page is ready (explicit HTTP 200 required) -> hide immediately
+            // page is ready -> hide immediately
             setScrapeStatus('complete');
             setScrapeProgress(100);
             if (intervalRef.current) {
@@ -128,20 +108,12 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               window.clearTimeout(timeoutRef.current);
               timeoutRef.current = null;
             }
-            if (checkRef.current) {
-              window.clearInterval(checkRef.current);
-              checkRef.current = null;
-            }
-            if (hideTimeoutRef.current) {
-              window.clearTimeout(hideTimeoutRef.current);
-              hideTimeoutRef.current = null;
-            }
             setShowScrapePopup(false);
           }
         } catch (e) {
-          // network error — ignore and retry on next tick
+          // network error — ignore, we'll rely on timeout to mark failure
         }
-      }, 2000) as unknown as number;
+      })();
     } else {
       // ensure popup hidden for other providers
       setShowScrapePopup(false);
@@ -155,14 +127,6 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      if (checkRef.current) {
-        window.clearInterval(checkRef.current);
-        checkRef.current = null;
-      }
-      if (hideTimeoutRef.current) {
-        window.clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = null;
-      }
     }
 
     return () => {
@@ -174,14 +138,6 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      if (checkRef.current) {
-        window.clearInterval(checkRef.current);
-        checkRef.current = null;
-      }
-      if (hideTimeoutRef.current) {
-        window.clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = null;
-      }
     };
   }, [provider, embedUrl]);
 
@@ -192,7 +148,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
     setScrapeProgress(0);
     setScrapeStatus('processing');
     setShowScrapePopup(true);
-  startRef.current = Date.now();
+  
 
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
@@ -221,22 +177,10 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
         window.clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      if (checkRef.current) {
-        window.clearInterval(checkRef.current);
-        checkRef.current = null;
-      }
     }, 35000) as unknown as number;
 
-    // start periodic fetch check every 2s to detect JSON error or page readiness (require status 200)
-    if (checkRef.current) {
-      window.clearInterval(checkRef.current);
-    }
-    if (hideTimeoutRef.current) {
-      window.clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = null;
-    }
-    startRef.current = Date.now();
-    checkRef.current = window.setInterval(async () => {
+    // One-shot fetch to detect readiness (do not poll)
+    (async () => {
       try {
         const res = await fetch(embedUrl, { cache: 'no-store' });
         const ct = res.headers.get('content-type') || '';
@@ -252,13 +196,8 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               window.clearTimeout(timeoutRef.current);
               timeoutRef.current = null;
             }
-            if (checkRef.current) {
-              window.clearInterval(checkRef.current);
-              checkRef.current = null;
-            }
           }
         } else if (res.status === 200) {
-          // page is ready -> hide immediately
           setScrapeStatus('complete');
           setScrapeProgress(100);
           if (intervalRef.current) {
@@ -269,20 +208,12 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             window.clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
           }
-          if (checkRef.current) {
-            window.clearInterval(checkRef.current);
-            checkRef.current = null;
-          }
-          if (hideTimeoutRef.current) {
-            window.clearTimeout(hideTimeoutRef.current);
-            hideTimeoutRef.current = null;
-          }
           setShowScrapePopup(false);
         }
       } catch (e) {
-        // ignore and retry
+        // ignore — timeout will handle failure
       }
-    }, 2000) as unknown as number;
+    })();
   }
 
   // iframe load handler
@@ -302,10 +233,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
 
     // Hide immediately for snayer when iframe loads and page is visible underneath
     if (provider === 'snayer') {
-      if (hideTimeoutRef.current) {
-        window.clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = null;
-      }
+      
       setShowScrapePopup(false);
     } else {
       // non-snayer: allow a short delay for UX then hide
