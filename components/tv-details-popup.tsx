@@ -140,7 +140,6 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
               <div>
                 <div className="flex items-start justify-between mb-2">
                   <motion.h2
-                    layoutId={`title-tv-${tmdbId}`}
                     className="text-2xl md:text-4xl font-bold text-white pr-4 transform-gpu will-change-transform"
                   >
                     {tvShow?.title}
@@ -219,10 +218,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                 </motion.p>
               </div>
               {/* Play button */}
-              <motion.div
-                initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 0.18, duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              <div
                 className="flex justify-end pt-4 md:pt-0 transform-gpu will-change-transform"
               >
                 <Button
@@ -238,7 +234,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                   <Play className="w-4 md:w-5 h-4 md:h-5 mr-2 fill-white" />
                   Play Now
                 </Button>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </div>
