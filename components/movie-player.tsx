@@ -39,6 +39,37 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
     setEmbedUrl(getProviderUrl(mediaId, mediaType, season, episode, title));
   }, [mediaId, mediaType, season, episode, title]);
 
+  // Handle iframe load event
+  useEffect(() => {
+    if (provider === 'snayer') {
+      const handleIframeLoad = () => {
+        setScrapeStatus('complete');
+        setScrapeProgress(100);
+        setShowScrapePopup(false);
+        if (intervalRef.current) {
+          window.clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        if (timeoutRef.current) {
+          window.clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+      };
+
+      // Add event listener for iframe load
+      const iframe = document.querySelector('iframe');
+      if (iframe) {
+        iframe.addEventListener('load', handleIframeLoad);
+      }
+
+      return () => {
+        if (iframe) {
+          iframe.removeEventListener('load', handleIframeLoad);
+        }
+      };
+    }
+  }, [provider]);
+
   // Start/stop scraping popup when provider is snayer
   useEffect(() => {
     // Only show for snayer
@@ -55,7 +86,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
       }
       intervalRef.current = window.setInterval(() => {
         setScrapeProgress((p) => {
-          const np = Math.min(100, p + 12);
+          const np = Math.min(100, p + 6);
           if (np >= 100 && intervalRef.current) {
             window.clearInterval(intervalRef.current);
             intervalRef.current = null;
@@ -64,9 +95,9 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           }
           return np;
         });
-    }, 2000) as unknown as number;
+    }, 3000) as unknown as number;
 
-      // timeout -> mark failed (35s)
+      // timeout -> mark failed (60s)
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
       }
@@ -77,7 +108,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           window.clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
-      }, 35000) as unknown as number;
+      }, 60000) as unknown as number;
       // One-shot fetch to verify endpoint readiness (do not poll)
       (async () => {
         try {
@@ -324,7 +355,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
                     </div>
                   </div>
 
-                  <p className="text-xs text-gray-400 text-center mt-6">Please wait 20-30 seconds. If unsuccessful, please try again as the scraper can sometimes experience issues.</p>
+                  <p className="text-xs text-gray-400 text-center mt-6">Please wait 30-60 seconds. If unsuccessful, please try again as the scraper can sometimes experience issues.</p>
 
                   {scrapeStatus === 'failed' && (
                     <div className="mt-6">
