@@ -210,8 +210,7 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidora.su/tv/${mediaId}/${season}/${episode}?colour=0099ff&autoplay=true&autonextepisode=true`
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
-        const snayerTitle = localStorage.getItem("snayerTitle") || ""
-        return `https://snayer.vercel.app/api/tv?tmdb=${mediaId}&s=${season}&e=${episode}&api=${bioapi}&title=${snayerTitle}`
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2&api=${bioapi}`
       }
       case "snayerm": {
         const snayerTitle = localStorage.getItem("snayerTitle") || ""
