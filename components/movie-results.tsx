@@ -20,7 +20,7 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null)
   const [movieDetails, setMovieDetails] = useState<any | null>(null)
   const [showPlayer, setShowPlayer] = useState(false)
-  const [playerMedia, setPlayerMedia] = useState<{ id: string, type: "movie" | "tv", title?: string } | null>(null)
+  const [playerMedia, setPlayerMedia] = useState<{ id: string, type: "movie" | "tv", title?: string, season?: number, episode?: number } | null>(null)
   const [showEpisodeSelector, setShowEpisodeSelector] = useState(false)
   const [episodeSelectorTmdbId, setEpisodeSelectorTmdbId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false);
@@ -77,12 +77,10 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
   // Handle episode selection from TVEpisodeSelector
   const handleSelectEpisode = (season: number, episode: number) => {
     if (episodeSelectorTmdbId) {
-      setPlayerMedia({ id: episodeSelectorTmdbId, type: "tv", title: undefined })
+      setPlayerMedia({ id: episodeSelectorTmdbId, type: "tv", title: undefined, season, episode })
       setShowPlayer(true)
       setShowEpisodeSelector(false)
       setEpisodeSelectorTmdbId(null)
-      // Optionally, you can store season/episode in localStorage or pass as props to MoviePlayer if needed
-      // For now, just play the show (MoviePlayer may need to be updated to accept season/episode)
     }
   }
 
@@ -99,6 +97,8 @@ export function MediaResults({ media, onMediaSelect, onNewSearch, toggleBookmark
           <MoviePlayer
             mediaId={playerMedia.id}
             mediaType={playerMedia.type}
+            season={playerMedia.season}
+            episode={playerMedia.episode}
             title={playerMedia.title}
             onClose={() => { setShowPlayer(false); setPlayerMedia(null) }}
           />
