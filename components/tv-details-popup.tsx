@@ -76,7 +76,6 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
       onClick={onClose}
     >
       <motion.div
-        layoutId={`card-tv-${tmdbId}`}
         onClick={e => e.stopPropagation()}
         className="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] flex flex-col shadow-2xl will-change-transform"
         initial={{ scale: 0.9, opacity: 0 }}
@@ -87,7 +86,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
         <div className="overflow-y-auto flex flex-col md:flex-row h-full">
           {/* Poster section */}
           <div className="md:sticky md:top-0 md:overflow-hidden">
-            <div
+            <motion.div
               className="relative w-full md:w-80 h-64 md:h-[90vh] flex-shrink-0 transform-gpu will-change-transform group"
             >
               <img
@@ -125,10 +124,10 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                   </>
                 )}
               </button>
-            </div>
+            </motion.div>
           </div>
           {/* Content section */}
-          <div
+          <motion.div
             className="flex-1 md:overflow-y-auto transform-gpu will-change-transform"
           >
             <div className="p-4 md:p-8 flex flex-col justify-between min-h-full">
@@ -218,7 +217,7 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
                 </Button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-50">
