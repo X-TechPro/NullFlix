@@ -67,21 +67,16 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
   }, [tmdbId])
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+    <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start md:items-center justify-center p-2 md:p-4 transform-gpu will-change-transform"
       onClick={onClose}
     >
       <motion.div
         onClick={e => e.stopPropagation()}
         className="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] flex flex-col shadow-2xl will-change-transform"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ type: "tween", duration: 0.12, ease: [0.25, 1, 0.5, 1] }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
       >
         <div className="overflow-y-auto flex flex-col md:flex-row h-full">
           {/* Poster section */}
@@ -234,6 +229,6 @@ export default function TVDetailsPopup({ tmdbId, onClose, onPlay }: TVDetailsPop
           </div>
         )}
       </motion.div>
-    </motion.div>
+    </div>
   )
 }
