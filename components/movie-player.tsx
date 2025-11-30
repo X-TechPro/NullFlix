@@ -78,7 +78,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
       setShowScrapePopup(true);
       setScrapeProgress(0);
       setScrapeStatus('processing');
-      
+
 
       // progress interval ~ every 2s increase by 12 until 100
       if (intervalRef.current) {
@@ -95,7 +95,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
           }
           return np;
         });
-    }, 3000) as unknown as number;
+      }, 3000) as unknown as number;
 
       // timeout -> mark failed (60s)
       if (timeoutRef.current) {
@@ -179,7 +179,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
     setScrapeProgress(0);
     setScrapeStatus('processing');
     setShowScrapePopup(true);
-  
+
 
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
@@ -264,7 +264,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
 
     // Hide immediately for snayer when iframe loads and page is visible underneath
     if (provider === 'snayer') {
-      
+
       setShowScrapePopup(false);
     } else {
       // non-snayer: allow a short delay for UX then hide
@@ -298,7 +298,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             onLoad={handleIframeLoad}
             {...(
-              ["vidrock"].includes(provider ?? "")
+              ["pstream"].includes(provider ?? "")
                 ? { sandbox: "allow-scripts allow-same-origin allow-forms" }
                 : {}
             )}
@@ -318,7 +318,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
               <div className="relative p-8 pb-6 flex-shrink-0">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="bg-gradient-to-r from-[#0099ff] to-cyan-400 bg-clip-text text-2xl font-bold text-transparent tracking-wide">Scraping ShowBox</h2>
-                  <div className={`rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm ${scrapeStatus === 'complete' ? 'text-green-500' : scrapeStatus === 'failed' ? 'text-red-500' : 'text-[#0099ff]'}`}> 
+                  <div className={`rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm ${scrapeStatus === 'complete' ? 'text-green-500' : scrapeStatus === 'failed' ? 'text-red-500' : 'text-[#0099ff]'}`}>
                     {scrapeStatus === 'processing' ? 'Processing' : scrapeStatus === 'complete' ? 'Complete' : 'Failed'}
                   </div>
                 </div>

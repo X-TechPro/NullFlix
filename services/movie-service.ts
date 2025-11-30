@@ -13,33 +13,23 @@ export interface Media {
 }
 
 export type Provider =
-  | "snayerm"
   | "snayer"
   | "videasy"
+  | "vidfast"
   | "vidrock"
   | "pstream"
-  | "1anime"
-  | "embed.su"
-  | "vidsrc.cc"
-  | "autoembed"
-  | "2embed"
-  | "vidsrc.xyz"
-  | "vidsrc.su"
-  | "vidsrc.co"
   | "uembed"
-  | "spenembed"
-  | "vidora"
-  | "vidfast"
-  | "superembed"
+  | "vidplus"
+  | "2embed"
+  | "vidsrc-embed.ru"
 
 export type ProviderServer =
   | "2embed.cc"
   | "2embed.skin"
-  | "vidsrc.xyz"
-  | "vidsrc.in"
-  | "vidsrc.pm"
-  | "vidsrc.me"
-  | "vidsrc.net"
+  | "vidsrc-embed.ru"
+  | "vidsrc-embed.su"
+  | "vidsrcme.su"
+  | "vsrc.su"
 
 /**
  * Revamped searchMedia with:
@@ -177,109 +167,64 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
   if (mediaType === "tv" && season !== undefined && episode !== undefined) {
     // TV show URL with season and episode
     switch (provider) {
-      case "pstream":
-        return `https://iframe.pstream.org/embed/tmdb-tv-${mediaId}/${season}/${episode}`
-      case "1anime":
-        return `https://flix.1ani.me/embed/tmdb-tv-${mediaId}/${season}/${episode}`
+      case "snayer": {
+        const bioapi = localStorage.getItem("bioapi") || ""
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2&api=${bioapi}`
+      }
       case "videasy":
         return `https://player.videasy.net/tv/${mediaId}/${season}/${episode}`
+      case "vidfast":
+        return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
       case "vidrock":
         return `https://vidrock.net/tv/${mediaId}/${season}/${episode}`
-      case "vidsrc.cc":
-        return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${season}/${episode}`
-      case "autoembed":
-        return `https://player.autoembed.cc/embed/tv/${mediaId}/${season}/${episode}`
+      case "pstream":
+        return `https://pstream.mov/embed/tmdb-tv-${mediaId}/${season}/${episode}`
+      case "uembed":
+        return `https://uembed.xyz/?id=${mediaId}&season=${season}&episode=${episode}`
+      case "vidplus":
+        return `https://vidplus.to/embed/tv/${mediaId}/${season}/${episode}`
       case "2embed":
         if (server === "2embed.skin") {
           return `https://www.2embed.skin/embedtv/${mediaId}&s=${season}&e=${episode}`
         } else {
           return `https://www.2embed.cc/embedtv/${mediaId}&s=${season}&e=${episode}`
         }
-      case "vidsrc.xyz":
-        const vidsrcDomain = server || "vidsrc.xyz"
-        return `https://${vidsrcDomain}/embed/tv?tmdb=${mediaId}&season=${season}&episode=${episode}`
-      case "vidsrc.su":
-        return `https://vidsrc.su/embed/tv/${mediaId}/${season}/${episode}`
-      case "vidsrc.co":
-        return `https://player.vidpro.top/embed/tv/${mediaId}/${season}/${episode}`
-      case "uembed":
-        return `https://uembed.site/?id=${mediaId}&season=${season}&episode=${episode}`
-      case "spenembed":
-        return `https://spencerdevs.xyz/tv/${mediaId}/${season}/${episode}?theme=0099ff`
-      case "vidora":
-        return `https://vidora.su/tv/${mediaId}/${season}/${episode}?colour=0099ff&autoplay=true&autonextepisode=true`
-      case "snayer": {
-        const bioapi = localStorage.getItem("bioapi") || ""
-        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2&api=${bioapi}`
-      }
-      case "snayerm": {
-        const snayerTitle = localStorage.getItem("snayerTitle") || ""
-        return `https://snayer.vercel.app/api/madplay?tmdb=${mediaId}&s=${season}&e=${episode}&title=${snayerTitle}`
-      }
-      case "vidfast":
-        return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
-      case "superembed":
-        return `https://multiembed.mov/directstream.php?video_id=${mediaId}&tmdb=1&s=${season}&e=${episode}`
-      case "embed.su":
+      case "vidsrc-embed.ru":
+        const vidsrcDomain = server || "vidsrc-embed.ru"
+        return `https://${vidsrcDomain}/embed/tv/${mediaId}/${season}/${episode}`
       default:
-        return `https://embed.su/embed/tv/${mediaId}/${season}/${episode}`
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2`
     }
   } else {
     // Movie URL
     switch (provider) {
-      case "pstream":
-        return `https://iframe.pstream.org/media/tmdb-movie-${mediaId}`
-      case "1anime":
-        return `https://flix.1ani.me/embed/tmdb-movie-${mediaId}`
+      case "snayer": {
+        const bioapi = localStorage.getItem("bioapi") || ""
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${bioapi}`
+      }
       case "videasy":
         return `https://player.videasy.net/movie/${mediaId}`
+      case "vidfast":
+        return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`
       case "vidrock":
         return `https://vidrock.net/movie/${mediaId}`
-      case "vidsrc.cc":
-        return `https://vidsrc.cc/v2/embed/movie/${mediaId}`
-      case "autoembed":
-        return `https://player.autoembed.cc/embed/movie/${mediaId}`
+      case "pstream":
+        return `https://pstream.mov/media/tmdb-movie-${mediaId}`
+      case "uembed":
+        return `https://uembed.xyz/?id=${mediaId}`
+      case "vidplus":
+        return `https://vidplus.to/embed/movie/${mediaId}`
       case "2embed":
         if (server === "2embed.skin") {
           return `https://www.2embed.skin/embed/${mediaId}`
         } else {
           return `https://www.2embed.cc/embed/${mediaId}`
         }
-      case "vidsrc.xyz":
-        const vidsrcDomain = server || "vidsrc.xyz"
-        return `https://${vidsrcDomain}/embed/movie?tmdb=${mediaId}`
-      case "vidsrc.su":
-        return `https://vidsrc.su/embed/movie/${mediaId}`
-      case "vidsrc.co":
-        return `https://player.vidpro.top/embed/movie/${mediaId}`
-      case "uembed":
-        return `https://uembed.site/?id=${mediaId}`
-      case "spenembed":
-        return `https://spencerdevs.xyz/movie/${mediaId}?theme=0099ff`
-      case "vidora":
-        return `https://vidora.su/movie/${mediaId}?colour=0099ff&autoplay=true&autonextepisode=true`
-      /*
-      case "snayer": {
-        const bioapi = localStorage.getItem("bioapi") || ""
-        const snayerTitle = localStorage.getItem("snayerTitle") || ""
-        return `https://snayer.vercel.app/api/movie?tmdb=${mediaId}&api=${bioapi}&title=${snayerTitle}`
-      }
-      */
-      case "snayer": {
-        const bioapi = localStorage.getItem("bioapi") || ""
-        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${bioapi}`
-      }
-      case "snayerm": {
-        const snayerTitle = localStorage.getItem("snayerTitle") || ""
-        return `https://snayer.vercel.app/api/madplay?tmdb=${mediaId}&title=${snayerTitle}`
-      }
-      case "vidfast":
-        return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`
-      case "superembed":
-        return `https://multiembed.mov/directstream.php?video_id=${mediaId}&tmdb=1`
-      case "embed.su":
+      case "vidsrc-embed.ru":
+        const vidsrcDomain = server || "vidsrc-embed.ru"
+        return `https://${vidsrcDomain}/embed/movie/${mediaId}`
       default:
-        return `https://embed.su/embed/movie/${mediaId}`
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}`
     }
   }
 }

@@ -55,12 +55,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
   // Provider dictionary
   const providers = [
-    /*{
-      id: "snayerm",
-      name: "Snayer - Madplay",
-      url: "https://snayer.vercel.app/",
-      description: "Clean and fast 🔥 (Recommended)",
-    },*/
     {
       id: "snayer",
       name: "Snayer - Showbox",
@@ -88,63 +82,21 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     {
       id: "pstream",
       name: "P-Stream",
-      url: "https://pstream.org/",
+      url: "https://pstream.mov/",
       description: "Best 🔥",
-    },
-    {
-      id: "1anime",
-      name: "1Anime",
-      url: "https://1anime.app/",
-      description: "Second Best 🔥",
     },
     {
       id: "uembed",
       name: "UEmbed",
-      url: "https://uembed.site/",
+      url: "https://uembed.xyz/",
       description: "Good 🔥",
     },
     {
-      id: "vidsrc.co",
-      name: "Vidsrc.co",
-      url: "https://vidsrc.co/",
+      id: "vidplus",
+      name: "VidPlus",
+      url: "https://vidplus.to/",
       description: "Good 👍",
     },
-    /*{
-      id: "spenembed",
-      name: "SpenEmbed",
-      url: "https://spencerdevs.xyz/",
-      description: "Slick UI",
-    },
-    {
-      id: "vidora",
-      name: "Vidora",
-      url: "https://vidora.su/",
-      description: "Slick UI",
-    },
-    {
-      id: "embed.su",
-      name: "Embed.su",
-      url: "https://embed.su/",
-      description: "Good",
-    },*/
-    {
-      id: "vidsrc.cc",
-      name: "Vidsrc.cc",
-      url: "https://vidsrc.cc/",
-      description: "Good 👍",
-    },
-    {
-      id: "autoembed",
-      name: "Autoembed",
-      url: "https://autoembed.cc/",
-      description: "Good 👍",
-    },
-    /*{
-      id: "superembed",
-      name: "SuperEmbed",
-      url: "https://superembed.stream/",
-      description: "Tons of ads",
-    },*/
     {
       id: "2embed",
       name: "2Embed",
@@ -157,25 +109,18 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       ],
     },
     {
-      id: "vidsrc.xyz",
-      name: "Vidsrc.xyz",
-      url: "https://vidsrc.xyz/",
+      id: "vidsrc-embed.ru",
+      name: "Vidsrc-Embed.Ru",
+      url: "https://vidsrc-embed.ru/",
       description: "Multiple servers available",
       hasServers: true,
       servers: [
-        { id: "vidsrc.xyz", name: "vidsrc.xyz" },
-        { id: "vidsrc.in", name: "vidsrc.in" },
-        { id: "vidsrc.pm", name: "vidsrc.pm" },
-        { id: "vidsrc.me", name: "vidsrc.me" },
-        { id: "vidsrc.net", name: "vidsrc.net" },
+        { id: "vidsrc-embed.ru", name: "vidsrc-embed.ru" },
+        { id: "vidsrc-embed.su", name: "vidsrc-embed.su" },
+        { id: "vidsrcme.su", name: "vidsrcme.su" },
+        { id: "vsrc.su", name: "vsrc.su" },
       ],
-    },/*
-    {
-      id: "vidsrc.su",
-      name: "Vidsrc.su",
-      url: "https://vidsrc.su/",
-      description: "Normal",
-    },*/
+    },
   ]
 
   // Load settings from localStorage on component mount
@@ -307,11 +252,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                           // Reset server if provider changes
                           if (!provider.hasServers) setSelectedServer("")
                         }}
-                        className={`w-full text-left rounded-lg border p-3 transition-colors ${
-                          selectedProvider === provider.id
-                            ? "border-[color:var(--theme-primary-light)] bg-[color:var(--theme-container-bg-on)]"
-                            : "border-gray-700 bg-gray-800 hover:border-[color:var(--theme-button-hover)]"
-                        }`}
+                        className={`w-full text-left rounded-lg border p-3 transition-colors ${selectedProvider === provider.id
+                          ? "border-[color:var(--theme-primary-light)] bg-[color:var(--theme-container-bg-on)]"
+                          : "border-gray-700 bg-gray-800 hover:border-[color:var(--theme-button-hover)]"
+                          }`}
                       >
                         <div className="font-semibold text-white">{provider.name}</div>
                         <div className="text-xs text-[color:var(--theme-primary-light)] truncate">
@@ -338,11 +282,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                               key={server.id}
                               type="button"
                               onClick={() => setSelectedServer(server.id)}
-                              className={`px-3 py-1 rounded-md border text-sm transition-colors ${
-                                selectedServer === server.id
-                                  ? "border-[color:var(--theme-primary-light)] bg-[color:var(--theme-container-bg-on)] text-white"
-                                  : "border-gray-700 bg-gray-800 text-gray-300 hover:border-[color:var(--theme-button-hover)]"
-                              }`}
+                              className={`px-3 py-1 rounded-md border text-sm transition-colors ${selectedServer === server.id
+                                ? "border-[color:var(--theme-primary-light)] bg-[color:var(--theme-container-bg-on)] text-white"
+                                : "border-gray-700 bg-gray-800 text-gray-300 hover:border-[color:var(--theme-button-hover)]"
+                                }`}
                             >
                               {server.name}
                             </button>
@@ -383,11 +326,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         type="button"
                         aria-label={key}
                         onClick={() => setTheme(key as ThemeColor)}
-                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${
-                          theme === key
-                            ? 'border-[color:var(--theme-primary-dark)] scale-110 shadow-lg'
-                            : ''
-                        }`}
+                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${theme === key
+                          ? 'border-[color:var(--theme-primary-dark)] scale-110 shadow-lg'
+                          : ''
+                          }`}
                         style={{
                           background: value['--theme-primary'],
                           borderColor: value['--theme-primary-light'],
