@@ -178,11 +178,11 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "vidrock":
         return `https://vidrock.net/tv/${mediaId}/${season}/${episode}`
       case "pstream":
-        return `https://pstream.mov/embed/tmdb-tv-${mediaId}/${season}/${episode}`
+        return `https://iframe.pstream.mov/embed/tmdb-tv-${mediaId}/${season}/${episode}`
       case "uembed":
         return `https://uembed.xyz/?id=${mediaId}&season=${season}&episode=${episode}`
       case "vidplus":
-        return `https://vidplus.to/embed/tv/${mediaId}/${season}/${episode}`
+        return `https://player.vidplus.to/embed/tv/${mediaId}/${season}/${episode}`
       case "2embed":
         if (server === "2embed.skin") {
           return `https://www.2embed.skin/embedtv/${mediaId}&s=${season}&e=${episode}`
@@ -209,11 +209,11 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
       case "vidrock":
         return `https://vidrock.net/movie/${mediaId}`
       case "pstream":
-        return `https://pstream.mov/media/tmdb-movie-${mediaId}`
+        return `https://iframe.pstream.mov/media/tmdb-movie-${mediaId}`
       case "uembed":
         return `https://uembed.xyz/?id=${mediaId}`
       case "vidplus":
-        return `https://vidplus.to/embed/movie/${mediaId}`
+        return `https://player.vidplus.to/embed/movie/${mediaId}`
       case "2embed":
         if (server === "2embed.skin") {
           return `https://www.2embed.skin/embed/${mediaId}`
