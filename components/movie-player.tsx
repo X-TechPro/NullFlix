@@ -298,7 +298,7 @@ export default function MoviePlayer({ mediaId, mediaType, season, episode, title
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             onLoad={handleIframeLoad}
             {...(
-              ["pstream"].includes(provider ?? "")
+              ["vidking"].includes(provider ?? "")
                 ? { sandbox: "allow-scripts allow-same-origin allow-forms" }
                 : {}
             )}
