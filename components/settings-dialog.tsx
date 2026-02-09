@@ -86,6 +86,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       description: "Best 🔥",
     },
     {
+      id: "vidking",
+      name: "VidKing",
+      url: "https://vidking.net/",
+      description: "Modern UI 👍",
+    },
+    {
       id: "uembed",
       name: "UEmbed",
       url: "https://uembed.xyz/",

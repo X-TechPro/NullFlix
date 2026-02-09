@@ -17,6 +17,7 @@ export type Provider =
   | "videasy"
   | "vidfast"
   | "vidrock"
+  | "vidking"
   | "pstream"
   | "uembed"
   | "vidplus"
@@ -116,7 +117,6 @@ export async function searchMedia(query: string): Promise<Media[]> {
           } else if (rt < 49) {
             score -= 50;
           }
-          // 50 <= rt <= 69 or 99 <= rt <= 100 → no change
         }
 
         return { media: item, score };
@@ -177,6 +177,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidfast.pro/tv/${mediaId}/${season}/${episode}?theme=0099ff`
       case "vidrock":
         return `https://vidrock.net/tv/${mediaId}/${season}/${episode}`
+      case "vidking":
+        return `https://vidking.net/embed/tv/${mediaId}/${season}/${episode}?color=008cff`
       case "pstream":
         return `https://iframe.pstream.mov/embed/tmdb-tv-${mediaId}/${season}/${episode}`
       case "uembed":
@@ -208,6 +210,8 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidfast.pro/movie/${mediaId}?theme=0099ff`
       case "vidrock":
         return `https://vidrock.net/movie/${mediaId}`
+      case "vidking":
+        return `https://vidking.net/embed/movie/${mediaId}?color=008cff`
       case "pstream":
         return `https://iframe.pstream.mov/media/tmdb-movie-${mediaId}`
       case "uembed":
