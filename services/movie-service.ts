@@ -60,12 +60,13 @@ function levenshteinDistance(a: string, b: string): number {
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return [];
 
-  // Normalization: lowercase, handle & -> and, keep alphanum and +, collapse spaces
+  // Normalization: lowercase, handle & -> and, + -> plus, keep alphanum, collapse spaces
   const normalize = (s: string) =>
     s
       .toLowerCase()
       .replace(/&/g, 'and')
-      .replace(/[^a-z0-9+]+/gi, ' ')
+      .replace(/\+/g, ' plus ')
+      .replace(/[^a-z0-9]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
@@ -75,7 +76,19 @@ export async function searchMedia(query: string): Promise<Media[]> {
   const qTokens = normalizedQ.split(/\s+/);
 
   try {
-    const tmdbResults = await searchMoviesViaTMDB(query);
+    let tmdbResults = await searchMoviesViaTMDB(query);
+
+    // If few results and query had symbols, try a broader search for the normalized query
+    if (tmdbResults.length < 5 && normalizedQ !== query.toLowerCase()) {
+      const extraResults = await searchMoviesViaTMDB(normalizedQ);
+      const seenIds = new Set(tmdbResults.map((r: any) => r.id.toString()));
+      for (const r of extraResults) {
+        if (!seenIds.has(r.id.toString())) {
+          tmdbResults.push(r);
+        }
+      }
+    }
+
     if (!tmdbResults || tmdbResults.length === 0) return [];
 
     const scored = tmdbResults
@@ -90,14 +103,19 @@ export async function searchMedia(query: string): Promise<Media[]> {
 
         // Calculate token match scores
         let matchedTokensCount = 0;
+        let partialMatchCount = 0;
         let fuzzyMatchedTokensCount = 0;
 
         for (const qt of qTokens) {
           if (tTokens.includes(qt)) {
             matchedTokensCount++;
           } else {
-            // Fuzzy match for tokens > 3 chars
-            if (qt.length > 3) {
+            // Partial match (e.g. "f" matches "fplus")
+            const hasPartial = tTokens.some(tt => tt.includes(qt) || qt.includes(tt));
+            if (hasPartial) {
+              partialMatchCount++;
+            } else if (qt.length > 3) {
+              // Fuzzy match for longer tokens
               const hasCloseMatch = tTokens.some(tt => {
                 const dist = levenshteinDistance(qt, tt);
                 return dist === 1 || (qt.length > 6 && dist <= 2);
@@ -107,14 +125,12 @@ export async function searchMedia(query: string): Promise<Media[]> {
           }
         }
 
-        const tokenMatchRatio = (matchedTokensCount + fuzzyMatchedTokensCount) / qTokens.length;
+        const tokenMatchRatio = (matchedTokensCount + partialMatchCount + fuzzyMatchedTokensCount) / qTokens.length;
         const includesExact = normalizedTitle.includes(normalizedQ);
         const isExact = normalizedTitle === normalizedQ;
 
-        // Filter out very poor matches if it's multiple words
-        // If query is "F+", and title is "Fast & Furious", matchRatio will be 0.
-        // We drop if matchRatio is low AND it doesn't even contain the normalized string
-        if (tokenMatchRatio < 0.4 && !includesExact) {
+        // Be more lenient for matches
+        if (tokenMatchRatio < 0.3 && !includesExact) {
           return { media: item, score: Number.NEGATIVE_INFINITY };
         }
 
@@ -122,31 +138,31 @@ export async function searchMedia(query: string): Promise<Media[]> {
 
         // 1) Heavily weight exact and starts-with matches
         if (isExact) {
-          score += 1000;
+          score += 2000;
         } else if (normalizedTitle.startsWith(normalizedQ)) {
-          score += 500;
+          score += 1000;
         } else if (includesExact) {
-          score += 200;
+          score += 500;
         }
 
         // 2) Token match weight
-        score += matchedTokensCount * 100;
+        score += matchedTokensCount * 200;
+        score += partialMatchCount * 100;
         score += fuzzyMatchedTokensCount * 50;
 
-        // 3) Penalty for extra words beyond the query: -10 per extra word
+        // 3) Penalty for extra words beyond the query: -15 per extra word
         const extraWords = Math.max(0, tTokens.length - qTokens.length);
-        score -= extraWords * 10;
+        score -= extraWords * 15;
 
-        // 4) Popularity bonus: cap at +30
-        if (typeof item.popularity === 'number' && item.popularity > 2) {
-          score += Math.min(item.popularity, 30);
+        // 4) Popularity bonus: cap at +50
+        if (typeof item.popularity === 'number' && item.popularity > 1) {
+          score += Math.min(item.popularity, 50);
         }
 
-        // 5) Runtime bonus (only for movies)
-        if (item.media_type === 'movie' && typeof item.runtime === 'number') {
-          const rt = item.runtime;
-          if (rt > 100) score += 20;
-          else if (rt < 50) score -= 30;
+        // 5) Release year bonus (favor newer content slightly)
+        const releaseDate = item.release_date || item.first_air_date || '';
+        if (releaseDate.startsWith('202')) {
+          score += 50;
         }
 
         return { media: item, score };
