@@ -76,20 +76,30 @@ export async function searchMedia(query: string): Promise<Media[]> {
   const qTokens = normalizedQ.split(/\s+/);
 
   try {
-    let tmdbResults = await searchMoviesViaTMDB(query);
+    // Search both original and normalized in parallel if they differ
+    const searchQueries = [query];
+    const lowerQuery = query.toLowerCase().trim();
+    if (normalizedQ !== lowerQuery && normalizedQ !== lowerQuery.replace(/\+/g, '')) {
+      searchQueries.push(normalizedQ);
+    }
 
-    // If few results and query had symbols, try a broader search for the normalized query
-    if (tmdbResults.length < 5 && normalizedQ !== query.toLowerCase()) {
-      const extraResults = await searchMoviesViaTMDB(normalizedQ);
-      const seenIds = new Set(tmdbResults.map((r: any) => r.id.toString()));
-      for (const r of extraResults) {
-        if (!seenIds.has(r.id.toString())) {
-          tmdbResults.push(r);
+    const allResults = await Promise.all(searchQueries.map(q => searchMoviesViaTMDB(q)));
+
+    // Flatten and deduplicate
+    const tmdbResults: any[] = [];
+    const seenIds = new Set<string>();
+
+    for (const results of allResults) {
+      for (const item of results) {
+        const id = item.id.toString();
+        if (!seenIds.has(id)) {
+          tmdbResults.push(item);
+          seenIds.add(id);
         }
       }
     }
 
-    if (!tmdbResults || tmdbResults.length === 0) return [];
+    if (tmdbResults.length === 0) return [];
 
     const scored = tmdbResults
       .map((item: any) => {
