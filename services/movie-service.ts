@@ -33,27 +33,46 @@ export type ProviderServer =
   | "vsrc.su"
 
 /**
- * Revamped searchMedia with:
- * 1) Penalty for extra words beyond the query: -5 per extra word.
- * 2) Popularity bonus capped at a maximum of +15.
- * 3) Runtime bonus/penalty still applied as before.
+ * Levenshtein distance helper for fuzzy matching
+ */
+function levenshteinDistance(a: string, b: string): number {
+  const matrix = Array.from({ length: a.length + 1 }, () =>
+    Array.from({ length: b.length + 1 }, () => 0)
+  );
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
+}
+
+/**
+ * Revamped searchMedia with fuzzy matching and token-based scoring.
  */
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return [];
 
-  // Normalization helper: lowercase, replace non-alphanum with space, collapse spaces, trim
+  // Normalization: lowercase, handle & -> and, keep alphanum and +, collapse spaces
   const normalize = (s: string) =>
     s
       .toLowerCase()
-      .replace(/&/g, 'and') // Replace & with 'and'
-      .replace(/[^a-z0-9]+/gi, ' ')
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9+]+/gi, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
-  const q = query.toLowerCase().trim();
   const normalizedQ = normalize(query);
-  const queryWordCount = normalizedQ.split(/\s+/).length;
-  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!normalizedQ) return [];
+
+  const qTokens = normalizedQ.split(/\s+/);
 
   try {
     const tmdbResults = await searchMoviesViaTMDB(query);
@@ -61,62 +80,73 @@ export async function searchMedia(query: string): Promise<Media[]> {
 
     const scored = tmdbResults
       .map((item: any) => {
-        //  — Use "title" if movie, "name" if TV
         const rawTitle =
           item.media_type === 'movie'
             ? (item.title || '')
             : (item.name || '');
-        const title = rawTitle.toLowerCase().trim();
-        const normalizedTitle = normalize(rawTitle);
 
-        // Drop if normalized query isn't anywhere in normalized title
-        if (!normalizedTitle.includes(normalizedQ)) {
+        const normalizedTitle = normalize(rawTitle);
+        const tTokens = normalizedTitle.split(/\s+/);
+
+        // Calculate token match scores
+        let matchedTokensCount = 0;
+        let fuzzyMatchedTokensCount = 0;
+
+        for (const qt of qTokens) {
+          if (tTokens.includes(qt)) {
+            matchedTokensCount++;
+          } else {
+            // Fuzzy match for tokens > 3 chars
+            if (qt.length > 3) {
+              const hasCloseMatch = tTokens.some(tt => {
+                const dist = levenshteinDistance(qt, tt);
+                return dist === 1 || (qt.length > 6 && dist <= 2);
+              });
+              if (hasCloseMatch) fuzzyMatchedTokensCount++;
+            }
+          }
+        }
+
+        const tokenMatchRatio = (matchedTokensCount + fuzzyMatchedTokensCount) / qTokens.length;
+        const includesExact = normalizedTitle.includes(normalizedQ);
+        const isExact = normalizedTitle === normalizedQ;
+
+        // Filter out very poor matches if it's multiple words
+        // If query is "F+", and title is "Fast & Furious", matchRatio will be 0.
+        // We drop if matchRatio is low AND it doesn't even contain the normalized string
+        if (tokenMatchRatio < 0.4 && !includesExact) {
           return { media: item, score: Number.NEGATIVE_INFINITY };
         }
 
         let score = 0;
 
-        // 1) Starts-with boost (normalized)
-        if (normalizedTitle.startsWith(normalizedQ)) {
-          score += 100;
+        // 1) Heavily weight exact and starts-with matches
+        if (isExact) {
+          score += 1000;
+        } else if (normalizedTitle.startsWith(normalizedQ)) {
+          score += 500;
+        } else if (includesExact) {
+          score += 200;
         }
 
-        // 2) Whole-word boost (if not startsWith)
-        const wholeWordRe = new RegExp(`\\b${escapeRegex(normalizedQ)}\\b`);
-        if (wholeWordRe.test(normalizedTitle) && !normalizedTitle.startsWith(normalizedQ)) {
-          score += 50;
-        }
+        // 2) Token match weight
+        score += matchedTokensCount * 100;
+        score += fuzzyMatchedTokensCount * 50;
 
-        // 3) Partial-only match penalty (e.g. "carson" when q="cars")
-        if (!wholeWordRe.test(normalizedTitle)) {
-          score -= 80;
-        }
+        // 3) Penalty for extra words beyond the query: -10 per extra word
+        const extraWords = Math.max(0, tTokens.length - qTokens.length);
+        score -= extraWords * 10;
 
-        // 4) Penalty for extra words beyond the query:
-        //    titleWordCount – queryWordCount = extraWords; each extra = -5
-        const titleWordCount = normalizedTitle.split(/\s+/).length;
-        const extraWords = titleWordCount - queryWordCount;
-        if (extraWords > 0) {
-          score -= extraWords * 5;
-        }
-
-        // 5) Popularity bonus: +1 for every 0.5 pop > 2.0, capped at +15
+        // 4) Popularity bonus: cap at +30
         if (typeof item.popularity === 'number' && item.popularity > 2) {
-          const rawBonus = Math.floor((item.popularity - 2) / 0.5);
-          const bonus = Math.min(rawBonus, 15);
-          score += bonus;
+          score += Math.min(item.popularity, 30);
         }
 
-        // 6) Runtime bonus/penalty (only for movies)
+        // 5) Runtime bonus (only for movies)
         if (item.media_type === 'movie' && typeof item.runtime === 'number') {
           const rt = item.runtime;
-          if (rt > 100) {
-            score += 50;
-          } else if (rt > 70 && rt < 99) {
-            score += 30;
-          } else if (rt < 49) {
-            score -= 50;
-          }
+          if (rt > 100) score += 20;
+          else if (rt < 50) score -= 30;
         }
 
         return { media: item, score };
@@ -143,7 +173,6 @@ export async function searchMedia(query: string): Promise<Media[]> {
     return [];
   }
 }
-
 
 export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", season?: number, episode?: number, title?: string): string {
   // Use a try-catch block to handle potential localStorage errors
