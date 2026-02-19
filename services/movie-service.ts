@@ -59,9 +59,29 @@ export async function searchMedia(query: string): Promise<Media[]> {
       variations.add(query.replace(/and/gi, " & "));
     }
 
+    // 3rd variation: Just words, no punctuation/symbols (e.g. "WALL·E" -> "WALL E")
+    const wordsOnly = query.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+    if (wordsOnly && wordsOnly !== query) {
+      variations.add(wordsOnly);
+    }
+
+    // 4th strategy: "Anchor search" - combat TMDB brittleness.
+    // TMDB fails "five night at freddy's" (0 results), but "freddy" finds it.
+    // We search for the 2 longest unique words (min 4 chars) as fallbacks.
+    const tokens = wordsOnly.split(" ").filter(t => t.length >= 4);
+    if (tokens.length > 0) {
+      const anchors = Array.from(new Set(tokens))
+        .sort((a, b) => b.length - a.length)
+        .slice(0, 2);
+      anchors.forEach(a => variations.add(a));
+    }
+
+    // Limit to 5 parallel variations max to keep it fast
+    const variationsArray = Array.from(variations).slice(0, 5);
+
     // Run searches in parallel for all variations
     const allResultsGroups = await Promise.all(
-      Array.from(variations).map((q) => searchMoviesViaTMDB(q))
+      variationsArray.map((q) => searchMoviesViaTMDB(q))
     );
 
     // Flatten and deduplicate by TMDB ID
@@ -86,7 +106,6 @@ export async function searchMedia(query: string): Promise<Media[]> {
       threshold: 0.4,
     });
 
-    const variationsArray = Array.from(variations);
     const fuseResults = fuse.search(query);
     const fuseScoreMap = new Map<string, number>();
 
