@@ -46,6 +46,7 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "latest",
     "framer-motion": "latest",
+    "fuse.js": "^7.1.0",
     "input-otp": "latest",
     "lucide-react": "^0.454.0",
     "next": "15.2.8",
