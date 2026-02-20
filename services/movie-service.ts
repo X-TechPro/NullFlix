@@ -34,39 +34,94 @@ export type ProviderServer =
   | "vsrc.su"
 
 /**
+ * Generate query variations to handle symbols that IMDB/TMDB may interpret differently
+ */
+function generateQueryVariations(query: string): string[] {
+  const variations = new Set<string>();
+  const lowerQuery = query.toLowerCase();
+  
+  // Add original query
+  variations.add(query);
+
+  // Symbol <-> word mappings
+  const mappings: [RegExp, string][] = [
+    [/\+/g, " plus "],
+    [/ plus /gi, " + "],
+    [/&/g, " and "],
+    [/ and /gi, " & "],
+    [/#/g, " number "],
+    [/ number /gi, " # "],
+    [/\$/g, " dollar "],
+    [/ dollar /gi, " $ "],
+    [/%/g, " percent "],
+    [/ percent /gi, " % "],
+    [/@/g, " at "],
+    [/ at /gi, " @ "],
+  ];
+
+  mappings.forEach(([regex, replacement]) => {
+    const transformed = query.replace(regex, replacement);
+    if (transformed !== query) {
+      variations.add(transformed);
+    }
+  });
+
+  return Array.from(variations);
+}
+
+/**
  * Revamped searchMedia with hybrid scoring:
- * 1. Search IMDB API for fuzzy matching (handles typos well)
- * 2. Use TMDB's Find by External ID to get TMDB data
+ * 1. Search IMDB API with query variations for better symbol handling
+ * 2. Use TMDB's Find by External ID to get TMDB data (fully parallel)
  * 3. Rerank using Fuse.js similarity + TMDB popularity/vote data
  */
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return [];
 
   try {
-    // Step 1: Search IMDB API (handles typos/fuzzy well)
-    const imdbResults = await searchViaIMDB(query);
+    // Step 1: Generate query variations for symbol handling
+    const variations = generateQueryVariations(query);
+
+    // Step 2: Search IMDB API for all variations in parallel
+    const allImdbResultsGroups = await Promise.all(
+      variations.map((v) => searchViaIMDB(v))
+    );
+
+    // Flatten and deduplicate by IMDB ID
+    const imdbResultsMap = new Map<string, any>();
+    allImdbResultsGroups.forEach((results) => {
+      if (results && Array.isArray(results)) {
+        results.forEach((item) => {
+          if (item.id) {
+            imdbResultsMap.set(item.id, item);
+          }
+        });
+      }
+    });
+
+    const imdbResults = Array.from(imdbResultsMap.values());
     if (imdbResults.length === 0) return [];
 
-    // Step 2: Get TMDB data for each IMDB ID (in parallel batches to avoid rate limits)
-    const tmdbResultsMap = new Map<string, any>();
+    // Step 3: Get TMDB data for all IMDB IDs in FULLY PARALLEL (no batching)
+    const tmdbPromises = imdbResults.map(async (imdbItem) => {
+      const tmdbData = await findTMDBByIMDBId(imdbItem.id);
+      return tmdbData;
+    });
+
+    const tmdbResultsAll = await Promise.all(tmdbPromises);
     
-    // Process in batches of 10 to avoid overwhelming the API
-    const batchSize = 10;
-    for (let i = 0; i < imdbResults.length; i += batchSize) {
-      const batch = imdbResults.slice(i, i + batchSize);
-      const tmdbPromises = batch.map(async (imdbItem) => {
-        const tmdbData = await findTMDBByIMDBId(imdbItem.id);
-        if (tmdbData && tmdbData.id) {
-          tmdbResultsMap.set(tmdbData.id.toString(), tmdbData);
-        }
-      });
-      await Promise.all(tmdbPromises);
-    }
+    // Filter out nulls and deduplicate by TMDB ID
+    const tmdbResultsMap = new Map<string, any>();
+    tmdbResultsAll.forEach((item) => {
+      if (item && item.id) {
+        tmdbResultsMap.set(item.id.toString(), item);
+      }
+    });
 
     const tmdbResults = Array.from(tmdbResultsMap.values());
     if (tmdbResults.length === 0) return [];
 
-    // Step 3: Initialize Fuse.js for fuzzy matching on TMDB results
+    // Step 4: Initialize Fuse.js for fuzzy matching on TMDB results
     const fuse = new Fuse(tmdbResults, {
       keys: ["title", "name", "original_title", "original_name"],
       includeScore: true,
@@ -102,11 +157,13 @@ export async function searchMedia(query: string): Promise<Media[]> {
         let finalScore =
           fuseSimilarity * 0.5 + popularityNorm * 0.3 + voteCountNorm * 0.2;
 
-        // exact_match bonus if title equals query (case-insensitive)
+        // exact_match bonus if title equals query or any variation (case-insensitive)
         const rawTitle = (item.title || item.name || "").toLowerCase().trim();
-        const queryLower = query.toLowerCase().trim();
-        
-        if (rawTitle === queryLower) {
+        const isExactMatch = variations.some(
+          (v) => v.toLowerCase().trim() === rawTitle
+        );
+
+        if (isExactMatch) {
           finalScore += 0.2; // Bonus for exact match
         }
 
