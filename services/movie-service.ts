@@ -1,5 +1,5 @@
 import { getTVShowByTMDB } from "@/utils/db"
-import { searchMoviesViaTMDB } from "@/services/tmdb-service"
+import { searchViaIMDB, findTMDBByIMDBId } from "@/services/tmdb-service"
 import Fuse from "fuse.js"
 
 export interface Media {
@@ -35,73 +35,55 @@ export type ProviderServer =
 
 /**
  * Revamped searchMedia with hybrid scoring:
- * Blends Fuse.js similarity, TMDB popularity, and vote count.
+ * 1. Search IMDB API for fuzzy matching (handles typos well)
+ * 2. Use TMDB's Find by External ID to get TMDB data
+ * 3. Rerank using Fuse.js similarity + TMDB popularity/vote data
  */
 export async function searchMedia(query: string): Promise<Media[]> {
   if (!query.trim()) return [];
 
   try {
-    // Generate query variations to handle TMDB's sensitivity to symbols
-    const variations = new Set<string>();
-    const lowerQuery = query.toLowerCase();
-    variations.add(query);
+    // Step 1: Search IMDB API (handles typos/fuzzy well)
+    const imdbResults = await searchViaIMDB(query);
+    if (imdbResults.length === 0) return [];
 
-    if (query.includes("+")) {
-      variations.add(query.replace(/\+/g, " plus "));
-    }
-    if (lowerQuery.includes("plus")) {
-      variations.add(query.replace(/plus/gi, " + "));
-    }
-    if (query.includes("&")) {
-      variations.add(query.replace(/&/g, " and "));
-    }
-    if (lowerQuery.includes("and")) {
-      variations.add(query.replace(/and/gi, " & "));
-    }
-
-    // Run searches in parallel for all variations
-    const allResultsGroups = await Promise.all(
-      Array.from(variations).map((q) => searchMoviesViaTMDB(q))
-    );
-
-    // Flatten and deduplicate by TMDB ID
+    // Step 2: Get TMDB data for each IMDB ID (in parallel batches to avoid rate limits)
     const tmdbResultsMap = new Map<string, any>();
-    allResultsGroups.forEach((results) => {
-      if (results && Array.isArray(results)) {
-        results.forEach((item) => {
-          if (item.id) {
-            tmdbResultsMap.set(item.id.toString(), item);
-          }
-        });
-      }
-    });
+    
+    // Process in batches of 10 to avoid overwhelming the API
+    const batchSize = 10;
+    for (let i = 0; i < imdbResults.length; i += batchSize) {
+      const batch = imdbResults.slice(i, i + batchSize);
+      const tmdbPromises = batch.map(async (imdbItem) => {
+        const tmdbData = await findTMDBByIMDBId(imdbItem.id);
+        if (tmdbData && tmdbData.id) {
+          tmdbResultsMap.set(tmdbData.id.toString(), tmdbData);
+        }
+      });
+      await Promise.all(tmdbPromises);
+    }
 
     const tmdbResults = Array.from(tmdbResultsMap.values());
     if (tmdbResults.length === 0) return [];
 
-    // Initialize Fuse.js for fuzzy matching on results returned by TMDB
+    // Step 3: Initialize Fuse.js for fuzzy matching on TMDB results
     const fuse = new Fuse(tmdbResults, {
-      keys: ["title", "name"],
+      keys: ["title", "name", "original_title", "original_name"],
       includeScore: true,
       threshold: 0.4,
     });
 
-    const variationsArray = Array.from(variations);
     const fuseResults = fuse.search(query);
     const fuseScoreMap = new Map<string, number>();
 
-    // For each variation, perform a Fuse search and keep the best score for each item
-    variationsArray.forEach((v) => {
-      const results = fuse.search(v);
-      results.forEach((res) => {
-        if (res.item.id) {
-          const idStr = res.item.id.toString();
-          const currentBest = fuseScoreMap.get(idStr) ?? 1;
-          if ((res.score ?? 1) < currentBest) {
-            fuseScoreMap.set(idStr, res.score ?? 1);
-          }
+    fuseResults.forEach((res) => {
+      if (res.item.id) {
+        const idStr = res.item.id.toString();
+        const currentBest = fuseScoreMap.get(idStr) ?? 1;
+        if ((res.score ?? 1) < currentBest) {
+          fuseScoreMap.set(idStr, res.score ?? 1);
         }
-      });
+      }
     });
 
     const scored = tmdbResults
@@ -120,13 +102,11 @@ export async function searchMedia(query: string): Promise<Media[]> {
         let finalScore =
           fuseSimilarity * 0.5 + popularityNorm * 0.3 + voteCountNorm * 0.2;
 
-        // exact_match bonus if title equals query or any variation (case-insensitive)
+        // exact_match bonus if title equals query (case-insensitive)
         const rawTitle = (item.title || item.name || "").toLowerCase().trim();
-        const isExactMatch = variationsArray.some(
-          (v) => v.toLowerCase().trim() === rawTitle
-        );
-
-        if (isExactMatch) {
+        const queryLower = query.toLowerCase().trim();
+        
+        if (rawTitle === queryLower) {
           finalScore += 0.2; // Bonus for exact match
         }
 
@@ -149,7 +129,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
       } as Media;
     });
   } catch (error) {
-    console.error("Error searching with TMDB API:", error);
+    console.error("Error searching with IMDB/TMDB API:", error);
     return [];
   }
 }
