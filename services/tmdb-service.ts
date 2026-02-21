@@ -113,14 +113,14 @@ export async function findTMDBByIMDBId(imdbId: string): Promise<TMDBMovie | null
     const url = `https://api.themoviedb.org/3/find/${imdbId}?external_source=imdb_id`
     const data = await fetchTMDB(url)
     if (!data) return null
-    
+
     // TMDB returns results in different arrays based on type
     const movieResults = data.movie_results || []
     const tvResults = data.tv_results || []
-    
+
     // Prefer movie results, fallback to TV
     const result = movieResults[0] || tvResults[0]
-    
+
     if (result) {
       return {
         ...result,
@@ -150,5 +150,5 @@ export async function fetchMovieDetailsByTMDB(id: string, type: "movie" | "tv" =
 
 export function getTMDBPoster(posterPath: string): string {
   if (!posterPath) return ""
-  return `https://image.tmdb.org/t/p/w500/${posterPath}`
+  return `https://image.tmdb.org/t/p/w780/${posterPath}`
 }

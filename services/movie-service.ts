@@ -39,7 +39,7 @@ export type ProviderServer =
 function generateQueryVariations(query: string): string[] {
   const variations = new Set<string>();
   const lowerQuery = query.toLowerCase();
-  
+
   // Add original query
   variations.add(query);
 
@@ -109,7 +109,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
     });
 
     const tmdbResultsAll = await Promise.all(tmdbPromises);
-    
+
     // Filter out nulls and deduplicate by TMDB ID
     const tmdbResultsMap = new Map<string, any>();
     tmdbResultsAll.forEach((item) => {
@@ -181,7 +181,7 @@ export async function searchMedia(query: string): Promise<Media[]> {
         genre: Array.isArray(media.genre_ids) ? media.genre_ids.join(",") : "",
         type: media.media_type === "tv" ? "tv" : "movie",
         poster: media.poster_path
-          ? `https://image.tmdb.org/t/p/w500/${media.poster_path}`
+          ? `https://image.tmdb.org/t/p/w780/${media.poster_path}`
           : undefined,
       } as Media;
     });
