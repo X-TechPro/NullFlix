@@ -12,20 +12,27 @@ if (typeof window !== "undefined") {
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { X, Download, Check, AlertTriangle, Info, RefreshCw, Trash2, Settings2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
+import { X, Check, AlertTriangle, Info, Settings } from "lucide-react"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeProvider as ThemeColorProvider, useThemeColor, THEME_COLORS_META } from "@/components/theme-color-context"
 import type { ThemeColor } from "@/components/theme-color-context"
-import { url } from "inspector"
 
 interface SettingsDialogProps {
   isOpen: boolean
   onClose: () => void
+}
+
+// Theme color mapping
+const THEME_COLOR_VALUES: Record<string, string> = {
+  sky: "#0ea5e9",
+  blue: "#3b82f6",
+  purple: "#a855f7",
+  pink: "#ec4899",
+  red: "#ef4444",
+  orange: "#f97316",
+  green: "#22c55e",
+  teal: "#14b8a6",
+  yellow: "#eab308",
 }
 
 export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
@@ -42,12 +49,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     typeof window !== "undefined" && localStorage.getItem("selectedServer")
       ? localStorage.getItem("selectedServer") as string
       : ""
-  )
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [downloadStatus, setDownloadStatus] = useState("")
-  const [enableDiscover, setEnableDiscover] = useState<boolean>(
-    typeof window !== "undefined" && localStorage.getItem("enableDiscover") === "true"
   )
   const [discoverEnabled, setDiscoverEnabled] = useState(
     typeof window !== "undefined" && localStorage.getItem("discover") === "true"
@@ -152,9 +153,9 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setBioApiKey(savedBioApiKey)
       }
 
-      const savedEnableDiscover = localStorage.getItem("enableDiscover")
-      if (savedEnableDiscover !== null) {
-        setEnableDiscover(savedEnableDiscover === "true")
+      const savedDiscover = localStorage.getItem("discover")
+      if (savedDiscover !== null) {
+        setDiscoverEnabled(savedDiscover === "true")
       }
 
       const savedTheme = localStorage.getItem("theme")
@@ -199,80 +200,99 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     setDiscoverEnabled(checked)
     if (typeof window !== "undefined") {
       localStorage.setItem("discover", checked ? "true" : "false")
-      window.dispatchEvent(new Event("storage")) // trigger update in other tabs/components
+      window.dispatchEvent(new Event("storage"))
     }
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+    <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-2 md:p-4 bg-black/70 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-gray-800 rounded-lg shadow-2xl"
+        className="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden w-full max-w-2xl max-h-[95vh] md:max-h-[90vh] flex flex-col shadow-2xl relative"
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 md:p-6 bg-slate-800 border-b border-slate-700">
           <div className="flex items-center gap-2">
-            <Settings2 className="w-5 h-5 text-[color:var(--theme-primary-light)]" />
-            <h2 className="text-xl font-bold text-white">Settings</h2>
+            <Settings className="w-5 h-5 md:w-6 md:h-6 text-sky-400" />
+            <h2 className="text-xl md:text-2xl font-bold text-white">Settings</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 transition-colors rounded-full hover:bg-gray-700 hover:text-white"
+            className="p-2 text-slate-400 transition-colors rounded-full hover:bg-slate-700 hover:text-white"
           >
-            <X size={18} />
+            <X className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
 
-        <div className="p-4">
-          <Tabs
-            defaultValue="providers"
-            value={activeTab}
-            onValueChange={setActiveTab}
-          >
-            <TabsList className="w-full mb-4 bg-gray-700">
-              <TabsTrigger value="providers" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary)] data-[state=active]:text-white">
-                Providers
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary)] data-[state=active]:text-white">
-                Settings
-              </TabsTrigger>
-              <TabsTrigger value="about" className="flex-1 data-[state=active]:bg-[color:var(--theme-primary)] data-[state=active]:text-white">
-                About
-              </TabsTrigger>
-            </TabsList>
+        {/* Content */}
+        <div className="p-4 md:p-6 overflow-y-auto flex-1">
+          {/* Custom Tabs */}
+          <div className="flex gap-1 mb-4 md:mb-6 bg-slate-700/50 p-1 rounded-xl">
+            <button
+              onClick={() => setActiveTab("providers")}
+              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${
+                activeTab === "providers"
+                  ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Providers
+            </button>
+            <button
+              onClick={() => setActiveTab("settings")}
+              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${
+                activeTab === "settings"
+                  ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Settings
+            </button>
+            <button
+              onClick={() => setActiveTab("about")}
+              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${
+                activeTab === "about"
+                  ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              About
+            </button>
+          </div>
 
-            <TabsContent value="providers" className="space-y-4">
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-white mb-2 block">Video Provider</Label>
-                  <div className="flex flex-col gap-3">
-                    {providers.map((provider) => (
-                      <button
-                        key={provider.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedProvider(provider.id)
-                          // Reset server if provider changes
-                          if (!provider.hasServers) setSelectedServer("")
-                        }}
-                        className={`w-full text-left rounded-lg border p-3 transition-colors ${selectedProvider === provider.id
-                          ? "border-[color:var(--theme-primary-light)] bg-[color:var(--theme-container-bg-on)]"
-                          : "border-gray-700 bg-gray-800 hover:border-[color:var(--theme-button-hover)]"
-                          }`}
-                      >
-                        <div className="font-semibold text-white">{provider.name}</div>
-                        <div className="text-xs text-[color:var(--theme-primary-light)] truncate">
-                          <a href={provider.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                            {provider.url}
-                          </a>
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">{provider.description}</div>
-                      </button>
-                    ))}
-                  </div>
+          {/* Providers Tab */}
+          {activeTab === "providers" && (
+            <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
+                <Label className="text-white text-base md:text-lg font-medium block mb-3">Video Provider</Label>
+                <div className="flex flex-col gap-3">
+                  {providers.map((provider) => (
+                    <button
+                      key={provider.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedProvider(provider.id)
+                        if (!provider.hasServers) setSelectedServer("")
+                      }}
+                      className={`w-full text-left rounded-xl border p-3 md:p-4 transition-all ${
+                        selectedProvider === provider.id
+                          ? "border-sky-400 bg-slate-700/50"
+                          : "border-slate-600 bg-slate-700/50 hover:border-sky-400"
+                      }`}
+                    >
+                      <div className="font-semibold text-white text-sm md:text-base">{provider.name}</div>
+                      <div className="text-xs text-sky-400 truncate">
+                        <a href={provider.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          {provider.url}
+                        </a>
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">{provider.description}</div>
+                    </button>
+                  ))}
                 </div>
 
                 {/* Server selection for providers with servers */}
@@ -280,18 +300,19 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   const selected = providers.find((p) => p.id === selectedProvider)
                   if (selected && selected.hasServers && selected.servers) {
                     return (
-                      <div>
-                        <Label className="text-white mb-2 block">Server</Label>
+                      <div className="mt-4">
+                        <Label className="text-white text-base md:text-lg font-medium block mb-2">Server</Label>
                         <div className="flex flex-wrap gap-2">
                           {selected.servers.map((server: any) => (
                             <button
                               key={server.id}
                               type="button"
                               onClick={() => setSelectedServer(server.id)}
-                              className={`px-3 py-1 rounded-md border text-sm transition-colors ${selectedServer === server.id
-                                ? "border-[color:var(--theme-primary-light)] bg-[color:var(--theme-container-bg-on)] text-white"
-                                : "border-gray-700 bg-gray-800 text-gray-300 hover:border-[color:var(--theme-button-hover)]"
-                                }`}
+                              className={`px-3 py-1.5 rounded-lg border text-sm transition-all ${
+                                selectedServer === server.id
+                                  ? "border-sky-400 bg-slate-700 text-white"
+                                  : "border-slate-600 bg-slate-700/50 text-slate-300 hover:border-sky-400"
+                              }`}
                             >
                               {server.name}
                             </button>
@@ -303,28 +324,43 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   return null
                 })()}
 
-                <div className="p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-note-border)] rounded-lg text-xs text-[color:var(--theme-primary-lighter)]">
-                  <div className="flex gap-2">
-                    <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <p>
-                      If a provider doesn't work, try another one. Different providers may have different content
-                      availability.
-                    </p>
-                  </div>
+                <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-xs text-sky-200 flex gap-2 items-start mt-4">
+                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <p>
+                    If a provider doesn't work, try another one. Different providers may have different content
+                    availability.
+                  </p>
                 </div>
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="settings" className="space-y-4">
+          {/* Settings Tab */}
+          {activeTab === "settings" && (
+            <div className="space-y-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-note-border)] rounded-lg mb-4 text-[color:var(--theme-primary-lighter)]">
-                  <Label className="text-white text-base font-medium">Enable Discover</Label>
-                  <Switch checked={discoverEnabled} onCheckedChange={handleToggleDiscover} />
+                {/* Enable Discover Toggle */}
+                <div className="flex items-center justify-between p-3 md:p-4 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-200">
+                  <Label className="text-white text-base md:text-lg font-medium">Enable Discover</Label>
+                  <button
+                    onClick={() => handleToggleDiscover(!discoverEnabled)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-slate-800 transition-colors ${
+                      discoverEnabled
+                        ? "bg-gradient-to-r from-sky-500/30 to-blue-600/30 shadow-inner"
+                        : "bg-slate-800/40"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none block h-5 w-5 rounded-full bg-blue-300 shadow-lg ring-0 transition-transform ${
+                        discoverEnabled ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Theme Selector */}
                 <div className="space-y-2">
-                  <Label className="text-white text-base font-medium">Theme Color</Label>
+                  <Label className="text-white text-base md:text-lg font-medium block">Theme Color</Label>
                   <div className="flex gap-3 flex-wrap">
                     {Object.entries(THEME_COLORS_META).map(([key, value]) => (
                       <button
@@ -332,15 +368,14 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         type="button"
                         aria-label={key}
                         onClick={() => setTheme(key as ThemeColor)}
-                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${theme === key
-                          ? 'border-[color:var(--theme-primary-dark)] scale-110 shadow-lg'
-                          : ''
-                          }`}
+                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${
+                          theme === key
+                            ? "scale-110 shadow-lg"
+                            : "opacity-80 hover:opacity-100"
+                        }`}
                         style={{
                           background: value['--theme-primary'],
-                          borderColor: value['--theme-primary-light'],
-                          opacity: theme === key ? 1 : 0.8,
-                          transform: theme === key ? 'scale(1.1)' : 'scale(1)',
+                          borderColor: theme === key ? '#0284c7' : value['--theme-primary-light'],
                         }}
                       >
                         {theme === key && (
@@ -351,114 +386,114 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   </div>
                 </div>
 
+                {/* TMDB API Key */}
                 <div className="space-y-2">
-                  <Label htmlFor="tmdb-api-key" className="text-white">
+                  <Label htmlFor="tmdb-api-key" className="text-white text-base md:text-lg font-medium block">
                     TMDB API Key
                   </Label>
                   <div className="flex gap-2">
-                    <Input
+                    <input
                       id="tmdb-api-key"
                       value={tmdbApiKey}
                       onChange={(e) => setTmdbApiKey(e.target.value)}
                       placeholder="Enter your TMDB API key"
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 text-sm md:text-base"
                     />
-                    <Button
+                    <button
                       type="button"
-                      className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)] text-white"
                       onClick={handleSaveTmdb}
+                      className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 px-4 py-2 text-sm md:text-base"
                     >
                       Save
-                    </Button>
+                    </button>
                   </div>
-                  <div className="p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-note-border)] rounded-lg text-xs text-[color:var(--theme-primary-lighter)] mb-2">
-                    <div className="flex gap-2">
-                      <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <p>
-                        TMDB API provides movie information and posters. Without it, the site won't work.
-                      </p>
-                    </div>
+                  <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-xs text-sky-200 flex gap-2 items-start">
+                    <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <p>
+                      TMDB API provides movie information and posters. Without it, the site won't work.
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-slate-400">
                     Get a free API key at{" "}
                     <a
                       href="https://www.themoviedb.org/settings/api"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[color:var(--theme-primary-light)] hover:underline"
+                      className="text-sky-400 hover:underline"
                     >
                       themoviedb.org
                     </a>
                   </p>
-                  <hr className="my-2 border-gray-700" />
+
+                  <hr className="my-4 border-slate-700" />
+
+                  {/* Browserless.io API Key */}
                   <div className="space-y-2">
-                    <Label htmlFor="browserless-api-key" className="text-white">
+                    <Label htmlFor="browserless-api-key" className="text-white text-base md:text-lg font-medium block">
                       Browserless.io API Key
                     </Label>
                     <div className="flex gap-2">
-                      <Input
+                      <input
                         id="browserless-api-key"
                         value={bioApiKey}
-                        onChange={e => setBioApiKey(e.target.value)}
+                        onChange={(e) => setBioApiKey(e.target.value)}
                         placeholder="Enter your Browserless.io API key"
-                        className="bg-gray-700 border-gray-600 text-white"
+                        className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 text-sm md:text-base"
                       />
-                      <Button
+                      <button
                         type="button"
-                        className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)] text-white"
                         onClick={handleSaveBioApi}
+                        className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 px-4 py-2 text-sm md:text-base"
                       >
                         Save
-                      </Button>
+                      </button>
                     </div>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-slate-400">
                       Get a free API key at{" "}
                       <a
                         href="https://www.browserless.io/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[color:var(--theme-primary-light)] hover:underline"
+                        className="text-sky-400 hover:underline"
                       >
                         browserless.io
                       </a>
                     </p>
-                    <div className="p-3 bg-[color:var(--theme-note-bg)] border border-[color:var(--theme-note-border)] rounded-lg text-xs text-[color:var(--theme-primary-lighter)] mt-2">
-                      <div className="flex gap-2">
-                        <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                        <p>
-                          Browserless.io API is used for advanced scraping (Snayer). Without it, some features may be limited or unavailable.
-                          You have 1000 free API calls per month. If you run out, you can switch providers.
-                        </p>
-                      </div>
+                    <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-xs text-sky-200 flex gap-2 items-start mt-2">
+                      <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <p>
+                        Browserless.io API is used for advanced scraping (Snayer). Without it, some features may be limited or unavailable.
+                        You have 1000 free API calls per month. If you run out, you can switch providers.
+                      </p>
                     </div>
-                    <hr className="my-2 border-gray-700" />
+
+                    <hr className="my-4 border-slate-700" />
+
                     {/* Obliterate Everything Button */}
                     <div className="mt-4">
-                      <Button
+                      <button
                         type="button"
-                        className="w-full bg-red-700 hover:bg-red-800 text-white flex items-center justify-center gap-2 border border-red-900 shadow-lg"
                         onClick={() => {
                           localStorage.clear()
                           window.location.reload()
                         }}
+                        className="w-full bg-red-700 hover:bg-red-800 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 border border-red-900 shadow-lg transition-all duration-200"
                       >
-                        <span className="flex items-center">
-                          <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" className="w-6 h-6 mr-2" fill="none">
-                            <g>
-                              <path fill="#CCD6DD" d="M24.187 9.657l5.658-5.654L32 6.16l-5.658 5.655z" />
-                              <circle fill="#31373D" cx="14" cy="22" r="14" />
-                              <path fill="#31373D" d="M19 11.342l5.658-5.657l5.657 5.658L24.657 17z" />
-                              <circle fill="#F18F26" cx="32" cy="4" r="4" />
-                              <circle fill="#FDCB58" cx="32" cy="4" r="2" />
-                            </g>
-                          </svg>
-                          Obliterate Everything
-                        </span>
-                      </Button>
-                      <div className="p-3 bg-red-900/20 border border-red-800/50 rounded-lg text-xs text-red-300 mt-2 flex gap-2 items-start">
+                        <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" className="w-6 h-6" fill="none">
+                          <g>
+                            <path fill="#CCD6DD" d="M24.187 9.657l5.658-5.654L32 6.16l-5.658 5.655z" />
+                            <circle fill="#31373D" cx="14" cy="22" r="14" />
+                            <path fill="#31373D" d="M19 11.342l5.658-5.657l5.657 5.658L24.657 17z" />
+                            <circle fill="#F18F26" cx="32" cy="4" r="4" />
+                            <circle fill="#FDCB58" cx="32" cy="4" r="2" />
+                          </g>
+                        </svg>
+                        Obliterate Everything
+                      </button>
+                      <div className="p-3 bg-red-900/20 border border-red-800/50 rounded-xl text-xs text-red-300 mt-2 flex gap-2 items-start">
                         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
                         <p>
-                          <b>Warning:</b> This will wipe <b>all your settings and bookmarks</b>.<br />
+                          <strong>Warning:</strong> This will wipe <strong>all your settings and bookmarks</strong>.<br />
                           Only use this if you encounter bugs or want to reset everything.
                         </p>
                       </div>
@@ -466,32 +501,70 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   </div>
                 </div>
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="about" className="space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-white">About NullFlix</h3>
-                <p className="text-gray-300 text-sm">
+          {/* About Tab */}
+          {activeTab === "about" && (
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-lg md:text-xl font-bold text-white mb-2">About NullFlix</h3>
+                <p className="text-slate-300 text-sm md:text-base leading-relaxed">
                   NullFlix is a free and open source movie streaming platform designed for simplicity and accessibility.<br />
-                  Built with Next.js and Tailwind CSS.<br />
-                  <br />
-                  <b>NullFlix's Repo:</b> <a href="https://github.com/X-TechPro/NullFlix" className="text-[color:var(--theme-primary-light)] hover:underline">https://github.com/X-TechPro/NullFlix</a><br />
-                  <b>Snayer's Repo:</b> <a href="https://github.com/X-TechPro/snayer" className="text-[color:var(--theme-primary-light)] hover:underline">https://github.com/X-TechPro/snayer</a><br />
-                  <b>Telegram:</b> <a href="https://t.me/nullflix" className="text-[color:var(--theme-primary-light)] hover:underline">https://t.me/nullflix</a>
+                  Built with Next.js and Tailwind CSS.
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <div className="mt-4 space-y-1 text-sm text-slate-300">
+                  <p>
+                    <strong className="text-white">NullFlix's Repo:</strong>{" "}
+                    <a
+                      href="https://github.com/X-TechPro/NullFlix"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-400 hover:underline"
+                    >
+                      https://github.com/X-TechPro/NullFlix
+                    </a>
+                  </p>
+                  <p>
+                    <strong className="text-white">Snayer's Repo:</strong>{" "}
+                    <a
+                      href="https://github.com/X-TechPro/snayer"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-400 hover:underline"
+                    >
+                      https://github.com/X-TechPro/snayer
+                    </a>
+                  </p>
+                  <p>
+                    <strong className="text-white">Telegram:</strong>{" "}
+                    <a
+                      href="https://t.me/nullflix"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-400 hover:underline"
+                    >
+                      https://t.me/nullflix
+                    </a>
+                  </p>
+                </div>
+                <p className="text-xs text-slate-500 mt-4">
                   &copy; {new Date().getFullYear()} NullFlix. This project is for educational/demo purposes only.
                 </p>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
 
-        <div className="sticky bottom-0 flex justify-end p-4 bg-gray-800 border-t border-gray-700">
-          <Button onClick={onClose} className="bg-[color:var(--theme-primary)] hover:bg-[color:var(--theme-button-hover)] text-white">
-            <Check size={16} className="mr-2" />
+        {/* Footer */}
+        <div className="sticky bottom-0 flex justify-end p-4 md:p-6 bg-slate-800 border-t border-slate-700">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 px-6 py-2 md:px-8 md:py-3 text-sm md:text-base"
+          >
+            <Check className="w-4 h-4 mr-2" />
             Close
-          </Button>
+          </button>
         </div>
       </motion.div>
     </div>
