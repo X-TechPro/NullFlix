@@ -208,6 +208,26 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-2 md:p-4 bg-black/70 backdrop-blur-sm">
+      <style jsx global>{`
+        .settings-scrollbar::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        .settings-scrollbar::-webkit-scrollbar-track {
+          background: #1e293b;
+          border-radius: 4px;
+        }
+
+        .settings-scrollbar::-webkit-scrollbar-thumb {
+          background: #475569;
+          border-radius: 4px;
+        }
+
+        .settings-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #64748b;
+        }
+      `}</style>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -229,7 +249,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         </div>
 
         {/* Content */}
-        <div className="p-4 md:p-6 overflow-y-auto flex-1">
+        <div className="p-4 md:p-6 overflow-y-auto flex-1 settings-scrollbar">
           {/* Custom Tabs */}
           <div className="flex gap-1 mb-4 md:mb-6 bg-slate-700/50 p-1 rounded-xl">
             <button
