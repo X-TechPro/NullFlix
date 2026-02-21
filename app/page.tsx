@@ -15,6 +15,7 @@ import MovieDetailsPopup from "@/components/movie-details-popup"
 import TVEpisodeSelector from "@/components/tv-episode-selector"
 import GlowingSearchBar from "@/components/glowing-search-bar"
 import { searchMedia, type Media } from "@/services/movie-service"
+import { getTMDBPoster } from "@/services/tmdb-service"
 import TVDetailsPopup from "@/components/tv-details-popup"
 import TrendingMoviesRow from "@/components/trending-movies-row"
 import { MediaResults, type MediaResultsProps } from "@/components/movie-results"
@@ -409,7 +410,7 @@ export default function Home() {
                       title: movie.title,
                       year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : "",
                       type: "movie",
-                      poster: movie.poster_path || undefined,
+                      poster: movie.poster_path ? getTMDBPoster(movie.poster_path) : undefined,
                     })}
                     isBookmarked={(id) => isBookmarked(id)}
                   />
