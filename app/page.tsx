@@ -228,7 +228,7 @@ export default function Home() {
   }
 
   // Add handler for trending movie click
-  const handleTrendingMovieClick = (movie: { id: number; _cardRect?: DOMRect }) => {
+  const handleTrendingMovieClick = (movie: { id: number; title: string; poster_path: string | null; release_date?: string; _cardRect?: DOMRect }) => {
     setSelectedMediaForDetails(String(movie.id))
     setShowMovieDetails(true)
     setCardRect(movie._cardRect || null)
@@ -401,7 +401,18 @@ export default function Home() {
               </motion.p>
               {discoverEnabled && (
                 <div className="mt-10 w-full">
-                  <TrendingMoviesRow onMovieClick={handleTrendingMovieClick} />
+                  <TrendingMoviesRow
+                    onMovieClick={handleTrendingMovieClick}
+                    toggleBookmark={(movie) => toggleBookmark({
+                      id: String(movie.id),
+                      tmdb: movie.id,
+                      title: movie.title,
+                      year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : "",
+                      type: "movie",
+                      poster: movie.poster_path || undefined,
+                    })}
+                    isBookmarked={(id) => isBookmarked(id)}
+                  />
                 </div>
               )}
 
