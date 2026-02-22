@@ -222,11 +222,10 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                         <button
                           key={season}
                           onClick={() => setSelectedSeason(season)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                            selectedSeason === season
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${selectedSeason === season
                               ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg"
                               : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                          }`}
+                            }`}
                         >
                           S{season}
                         </button>
@@ -234,13 +233,6 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
                     </div>
                   </div>
                 )}
-
-                {/* Info card */}
-                <div className="mt-6 p-4 bg-slate-700/50 rounded-xl border border-slate-600">
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    <span className="text-sky-400 font-semibold">Tip:</span> Select a season to view all available episodes. Click any episode to start watching.
-                  </p>
-                </div>
               </div>
 
               {/* Episode grid */}
