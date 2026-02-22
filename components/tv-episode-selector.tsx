@@ -105,6 +105,26 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start md:items-center justify-center p-2 md:p-4 transform-gpu will-change-transform">
+      <style jsx global>{`
+        .settings-scrollbar::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        .settings-scrollbar::-webkit-scrollbar-track {
+          background: #1e293b;
+          border-radius: 4px;
+        }
+
+        .settings-scrollbar::-webkit-scrollbar-thumb {
+          background: #475569;
+          border-radius: 4px;
+        }
+
+        .settings-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #64748b;
+        }
+      `}</style>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -173,7 +193,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
           ) : (
             <>
               {/* Sidebar - Season selector */}
-              <div className="md:w-64 bg-slate-800 border-r border-slate-700 p-4 md:p-6 flex-shrink-0 overflow-y-auto">
+              <div className="md:w-64 bg-slate-800 border-r border-slate-700 p-4 md:p-6 flex-shrink-0 overflow-y-auto settings-scrollbar">
                 <label className="block mb-3 text-sm font-semibold text-slate-300">Select Season</label>
                 <div className="relative">
                   <select
@@ -224,7 +244,7 @@ export default function TVEpisodeSelector({ tmdbId, onSelectEpisode, onClose }: 
               </div>
 
               {/* Episode grid */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 settings-scrollbar">
                 {selectedSeason ? (
                   <>
                     <div className="flex items-center justify-between mb-4">
