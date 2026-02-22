@@ -554,14 +554,14 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     </a>
                   </p>
                   <p>
-                    <strong className="text-white">Snayer's Repo:</strong>{" "}
+                    <strong className="text-white">Veox's Repo:</strong>{" "}
                     <a
-                      href="https://github.com/X-TechPro/snayer"
+                      href="https://github.com/X-TechPro/Veox"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sky-400 hover:underline"
                     >
-                      https://github.com/X-TechPro/snayer
+                      https://github.com/X-TechPro/Veox
                     </a>
                   </p>
                   <p>
