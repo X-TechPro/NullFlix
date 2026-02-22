@@ -14,6 +14,7 @@ export interface Media {
 }
 
 export type Provider =
+  | "veox"
   | "snayer"
   | "videasy"
   | "vidfast"
@@ -213,6 +214,9 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
   if (mediaType === "tv" && season !== undefined && episode !== undefined) {
     // TV show URL with season and episode
     switch (provider) {
+      case "veox":
+        const bioapi = localStorage.getItem("bioapi") || ""
+        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${bioapi}&type=2&s=${season}&e=${episode}`
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
         return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2&api=${bioapi}`
@@ -246,6 +250,9 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
   } else {
     // Movie URL
     switch (provider) {
+      case "veox":
+        const bioapi = localStorage.getItem("bioapi") || ""
+        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${bioapi}`
       case "snayer": {
         const bioapi = localStorage.getItem("bioapi") || ""
         return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${bioapi}`

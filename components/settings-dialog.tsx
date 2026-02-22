@@ -12,7 +12,7 @@ if (typeof window !== "undefined") {
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { X, Check, AlertTriangle, Info, Settings } from "lucide-react"
+import { X, Check, AlertTriangle, Info, Settings, Crown } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { ThemeProvider as ThemeColorProvider, useThemeColor, THEME_COLORS_META } from "@/components/theme-color-context"
 import type { ThemeColor } from "@/components/theme-color-context"
@@ -43,7 +43,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const [selectedProvider, setSelectedProvider] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedProvider")
       ? localStorage.getItem("selectedProvider") as string
-      : "videasy"
+      : "veox"
   )
   const [selectedServer, setSelectedServer] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedServer")
@@ -57,8 +57,14 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   // Provider dictionary
   const providers = [
     {
+      id: "veox",
+      name: "Veox",
+      url: "https://veox-self.vercel.app/",
+      description: "Elite player 🔥",
+    },
+    {
       id: "snayer",
-      name: "Snayer - Showbox",
+      name: "Snayer - Showbox [DEPRECATED]",
       url: "https://snayer.vercel.app/",
       description: "Elite player (BETA) 🔥",
     },
@@ -254,31 +260,28 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
           <div className="flex gap-1 mb-4 md:mb-6 bg-slate-700/50 p-1 rounded-xl">
             <button
               onClick={() => setActiveTab("providers")}
-              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${
-                activeTab === "providers"
-                  ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
-                  : "text-slate-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${activeTab === "providers"
+                ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
+                : "text-slate-400 hover:text-white"
+                }`}
             >
               Providers
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${
-                activeTab === "settings"
-                  ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
-                  : "text-slate-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${activeTab === "settings"
+                ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
+                : "text-slate-400 hover:text-white"
+                }`}
             >
               Settings
             </button>
             <button
               onClick={() => setActiveTab("about")}
-              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${
-                activeTab === "about"
-                  ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
-                  : "text-slate-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 px-3 md:px-4 rounded-lg text-sm md:text-base font-medium transition-all ${activeTab === "about"
+                ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-md"
+                : "text-slate-400 hover:text-white"
+                }`}
             >
               About
             </button>
@@ -298,19 +301,28 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         setSelectedProvider(provider.id)
                         if (!provider.hasServers) setSelectedServer("")
                       }}
-                      className={`w-full text-left rounded-xl border p-3 md:p-4 transition-all ${
-                        selectedProvider === provider.id
-                          ? "border-sky-400 bg-slate-700/50"
-                          : "border-slate-600 bg-slate-700/50 hover:border-sky-400"
-                      }`}
+                      className={`relative w-full text-left rounded-xl border p-3 md:p-4 transition-all ${selectedProvider === provider.id
+                        ? "border-sky-400 bg-slate-700/50"
+                        : "border-slate-600 bg-slate-700/50 hover:border-sky-400"
+                        }`}
                     >
-                      <div className="font-semibold text-white text-sm md:text-base">{provider.name}</div>
-                      <div className="text-xs text-sky-400 truncate">
-                        <a href={provider.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                          {provider.url}
-                        </a>
+                      <div className="pr-12">
+                        <div className="font-semibold text-white text-sm md:text-base">{provider.name}</div>
+                        <div className="text-xs text-sky-400 truncate">
+                          <a href={provider.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            {provider.url}
+                          </a>
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">{provider.description}</div>
                       </div>
-                      <div className="text-xs text-slate-400 mt-1">{provider.description}</div>
+                      {provider.id === "veox" && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <Crown
+                            className="w-6 h-6 md:w-7 md:h-7 drop-shadow-md"
+                            style={{ color: THEME_COLORS_META[theme as keyof typeof THEME_COLORS_META]?.['--theme-primary'] || '#0ea5e9' }}
+                          />
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -328,11 +340,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                               key={server.id}
                               type="button"
                               onClick={() => setSelectedServer(server.id)}
-                              className={`px-3 py-1.5 rounded-lg border text-sm transition-all ${
-                                selectedServer === server.id
-                                  ? "border-sky-400 bg-slate-700 text-white"
-                                  : "border-slate-600 bg-slate-700/50 text-slate-300 hover:border-sky-400"
-                              }`}
+                              className={`px-3 py-1.5 rounded-lg border text-sm transition-all ${selectedServer === server.id
+                                ? "border-sky-400 bg-slate-700 text-white"
+                                : "border-slate-600 bg-slate-700/50 text-slate-300 hover:border-sky-400"
+                                }`}
                             >
                               {server.name}
                             </button>
@@ -364,16 +375,14 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                   <Label className="text-white text-base md:text-lg font-medium">Enable Discover</Label>
                   <button
                     onClick={() => handleToggleDiscover(!discoverEnabled)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-slate-800 transition-colors ${
-                      discoverEnabled
-                        ? "bg-gradient-to-r from-sky-500/30 to-blue-600/30 shadow-inner"
-                        : "bg-slate-800/40"
-                    }`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-slate-800 transition-colors ${discoverEnabled
+                      ? "bg-gradient-to-r from-sky-500/30 to-blue-600/30 shadow-inner"
+                      : "bg-slate-800/40"
+                      }`}
                   >
                     <span
-                      className={`pointer-events-none block h-5 w-5 rounded-full bg-blue-300 shadow-lg ring-0 transition-transform ${
-                        discoverEnabled ? "translate-x-5" : "translate-x-0"
-                      }`}
+                      className={`pointer-events-none block h-5 w-5 rounded-full bg-blue-300 shadow-lg ring-0 transition-transform ${discoverEnabled ? "translate-x-5" : "translate-x-0"
+                        }`}
                     />
                   </button>
                 </div>
@@ -388,11 +397,10 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                         type="button"
                         aria-label={key}
                         onClick={() => setTheme(key as ThemeColor)}
-                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${
-                          theme === key
-                            ? "scale-110 shadow-lg"
-                            : "opacity-80 hover:opacity-100"
-                        }`}
+                        className={`w-9 h-9 rounded-full border-4 flex items-center justify-center transition-all duration-200 focus:outline-none ${theme === key
+                          ? "scale-110 shadow-lg"
+                          : "opacity-80 hover:opacity-100"
+                          }`}
                         style={{
                           background: value['--theme-primary'],
                           borderColor: theme === key ? '#0284c7' : value['--theme-primary-light'],
