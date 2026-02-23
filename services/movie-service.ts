@@ -1,5 +1,5 @@
 import { getTVShowByTMDB } from "@/utils/db"
-import { searchViaIMDB, findTMDBByIMDBId } from "@/services/tmdb-service"
+import { searchViaIMDB, findTMDBByIMDBId, searchMoviesViaTMDB } from "@/services/tmdb-service"
 import Fuse from "fuse.js"
 
 export interface Media {
@@ -83,10 +83,23 @@ export async function searchMedia(query: string): Promise<Media[]> {
     // Step 1: Generate query variations for symbol handling
     const variations = generateQueryVariations(query);
 
-    // Step 2: Search IMDB API for all variations in parallel
-    const allImdbResultsGroups = await Promise.all(
-      variations.map((v) => searchViaIMDB(v))
-    );
+    // Step 2: Search IMDB API & TMDB API for all variations in parallel
+    const [allImdbResultsGroups, allTmdbDirectResultsGroups] = await Promise.all([
+      Promise.all(variations.map((v) => searchViaIMDB(v))),
+      Promise.all(variations.map((v) => searchMoviesViaTMDB(v)))
+    ]);
+
+    // Flatten direct TMDB results
+    const tmdbDirectResults = new Map<string, any>();
+    allTmdbDirectResultsGroups.forEach((results) => {
+      if (results && Array.isArray(results)) {
+        results.forEach((item) => {
+          if (item && item.id) {
+            tmdbDirectResults.set(item.id.toString(), item);
+          }
+        });
+      }
+    });
 
     // Flatten and deduplicate by IMDB ID
     const imdbResultsMap = new Map<string, any>();
@@ -101,7 +114,6 @@ export async function searchMedia(query: string): Promise<Media[]> {
     });
 
     const imdbResults = Array.from(imdbResultsMap.values());
-    if (imdbResults.length === 0) return [];
 
     // Step 3: Get TMDB data for all IMDB IDs in FULLY PARALLEL (no batching)
     const tmdbPromises = imdbResults.map(async (imdbItem) => {
@@ -113,6 +125,14 @@ export async function searchMedia(query: string): Promise<Media[]> {
 
     // Filter out nulls and deduplicate by TMDB ID
     const tmdbResultsMap = new Map<string, any>();
+
+    // Add direct TMDB results first
+    Array.from(tmdbDirectResults.values()).forEach((item) => {
+      if (item && item.id) {
+        tmdbResultsMap.set(item.id.toString(), item);
+      }
+    });
+
     tmdbResultsAll.forEach((item) => {
       if (item && item.id) {
         tmdbResultsMap.set(item.id.toString(), item);
