@@ -5,8 +5,8 @@ if (typeof window !== "undefined") {
   if (!localStorage.getItem("tmdbApiKey")) {
     localStorage.setItem("tmdbApiKey", "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWFjNjM1ODA4YmRjMDJkZjI2ZDMwMjk0MGI0Y2EzNyIsIm5iZiI6MTc0ODY4NTIxNy43Mjg5OTk5LCJzdWIiOiI2ODNhZDFhMTkyMWI4N2IxYzk1Mzc4ODQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.w-oWdRIxwlXKTpP42Yo87Mld5sqp8uNFpDHgrqB6a3U")
   }
-  if (!localStorage.getItem("bioapi")) {
-    localStorage.setItem("bioapi", "2SOcK4TddDM1mqEbacc7db55c60d542e17a65e2f19de8f8af")
+  if (!localStorage.getItem("sdapi")) {
+    localStorage.setItem("sdapi", "b62beb535a71454fa80fa5351da9088a12adfbb4a2f")
   }
 }
 
@@ -39,7 +39,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const { theme, setTheme } = useThemeColor()
   const [activeTab, setActiveTab] = useState("providers")
   const [tmdbApiKey, setTmdbApiKey] = useState("")
-  const [bioApiKey, setBioApiKey] = useState("")
+  const [SDApiKey, setSDApiKey] = useState("")
   const [selectedProvider, setSelectedProvider] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedProvider")
       ? localStorage.getItem("selectedProvider") as string
@@ -61,12 +61,6 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       name: "Veox",
       url: "https://veox-self.vercel.app/",
       description: "Elite player 🔥",
-    },
-    {
-      id: "snayer",
-      name: "Snayer - Showbox [DEPRECATED]",
-      url: "https://snayer.vercel.app/",
-      description: "Elite player (BETA) 🔥",
     },
     {
       id: "videasy",
@@ -103,6 +97,12 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
       name: "UEmbed",
       url: "https://uembed.xyz/",
       description: "Good 🔥",
+    },
+    {
+      id: "snayer",
+      name: "Snayer - Showbox [DEPRECATED]",
+      url: "https://snayer.vercel.app/",
+      description: "Elite player (BETA) 🔥",
     },
     {
       id: "vidplus",
@@ -154,9 +154,9 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setSelectedServer(savedServer)
       }
 
-      const savedBioApiKey = localStorage.getItem("bioapi")
-      if (savedBioApiKey !== null) {
-        setBioApiKey(savedBioApiKey)
+      const savedSDApiKey = localStorage.getItem("sdapi")
+      if (savedSDApiKey !== null) {
+        setSDApiKey(savedSDApiKey)
       }
 
       const savedDiscover = localStorage.getItem("discover")
@@ -194,11 +194,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     }
   }
 
-  const handleSaveBioApi = () => {
+  const handleSaveSDApi = () => {
     try {
-      localStorage.setItem("bioapi", bioApiKey)
+      localStorage.setItem("sdapi", SDApiKey)
     } catch (e) {
-      console.error("Error saving Browserless.io API key:", e)
+      console.error("Error saving Scrape.do API key:", e)
     }
   }
 
@@ -455,22 +455,22 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
                   <hr className="my-4 border-slate-700" />
 
-                  {/* Browserless.io API Key */}
+                  {/* Scrape.do API Key */}
                   <div className="space-y-2">
-                    <Label htmlFor="browserless-api-key" className="text-white text-base md:text-lg font-medium block">
-                      Browserless.io API Key
+                    <Label htmlFor="scrapedo-api-key" className="text-white text-base md:text-lg font-medium block">
+                      Scrape.do API Key
                     </Label>
                     <div className="flex gap-2">
                       <input
-                        id="browserless-api-key"
-                        value={bioApiKey}
-                        onChange={(e) => setBioApiKey(e.target.value)}
-                        placeholder="Enter your Browserless.io API key"
+                        id="scrapedo-api-key"
+                        value={SDApiKey}
+                        onChange={(e) => setSDApiKey(e.target.value)}
+                        placeholder="Enter your Scrape.do API key"
                         className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 text-sm md:text-base"
                       />
                       <button
                         type="button"
-                        onClick={handleSaveBioApi}
+                        onClick={handleSaveSDApi}
                         className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 px-4 py-2 text-sm md:text-base"
                       >
                         Save
@@ -479,18 +479,18 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     <p className="text-xs text-slate-400">
                       Get a free API key at{" "}
                       <a
-                        href="https://www.browserless.io/"
+                        href="https://scrape.do/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sky-400 hover:underline"
                       >
-                        browserless.io
+                        scrape.do
                       </a>
                     </p>
                     <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-xs text-sky-200 flex gap-2 items-start mt-2">
                       <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <p>
-                        Browserless.io API is used for advanced scraping (Snayer). Without it, some features may be limited or unavailable.
+                        Scrape.do API is used for advanced scraping (Veox). Without it, some features may be limited or unavailable.
                         You have 1000 free API calls per month. If you run out, you can switch providers.
                       </p>
                     </div>
