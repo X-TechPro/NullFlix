@@ -20,8 +20,8 @@ export type Provider =
   | "vidfast"
   | "vidrock"
   | "vidking"
-  | "pstream"
-  | "uembed"
+  | "vidlux"
+  | "vidrush"
   | "vidplus"
   | "2embed"
   | "vidsrc-embed.ru"
@@ -33,6 +33,10 @@ export type ProviderServer =
   | "vidsrc-embed.su"
   | "vidsrcme.su"
   | "vsrc.su"
+  | "vidlux.xyz"
+  | "vidlux.top"
+  | "vidlux.site"
+  | "vidlux.online"
 
 /**
  * Generate query variations to handle symbols that IMDB/TMDB may interpret differently
@@ -249,10 +253,12 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidrock.net/tv/${mediaId}/${season}/${episode}`
       case "vidking":
         return `https://vidking.net/embed/tv/${mediaId}/${season}/${episode}?color=008cff`
-      case "pstream":
-        return `https://iframe.pstream.mov/embed/tmdb-tv-${mediaId}/${season}/${episode}`
-      case "uembed":
-        return `https://uembed.xyz/?id=${mediaId}&season=${season}&episode=${episode}`
+      case "vidlux":
+        const vidluxDomain = server || "vidlux.site"
+        return `https://${vidluxDomain}/embed/tv/${mediaId}/${season}/${episode}`
+      case "vidrush":
+        const vidrushParams = "autoplay=true&poster=true&chromecast=true&servericon=true&setting=true&pip=true&download=true&font=Roboto&fontcolor=6f63ff&fontsize=20&opacity=0.5&primarycolor=009de0&secondarycolor=0a0a12&iconcolor=ffffff"
+        return `https://player.vidrush.net/embed/tv/${mediaId}/${season}/${episode}?${vidrushParams}`
       case "vidplus":
         return `https://player.vidplus.to/embed/tv/${mediaId}/${season}/${episode}`
       case "2embed":
@@ -285,10 +291,12 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
         return `https://vidrock.net/movie/${mediaId}`
       case "vidking":
         return `https://vidking.net/embed/movie/${mediaId}?color=008cff`
-      case "pstream":
-        return `https://iframe.pstream.mov/media/tmdb-movie-${mediaId}`
-      case "uembed":
-        return `https://uembed.xyz/?id=${mediaId}`
+      case "vidlux":
+        const vidluxMovieDomain = server || "vidlux.xyz"
+        return `https://${vidluxMovieDomain}/embed/movie/${mediaId}`
+      case "vidrush":
+        const vidrushMovieParams = "autoplay=true&poster=true&chromecast=true&servericon=true&setting=true&pip=true&download=true&font=Roboto&fontcolor=6f63ff&fontsize=20&opacity=0.5&primarycolor=009de0&secondarycolor=0a0a12&iconcolor=ffffff"
+        return `https://player.vidrush.net/embed/movie/${mediaId}?${vidrushMovieParams}`
       case "vidplus":
         return `https://player.vidplus.to/embed/movie/${mediaId}`
       case "2embed":
