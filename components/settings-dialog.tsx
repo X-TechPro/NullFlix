@@ -5,8 +5,8 @@ if (typeof window !== "undefined") {
   if (!localStorage.getItem("tmdbApiKey")) {
     localStorage.setItem("tmdbApiKey", "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWFjNjM1ODA4YmRjMDJkZjI2ZDMwMjk0MGI0Y2EzNyIsIm5iZiI6MTc0ODY4NTIxNy43Mjg5OTk5LCJzdWIiOiI2ODNhZDFhMTkyMWI4N2IxYzk1Mzc4ODQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.w-oWdRIxwlXKTpP42Yo87Mld5sqp8uNFpDHgrqB6a3U")
   }
-  if (!localStorage.getItem("sdapi")) {
-    localStorage.setItem("sdapi", "b62beb535a71454fa80fa5351da9088a12adfbb4a2f")
+  if (!localStorage.getItem("blapi")) {
+    localStorage.setItem("blapi", "2SMwrPar9yWfYf9469d6575eb65a0faa5bd0c0269de8008e7")
   }
 }
 
@@ -39,7 +39,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
   const { theme, setTheme } = useThemeColor()
   const [activeTab, setActiveTab] = useState("providers")
   const [tmdbApiKey, setTmdbApiKey] = useState("")
-  const [SDApiKey, setSDApiKey] = useState("")
+  const [BLApiKey, setBLApiKey] = useState("")
   const [selectedProvider, setSelectedProvider] = useState<string>(
     typeof window !== "undefined" && localStorage.getItem("selectedProvider")
       ? localStorage.getItem("selectedProvider") as string
@@ -161,9 +161,9 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setSelectedServer(savedServer)
       }
 
-      const savedSDApiKey = localStorage.getItem("sdapi")
-      if (savedSDApiKey !== null) {
-        setSDApiKey(savedSDApiKey)
+      const savedBLApiKey = localStorage.getItem("blapi")
+      if (savedBLApiKey !== null) {
+        setBLApiKey(savedBLApiKey)
       }
 
       const savedDiscover = localStorage.getItem("discover")
@@ -201,11 +201,11 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
     }
   }
 
-  const handleSaveSDApi = () => {
+  const handleSaveBLApi = () => {
     try {
-      localStorage.setItem("sdapi", SDApiKey)
+      localStorage.setItem("blapi", BLApiKey)
     } catch (e) {
-      console.error("Error saving Scrape.do API key:", e)
+      console.error("Error saving Browseless.io API key:", e)
     }
   }
 
@@ -462,22 +462,22 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
                   <hr className="my-4 border-slate-700" />
 
-                  {/* Scrape.do API Key */}
+                  {/* Browseless.io API Key */}
                   <div className="space-y-2">
-                    <Label htmlFor="scrapedo-api-key" className="text-white text-base md:text-lg font-medium block">
-                      Scrape.do API Key
+                    <Label htmlFor="browserless-api-key" className="text-white text-base md:text-lg font-medium block">
+                      Browseless.io API Key
                     </Label>
                     <div className="flex gap-2">
                       <input
-                        id="scrapedo-api-key"
-                        value={SDApiKey}
-                        onChange={(e) => setSDApiKey(e.target.value)}
-                        placeholder="Enter your Scrape.do API key"
+                        id="browserless-api-key"
+                        value={BLApiKey}
+                        onChange={(e) => setBLApiKey(e.target.value)}
+                        placeholder="Enter your Browseless.io API key"
                         className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-white placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 text-sm md:text-base"
                       />
                       <button
                         type="button"
-                        onClick={handleSaveSDApi}
+                        onClick={handleSaveBLApi}
                         className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 px-4 py-2 text-sm md:text-base"
                       >
                         Save
@@ -486,18 +486,18 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
                     <p className="text-xs text-slate-400">
                       Get a free API key at{" "}
                       <a
-                        href="https://scrape.do/"
+                        href="https://browseless.io/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sky-400 hover:underline"
                       >
-                        scrape.do
+                        browseless.io
                       </a>
                     </p>
                     <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-xs text-sky-200 flex gap-2 items-start mt-2">
                       <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <p>
-                        Scrape.do API is used for advanced scraping (Veox). Without it, some features may be limited or unavailable.
+                        Browseless.io API is used for advanced scraping (Veox). Without it, some features may be limited or unavailable.
                         You have 1000 free API calls per month. If you run out, you can switch providers.
                       </p>
                     </div>
