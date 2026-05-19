@@ -277,11 +277,11 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
     // Movie URL
     switch (provider) {
       case "veox":
-        const sdapi = localStorage.getItem("sdapi") || ""
-        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${sdapi}`
+        const blapi = localStorage.getItem("blapi") || ""
+        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${blapi}`
       case "snayer": {
-        const sdapi = localStorage.getItem("sdapi") || ""
-        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${sdapi}`
+        const blapi = localStorage.getItem("blapi") || ""
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${blapi}`
       }
       case "videasy":
         return `https://player.videasy.net/movie/${mediaId}`
