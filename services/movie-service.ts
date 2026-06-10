@@ -239,11 +239,11 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
     // TV show URL with season and episode
     switch (provider) {
       case "veox":
-        const blapi = localStorage.getItem("blapi") || ""
-        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${blapi}&type=2&s=${season}&e=${episode}`
+        const blapi1 = localStorage.getItem("blapi1") || ""
+        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${blapi1}&type=2&s=${season}&e=${episode}`
       case "snayer": {
-        const blapi = localStorage.getItem("blapi") || ""
-        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2&api=${blapi}`
+        const blapi1 = localStorage.getItem("blapi1") || ""
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&s=${season}&e=${episode}&type=2&api=${blapi1}`
       }
       case "videasy":
         return `https://player.videasy.net/tv/${mediaId}/${season}/${episode}`
@@ -277,11 +277,11 @@ export function getProviderUrl(mediaId: string, mediaType: "movie" | "tv", seaso
     // Movie URL
     switch (provider) {
       case "veox":
-        const blapi = localStorage.getItem("blapi") || ""
-        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${blapi}`
+        const blapi1 = localStorage.getItem("blapi1") || ""
+        return `https://veox-self.vercel.app/showbox?tmdb=${mediaId}&api=${blapi1}`
       case "snayer": {
-        const blapi = localStorage.getItem("blapi") || ""
-        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${blapi}`
+        const blapi1 = localStorage.getItem("blapi1") || ""
+        return `https://snayer.vercel.app/api/showbox?tmdb=${mediaId}&api=${blapi1}`
       }
       case "videasy":
         return `https://player.videasy.net/movie/${mediaId}`

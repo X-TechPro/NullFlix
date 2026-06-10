@@ -5,8 +5,8 @@ if (typeof window !== "undefined") {
   if (!localStorage.getItem("tmdbApiKey")) {
     localStorage.setItem("tmdbApiKey", "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWFjNjM1ODA4YmRjMDJkZjI2ZDMwMjk0MGI0Y2EzNyIsIm5iZiI6MTc0ODY4NTIxNy43Mjg5OTk5LCJzdWIiOiI2ODNhZDFhMTkyMWI4N2IxYzk1Mzc4ODQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.w-oWdRIxwlXKTpP42Yo87Mld5sqp8uNFpDHgrqB6a3U")
   }
-  if (!localStorage.getItem("blapi")) {
-    localStorage.setItem("blapi", "2SMwrPar9yWfYf9469d6575eb65a0faa5bd0c0269de8008e7")
+  if (!localStorage.getItem("blapi1")) {
+    localStorage.setItem("blapi1", "1SMwrPar9yWfYf9092b175b56690b973b862ad3ab7ee5f5b7")
   }
 }
 
@@ -161,7 +161,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
         setSelectedServer(savedServer)
       }
 
-      const savedBLApiKey = localStorage.getItem("blapi")
+      const savedBLApiKey = localStorage.getItem("blapi1")
       if (savedBLApiKey !== null) {
         setBLApiKey(savedBLApiKey)
       }
@@ -203,7 +203,7 @@ export default function SettingsDialog({ isOpen, onClose }: SettingsDialogProps)
 
   const handleSaveBLApi = () => {
     try {
-      localStorage.setItem("blapi", BLApiKey)
+      localStorage.setItem("blapi1", BLApiKey)
     } catch (e) {
       console.error("Error saving Browseless.io API key:", e)
     }
